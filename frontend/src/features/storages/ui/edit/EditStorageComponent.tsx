@@ -193,7 +193,7 @@ export function EditStorageComponent({
             id: undefined as unknown as string,
             workspaceId,
             name: '',
-            type: StorageType.LOCAL,
+            type: IS_CLOUD ? StorageType.S3 : StorageType.LOCAL,
             isSystem: false,
             localStorage: {},
           },
