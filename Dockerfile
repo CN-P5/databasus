@@ -275,7 +275,7 @@ JSEOF
 # Inject analytics script if provided
 if [ -n "\${ANALYTICS_SCRIPT:-}" ]; then
   echo "Injecting analytics script..."
-  sed -i "s#</head>#  \${ANALYTICS_SCRIPT}\n  </head>#" /app/ui/build/index.html
+  sed -i "s#</head>#  \${ANALYTICS_SCRIPT}"$'\n'"  </head>#" /app/ui/build/index.html
 fi
 
 # Ensure proper ownership of data directory
