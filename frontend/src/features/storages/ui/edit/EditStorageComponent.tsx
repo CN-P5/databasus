@@ -195,7 +195,16 @@ export function EditStorageComponent({
             name: '',
             type: IS_CLOUD ? StorageType.S3 : StorageType.LOCAL,
             isSystem: false,
-            localStorage: {},
+            localStorage: IS_CLOUD ? undefined : {},
+            s3Storage: IS_CLOUD
+              ? {
+                  s3Bucket: '',
+                  s3Region: '',
+                  s3AccessKey: '',
+                  s3SecretKey: '',
+                  s3Endpoint: '',
+                }
+              : undefined,
           },
     );
   }, [editingStorage]);
