@@ -227,23 +227,22 @@ export const StorageComponent = ({
               </div>
             )}
 
-            {!storage.isSystem ||
-              (user.role === UserRole.ADMIN && (
-                <div className="mt-5 flex items-center font-bold">
-                  <div>Storage settings</div>
+            {(!storage.isSystem || user.role === UserRole.ADMIN) && (
+              <div className="mt-5 flex items-center font-bold">
+                <div>Storage settings</div>
 
-                  {!isEditSettings && isCanManageStorages ? (
-                    <div
-                      className="ml-2 h-4 w-4 cursor-pointer"
-                      onClick={() => startEdit('settings')}
-                    >
-                      <img src="/icons/pen-gray.svg" />
-                    </div>
-                  ) : (
-                    <div />
-                  )}
-                </div>
-              ))}
+                {!isEditSettings && isCanManageStorages ? (
+                  <div
+                    className="ml-2 h-4 w-4 cursor-pointer"
+                    onClick={() => startEdit('settings')}
+                  >
+                    <img src="/icons/pen-gray.svg" />
+                  </div>
+                ) : (
+                  <div />
+                )}
+              </div>
+            )}
 
             <div className="mt-1 text-sm">
               {isEditSettings && isCanManageStorages ? (
