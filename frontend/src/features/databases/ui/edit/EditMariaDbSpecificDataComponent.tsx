@@ -402,7 +402,7 @@ export const EditMariaDbSpecificDataComponent = ({
         )}
       </div>
 
-      {isConnectionFailed && (
+      {isConnectionFailed && !IS_CLOUD && (
         <div className="mt-3 text-sm text-gray-500 dark:text-gray-400">
           If your database uses IP whitelist, make sure Databasus server IP is added to the allowed
           list.
