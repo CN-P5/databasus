@@ -71,6 +71,7 @@ func tryInitVictoriaLogs() *VictoriaLogsWriter {
 
 	// Try to get config - this may fail early in startup
 	url := getVictoriaLogsURL()
+	username := getVictoriaLogsUsername()
 	password := getVictoriaLogsPassword()
 
 	if url == "" {
@@ -78,7 +79,7 @@ func tryInitVictoriaLogs() *VictoriaLogsWriter {
 		return nil
 	}
 
-	return NewVictoriaLogsWriter(url, password)
+	return NewVictoriaLogsWriter(url, username, password)
 }
 
 func ensureEnvLoaded() {
@@ -124,6 +125,10 @@ func ensureEnvLoaded() {
 
 func getVictoriaLogsURL() string {
 	return os.Getenv("VICTORIA_LOGS_URL")
+}
+
+func getVictoriaLogsUsername() string {
+	return os.Getenv("VICTORIA_LOGS_USERNAME")
 }
 
 func getVictoriaLogsPassword() string {
