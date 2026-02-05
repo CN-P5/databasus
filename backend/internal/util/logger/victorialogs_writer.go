@@ -23,6 +23,7 @@ type logEntry struct {
 
 type VictoriaLogsWriter struct {
 	url        string
+	username   string
 	password   string
 	httpClient *http.Client
 	logChannel chan logEntry
@@ -33,11 +34,12 @@ type VictoriaLogsWriter struct {
 	logger     *slog.Logger
 }
 
-func NewVictoriaLogsWriter(url, password string) *VictoriaLogsWriter {
+func NewVictoriaLogsWriter(url, username, password string) *VictoriaLogsWriter {
 	ctx, cancel := context.WithCancel(context.Background())
 
 	writer := &VictoriaLogsWriter{
 		url:      url,
+		username: username,
 		password: password,
 		httpClient: &http.Client{
 			Timeout: 10 * time.Second,
@@ -149,9 +151,9 @@ func (w *VictoriaLogsWriter) sendHTTP(entries []logEntry) error {
 	// Set headers
 	req.Header.Set("Content-Type", "application/x-ndjson")
 
-	// Set Basic Auth (password as username, empty password)
+	// Set Basic Auth (username:password)
 	if w.password != "" {
-		auth := base64.StdEncoding.EncodeToString([]byte(w.password + ":"))
+		auth := base64.StdEncoding.EncodeToString([]byte(w.username + ":" + w.password))
 		req.Header.Set("Authorization", "Basic "+auth)
 	}
 
