@@ -26,12 +26,13 @@ type MongodbDatabase struct {
 	Version tools.MongodbVersion `json:"version" gorm:"type:text;not null"`
 
 	Host         string `json:"host"         gorm:"type:text;not null"`
-	Port         int    `json:"port"         gorm:"type:int;not null"`
+	Port         *int   `json:"port"         gorm:"type:int"`
 	Username     string `json:"username"     gorm:"type:text;not null"`
 	Password     string `json:"password"     gorm:"type:text;not null"`
 	Database     string `json:"database"     gorm:"type:text;not null"`
 	AuthDatabase string `json:"authDatabase" gorm:"type:text;not null;default:'admin'"`
 	IsHttps      bool   `json:"isHttps"      gorm:"type:boolean;default:false"`
+	IsSrv        bool   `json:"isSrv"        gorm:"column:is_srv;type:boolean;not null;default:false"`
 	CpuCount     int    `json:"cpuCount"     gorm:"column:cpu_count;type:int;not null;default:1"`
 }
 
@@ -43,9 +44,13 @@ func (m *MongodbDatabase) Validate() error {
 	if m.Host == "" {
 		return errors.New("host is required")
 	}
-	if m.Port == 0 {
-		return errors.New("port is required")
+
+	if !m.IsSrv {
+		if m.Port == nil || *m.Port == 0 {
+			return errors.New("port is required for standard connections")
+		}
 	}
+
 	if m.Username == "" {
 		return errors.New("username is required")
 	}
@@ -58,6 +63,7 @@ func (m *MongodbDatabase) Validate() error {
 	if m.CpuCount <= 0 {
 		return errors.New("cpu count must be greater than 0")
 	}
+
 	return nil
 }
 
@@ -125,6 +131,7 @@ func (m *MongodbDatabase) Update(incoming *MongodbDatabase) {
 	m.Database = incoming.Database
 	m.AuthDatabase = incoming.AuthDatabase
 	m.IsHttps = incoming.IsHttps
+	m.IsSrv = incoming.IsSrv
 	m.CpuCount = incoming.CpuCount
 
 	if incoming.Password != "" {
@@ -455,12 +462,29 @@ func (m *MongodbDatabase) buildConnectionURI(password string) string {
 		tlsParams = "&tls=true&tlsInsecure=true"
 	}
 
+	if m.IsSrv {
+		return fmt.Sprintf(
+			"mongodb+srv://%s:%s@%s/%s?authSource=%s&connectTimeoutMS=15000%s",
+			url.QueryEscape(m.Username),
+			url.QueryEscape(password),
+			m.Host,
+			m.Database,
+			authDB,
+			tlsParams,
+		)
+	}
+
+	port := 27017
+	if m.Port != nil {
+		port = *m.Port
+	}
+
 	return fmt.Sprintf(
 		"mongodb://%s:%s@%s:%d/%s?authSource=%s&connectTimeoutMS=15000%s",
 		url.QueryEscape(m.Username),
 		url.QueryEscape(password),
 		m.Host,
-		m.Port,
+		port,
 		m.Database,
 		authDB,
 		tlsParams,
@@ -479,12 +503,28 @@ func (m *MongodbDatabase) BuildMongodumpURI(password string) string {
 		tlsParams = "&tls=true&tlsInsecure=true"
 	}
 
+	if m.IsSrv {
+		return fmt.Sprintf(
+			"mongodb+srv://%s:%s@%s/?authSource=%s&connectTimeoutMS=15000%s",
+			url.QueryEscape(m.Username),
+			url.QueryEscape(password),
+			m.Host,
+			authDB,
+			tlsParams,
+		)
+	}
+
+	port := 27017
+	if m.Port != nil {
+		port = *m.Port
+	}
+
 	return fmt.Sprintf(
 		"mongodb://%s:%s@%s:%d/?authSource=%s&connectTimeoutMS=15000%s",
 		url.QueryEscape(m.Username),
 		url.QueryEscape(password),
 		m.Host,
-		m.Port,
+		port,
 		authDB,
 		tlsParams,
 	)

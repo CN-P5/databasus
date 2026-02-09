@@ -6,6 +6,7 @@ export type ParseResult = {
   database: string;
   authDatabase: string;
   useTls: boolean;
+  isSrv: boolean;
 };
 
 export type ParseError = {
@@ -63,7 +64,8 @@ export class MongodbConnectionStringParser {
       const host = url.hostname;
       const port = url.port ? parseInt(url.port, 10) : isSrv ? 27017 : 27017;
       const username = decodeURIComponent(url.username);
-      const password = decodeURIComponent(url.password);
+      const rawPassword = decodeURIComponent(url.password);
+      const password = this.isPasswordPlaceholder(rawPassword) ? '' : rawPassword;
       const database = decodeURIComponent(url.pathname.slice(1));
       const authDatabase = this.getAuthSource(url.search) || 'admin';
       const useTls = isSrv ? true : this.checkTlsMode(url.search);
@@ -76,10 +78,6 @@ export class MongodbConnectionStringParser {
         return { error: 'Username is missing from connection string' };
       }
 
-      if (!password) {
-        return { error: 'Password is missing from connection string' };
-      }
-
       return {
         host,
         port,
@@ -88,6 +86,7 @@ export class MongodbConnectionStringParser {
         database: database || '',
         authDatabase,
         useTls,
+        isSrv,
       };
     } catch (e) {
       return {
@@ -114,7 +113,8 @@ export class MongodbConnectionStringParser {
       const port = params['port'];
       const database = params['database'] || params['dbname'] || params['db'];
       const username = params['user'] || params['username'];
-      const password = params['password'];
+      const rawPassword = params['password'];
+      const password = this.isPasswordPlaceholder(rawPassword) ? '' : rawPassword || '';
       const authDatabase = params['authSource'] || params['authDatabase'] || 'admin';
       const tls = params['tls'] || params['ssl'];
 
@@ -132,13 +132,6 @@ export class MongodbConnectionStringParser {
         };
       }
 
-      if (!password) {
-        return {
-          error: 'Password is missing from connection string. Use password=yourpassword',
-          format: 'key-value',
-        };
-      }
-
       const useTls = this.isTlsEnabled(tls);
 
       return {
@@ -149,6 +142,7 @@ export class MongodbConnectionStringParser {
         database: database || '',
         authDatabase,
         useTls,
+        isSrv: false,
       };
     } catch (e) {
       return {
@@ -190,5 +184,12 @@ export class MongodbConnectionStringParser {
     const lowercased = tlsValue.toLowerCase();
     const enabledValues = ['true', 'yes', '1'];
     return enabledValues.includes(lowercased);
+  }
+
+  private static isPasswordPlaceholder(password: string | null | undefined): boolean {
+    if (!password) return false;
+
+    const trimmed = password.trim();
+    return trimmed === '<db_password>' || trimmed === '<password>';
   }
 }

@@ -64,15 +64,17 @@ func Test_TestConnection_InsufficientPermissions_ReturnsError(t *testing.T) {
 
 			defer dropUserSafe(container.Client, limitedUsername, container.AuthDatabase)
 
+			port := container.Port
 			mongodbModel := &MongodbDatabase{
 				Version:      tc.version,
 				Host:         container.Host,
-				Port:         container.Port,
+				Port:         &port,
 				Username:     limitedUsername,
 				Password:     limitedPassword,
 				Database:     container.Database,
 				AuthDatabase: container.AuthDatabase,
 				IsHttps:      false,
+				IsSrv:        false,
 				CpuCount:     1,
 			}
 
@@ -133,15 +135,17 @@ func Test_TestConnection_SufficientPermissions_Success(t *testing.T) {
 
 			defer dropUserSafe(container.Client, backupUsername, container.AuthDatabase)
 
+			port := container.Port
 			mongodbModel := &MongodbDatabase{
 				Version:      tc.version,
 				Host:         container.Host,
-				Port:         container.Port,
+				Port:         &port,
 				Username:     backupUsername,
 				Password:     backupPassword,
 				Database:     container.Database,
 				AuthDatabase: container.AuthDatabase,
 				IsHttps:      false,
+				IsSrv:        false,
 				CpuCount:     1,
 			}
 
@@ -442,15 +446,17 @@ func connectToMongodbContainer(
 }
 
 func createMongodbModel(container *MongodbContainer) *MongodbDatabase {
+	port := container.Port
 	return &MongodbDatabase{
 		Version:      container.Version,
 		Host:         container.Host,
-		Port:         container.Port,
+		Port:         &port,
 		Username:     container.Username,
 		Password:     container.Password,
 		Database:     container.Database,
 		AuthDatabase: container.AuthDatabase,
 		IsHttps:      false,
+		IsSrv:        false,
 		CpuCount:     1,
 	}
 }
@@ -488,4 +494,158 @@ func assertWriteDenied(t *testing.T, err error) {
 			strings.Contains(errStr, "unauthorized") ||
 			strings.Contains(errStr, "permission denied"),
 		"Expected authorization error, got: %v", err)
+}
+
+func Test_BuildConnectionURI_WithSrvFormat_ReturnsCorrectUri(t *testing.T) {
+	port := 27017
+	model := &MongodbDatabase{
+		Host:         "cluster0.example.mongodb.net",
+		Port:         &port,
+		Username:     "testuser",
+		Password:     "testpass123",
+		Database:     "mydb",
+		AuthDatabase: "admin",
+		IsHttps:      false,
+		IsSrv:        true,
+	}
+
+	uri := model.buildConnectionURI("testpass123")
+
+	assert.Contains(t, uri, "mongodb+srv://")
+	assert.Contains(t, uri, "testuser")
+	assert.Contains(t, uri, "testpass123")
+	assert.Contains(t, uri, "cluster0.example.mongodb.net")
+	assert.Contains(t, uri, "/mydb")
+	assert.Contains(t, uri, "authSource=admin")
+	assert.Contains(t, uri, "connectTimeoutMS=15000")
+	assert.NotContains(t, uri, ":27017")
+}
+
+func Test_BuildConnectionURI_WithStandardFormat_ReturnsCorrectUri(t *testing.T) {
+	port := 27017
+	model := &MongodbDatabase{
+		Host:         "localhost",
+		Port:         &port,
+		Username:     "testuser",
+		Password:     "testpass123",
+		Database:     "mydb",
+		AuthDatabase: "admin",
+		IsHttps:      false,
+		IsSrv:        false,
+	}
+
+	uri := model.buildConnectionURI("testpass123")
+
+	assert.Contains(t, uri, "mongodb://")
+	assert.Contains(t, uri, "testuser")
+	assert.Contains(t, uri, "testpass123")
+	assert.Contains(t, uri, "localhost:27017")
+	assert.Contains(t, uri, "/mydb")
+	assert.Contains(t, uri, "authSource=admin")
+	assert.Contains(t, uri, "connectTimeoutMS=15000")
+	assert.NotContains(t, uri, "mongodb+srv://")
+}
+
+func Test_BuildConnectionURI_WithNullPort_UsesDefault(t *testing.T) {
+	model := &MongodbDatabase{
+		Host:         "localhost",
+		Port:         nil,
+		Username:     "testuser",
+		Password:     "testpass123",
+		Database:     "mydb",
+		AuthDatabase: "admin",
+		IsHttps:      false,
+		IsSrv:        false,
+	}
+
+	uri := model.buildConnectionURI("testpass123")
+
+	assert.Contains(t, uri, "localhost:27017")
+}
+
+func Test_BuildMongodumpURI_WithSrvFormat_ReturnsCorrectUri(t *testing.T) {
+	port := 27017
+	model := &MongodbDatabase{
+		Host:         "cluster0.example.mongodb.net",
+		Port:         &port,
+		Username:     "testuser",
+		Password:     "testpass123",
+		Database:     "mydb",
+		AuthDatabase: "admin",
+		IsHttps:      false,
+		IsSrv:        true,
+	}
+
+	uri := model.BuildMongodumpURI("testpass123")
+
+	assert.Contains(t, uri, "mongodb+srv://")
+	assert.Contains(t, uri, "testuser")
+	assert.Contains(t, uri, "testpass123")
+	assert.Contains(t, uri, "cluster0.example.mongodb.net")
+	assert.Contains(t, uri, "/?authSource=admin")
+	assert.Contains(t, uri, "connectTimeoutMS=15000")
+	assert.NotContains(t, uri, ":27017")
+	assert.NotContains(t, uri, "/mydb")
+}
+
+func Test_BuildMongodumpURI_WithStandardFormat_ReturnsCorrectUri(t *testing.T) {
+	port := 27017
+	model := &MongodbDatabase{
+		Host:         "localhost",
+		Port:         &port,
+		Username:     "testuser",
+		Password:     "testpass123",
+		Database:     "mydb",
+		AuthDatabase: "admin",
+		IsHttps:      false,
+		IsSrv:        false,
+	}
+
+	uri := model.BuildMongodumpURI("testpass123")
+
+	assert.Contains(t, uri, "mongodb://")
+	assert.Contains(t, uri, "testuser")
+	assert.Contains(t, uri, "testpass123")
+	assert.Contains(t, uri, "localhost:27017")
+	assert.Contains(t, uri, "/?authSource=admin")
+	assert.Contains(t, uri, "connectTimeoutMS=15000")
+	assert.NotContains(t, uri, "mongodb+srv://")
+	assert.NotContains(t, uri, "/mydb")
+}
+
+func Test_Validate_SrvConnection_AllowsNullPort(t *testing.T) {
+	model := &MongodbDatabase{
+		Host:         "cluster0.example.mongodb.net",
+		Port:         nil,
+		Username:     "testuser",
+		Password:     "testpass123",
+		Database:     "mydb",
+		AuthDatabase: "admin",
+		IsHttps:      false,
+		IsSrv:        true,
+		CpuCount:     1,
+	}
+
+	err := model.Validate()
+
+	assert.NoError(t, err)
+}
+
+func Test_Validate_StandardConnection_RequiresPort(t *testing.T) {
+	model := &MongodbDatabase{
+		Host:         "localhost",
+		Port:         nil,
+		Username:     "testuser",
+		Password:     "testpass123",
+		Database:     "mydb",
+		AuthDatabase: "admin",
+		IsHttps:      false,
+		IsSrv:        false,
+		CpuCount:     1,
+	}
+
+	err := model.Validate()
+
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "port is required for standard connections")
 }
