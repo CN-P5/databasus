@@ -385,13 +385,14 @@ func createMongodbDatabaseViaAPI(
 		Type:        databases.DatabaseTypeMongodb,
 		Mongodb: &mongodbtypes.MongodbDatabase{
 			Host:         host,
-			Port:         port,
+			Port:         &port,
 			Username:     username,
 			Password:     password,
 			Database:     database,
 			AuthDatabase: authDatabase,
 			Version:      version,
 			IsHttps:      false,
+			IsSrv:        false,
 			CpuCount:     1,
 		},
 	}
@@ -432,13 +433,14 @@ func createMongodbRestoreViaAPI(
 	request := restores_core.RestoreBackupRequest{
 		MongodbDatabase: &mongodbtypes.MongodbDatabase{
 			Host:         host,
-			Port:         port,
+			Port:         &port,
 			Username:     username,
 			Password:     password,
 			Database:     database,
 			AuthDatabase: authDatabase,
 			Version:      version,
 			IsHttps:      false,
+			IsSrv:        false,
 			CpuCount:     1,
 		},
 	}

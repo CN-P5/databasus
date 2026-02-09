@@ -46,7 +46,7 @@ export const EditMongoDbSpecificDataComponent = ({
   const [isTestingConnection, setIsTestingConnection] = useState(false);
   const [isConnectionFailed, setIsConnectionFailed] = useState(false);
 
-  const hasAdvancedValues = !!database.mongodb?.authDatabase;
+  const hasAdvancedValues = !!database.mongodb?.authDatabase || !!database.mongodb?.isSrv;
   const [isShowAdvanced, setShowAdvanced] = useState(hasAdvancedValues);
 
   const parseFromClipboard = async () => {
@@ -75,17 +75,29 @@ export const EditMongoDbSpecificDataComponent = ({
           host: result.host,
           port: result.port,
           username: result.username,
-          password: result.password,
+          password: result.password || '',
           database: result.database,
           authDatabase: result.authDatabase,
           isHttps: result.useTls,
+          isSrv: result.isSrv,
           cpuCount: 1,
         },
       };
 
+      if (result.isSrv) {
+        setShowAdvanced(true);
+      }
+
       setEditingDatabase(updatedDatabase);
       setIsConnectionTested(false);
-      message.success('Connection string parsed successfully');
+
+      if (!result.password) {
+        message.warning(
+          'Connection string parsed successfully. Please enter the password manually.',
+        );
+      } else {
+        message.success('Connection string parsed successfully');
+      }
     } catch {
       message.error('Failed to read clipboard. Please check browser permissions.');
     }
@@ -156,9 +168,11 @@ export const EditMongoDbSpecificDataComponent = ({
 
   if (!editingDatabase) return null;
 
+  const isSrvConnection = editingDatabase.mongodb?.isSrv || false;
+
   let isAllFieldsFilled = true;
   if (!editingDatabase.mongodb?.host) isAllFieldsFilled = false;
-  if (!editingDatabase.mongodb?.port) isAllFieldsFilled = false;
+  if (!isSrvConnection && !editingDatabase.mongodb?.port) isAllFieldsFilled = false;
   if (!editingDatabase.mongodb?.username) isAllFieldsFilled = false;
   if (!editingDatabase.id && !editingDatabase.mongodb?.password) isAllFieldsFilled = false;
   if (!editingDatabase.mongodb?.database) isAllFieldsFilled = false;
@@ -220,25 +234,27 @@ export const EditMongoDbSpecificDataComponent = ({
         </div>
       )}
 
-      <div className="mb-1 flex w-full items-center">
-        <div className="min-w-[150px]">Port</div>
-        <InputNumber
-          type="number"
-          value={editingDatabase.mongodb?.port}
-          onChange={(e) => {
-            if (!editingDatabase.mongodb || e === null) return;
+      {!isSrvConnection && (
+        <div className="mb-1 flex w-full items-center">
+          <div className="min-w-[150px]">Port</div>
+          <InputNumber
+            type="number"
+            value={editingDatabase.mongodb?.port}
+            onChange={(e) => {
+              if (!editingDatabase.mongodb || e === null) return;
 
-            setEditingDatabase({
-              ...editingDatabase,
-              mongodb: { ...editingDatabase.mongodb, port: e },
-            });
-            setIsConnectionTested(false);
-          }}
-          size="small"
-          className="max-w-[200px] grow"
-          placeholder="27017"
-        />
-      </div>
+              setEditingDatabase({
+                ...editingDatabase,
+                mongodb: { ...editingDatabase.mongodb, port: e },
+              });
+              setIsConnectionTested(false);
+            }}
+            size="small"
+            className="max-w-[200px] grow"
+            placeholder="27017"
+          />
+        </div>
+      )}
 
       <div className="mb-1 flex w-full items-center">
         <div className="min-w-[150px]">Username</div>
@@ -366,6 +382,31 @@ export const EditMongoDbSpecificDataComponent = ({
 
       {isShowAdvanced && (
         <>
+          <div className="mb-1 flex w-full items-center">
+            <div className="min-w-[150px]">Use SRV connection</div>
+            <div className="flex items-center">
+              <Switch
+                checked={editingDatabase.mongodb?.isSrv || false}
+                onChange={(checked) => {
+                  if (!editingDatabase.mongodb) return;
+
+                  setEditingDatabase({
+                    ...editingDatabase,
+                    mongodb: { ...editingDatabase.mongodb, isSrv: checked },
+                  });
+                  setIsConnectionTested(false);
+                }}
+                size="small"
+              />
+              <Tooltip
+                className="cursor-pointer"
+                title="Enable for MongoDB Atlas SRV connections (mongodb+srv://). Port is not required for SRV connections."
+              >
+                <InfoCircleOutlined className="ml-2" style={{ color: 'gray' }} />
+              </Tooltip>
+            </div>
+          </div>
+
           <div className="mb-1 flex w-full items-center">
             <div className="min-w-[150px]">Auth database</div>
             <Input

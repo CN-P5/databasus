@@ -10,5 +10,6 @@ export interface MongodbDatabase {
   database: string;
   authDatabase: string;
   isHttps: boolean;
+  isSrv: boolean;
   cpuCount: number;
 }

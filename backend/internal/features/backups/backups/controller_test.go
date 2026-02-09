@@ -1366,10 +1366,23 @@ func createTestBackup(
 		panic(err)
 	}
 
-	storages, err := storages.GetStorageService().GetStorages(user, *database.WorkspaceID)
-	if err != nil || len(storages) == 0 {
+	loadedStorages, err := storages.GetStorageService().GetStorages(user, *database.WorkspaceID)
+	if err != nil || len(loadedStorages) == 0 {
 		panic("No storage found for workspace")
 	}
+
+	// Filter out system storages
+	var nonSystemStorages []*storages.Storage
+	for _, storage := range loadedStorages {
+		if !storage.IsSystem {
+			nonSystemStorages = append(nonSystemStorages, storage)
+		}
+	}
+	if len(nonSystemStorages) == 0 {
+		panic("No non-system storage found for workspace")
+	}
+
+	storages := nonSystemStorages
 
 	backup := &backups_core.Backup{
 		ID:               uuid.New(),
