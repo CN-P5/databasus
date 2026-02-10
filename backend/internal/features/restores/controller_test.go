@@ -32,7 +32,6 @@ import (
 	tasks_cancellation "databasus-backend/internal/features/tasks/cancellation"
 	users_dto "databasus-backend/internal/features/users/dto"
 	users_enums "databasus-backend/internal/features/users/enums"
-	users_services "databasus-backend/internal/features/users/services"
 	users_testing "databasus-backend/internal/features/users/testing"
 	workspaces_models "databasus-backend/internal/features/workspaces/models"
 	workspaces_testing "databasus-backend/internal/features/workspaces/testing"
@@ -358,7 +357,7 @@ func Test_RestoreBackup_DiskSpaceValidation(t *testing.T) {
 				_, err = configService.SaveBackupConfig(config)
 				assert.NoError(t, err)
 
-				backup = createTestBackup(mysqlDB, owner)
+				backup = createTestBackup(mysqlDB, storage)
 
 				request = restores_core.RestoreBackupRequest{
 					MysqlDatabase: &mysql.MysqlDatabase{
@@ -610,7 +609,7 @@ func createTestDatabaseWithBackupForRestore(
 		panic(err)
 	}
 
-	backup := createTestBackup(database, owner)
+	backup := createTestBackup(database, storage)
 
 	return database, backup
 }
@@ -727,24 +726,14 @@ func createTestStorage(workspaceID uuid.UUID) *storages.Storage {
 
 func createTestBackup(
 	database *databases.Database,
-	owner *users_dto.SignInResponseDTO,
+	storage *storages.Storage,
 ) *backups_core.Backup {
 	fieldEncryptor := util_encryption.GetFieldEncryptor()
-	userService := users_services.GetUserService()
-	user, err := userService.GetUserFromToken(owner.Token)
-	if err != nil {
-		panic(err)
-	}
-
-	storages, err := storages.GetStorageService().GetStorages(user, *database.WorkspaceID)
-	if err != nil || len(storages) == 0 {
-		panic("No storage found for workspace")
-	}
 
 	backup := &backups_core.Backup{
 		ID:               uuid.New(),
 		DatabaseID:       database.ID,
-		StorageID:        storages[0].ID,
+		StorageID:        storage.ID,
 		Status:           backups_core.BackupStatusCompleted,
 		BackupSizeMb:     10.5,
 		BackupDurationMs: 1000,
@@ -759,7 +748,7 @@ func createTestBackup(
 	dummyContent := []byte("dummy backup content for testing")
 	reader := strings.NewReader(string(dummyContent))
 	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
-	if err := storages[0].SaveFile(
+	if err := storage.SaveFile(
 		context.Background(),
 		fieldEncryptor,
 		logger,
