@@ -52,7 +52,7 @@ func (c *UserController) RegisterProtectedRoutes(router *gin.RouterGroup) {
 // @Accept json
 // @Produce json
 // @Param request body users_dto.SignUpRequestDTO true "User signup data"
-// @Success 200
+// @Success 200 {object} users_dto.SignInResponseDTO
 // @Failure 400
 // @Router /users/signup [post]
 func (c *UserController) SignUp(ctx *gin.Context) {
@@ -84,13 +84,19 @@ func (c *UserController) SignUp(ctx *gin.Context) {
 		}
 	}
 
-	err := c.userService.SignUp(&request)
+	user, err := c.userService.SignUp(&request)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{"message": "User created successfully"})
+	response, err := c.userService.GenerateAccessToken(user)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate token"})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, response)
 }
 
 // SignIn

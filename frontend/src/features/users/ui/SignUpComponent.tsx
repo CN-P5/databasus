@@ -92,11 +92,6 @@ export function SignUpComponent({ onSwitchToSignIn }: SignUpComponentProps): JSX
           name,
           cloudflareTurnstileToken: token,
         });
-        await userApi.signIn({
-          email,
-          password,
-          cloudflareTurnstileToken: token,
-        });
       } catch (e) {
         setSignUpError(StringUtils.capitalizeFirstLetter((e as Error).message));
         resetCloudflareTurnstile();
