@@ -44,19 +44,19 @@ func (s *UserService) SetEmailSender(sender users_interfaces.EmailSender) {
 	s.emailSender = sender
 }
 
-func (s *UserService) SignUp(request *users_dto.SignUpRequestDTO) error {
+func (s *UserService) SignUp(request *users_dto.SignUpRequestDTO) (*users_models.User, error) {
 	existingUser, err := s.userRepository.GetUserByEmail(request.Email)
 	if err != nil {
-		return fmt.Errorf("failed to check existing user: %w", err)
+		return nil, fmt.Errorf("failed to check existing user: %w", err)
 	}
 
 	if existingUser != nil && existingUser.Status != users_enums.UserStatusInvited {
-		return errors.New("user with this email already exists")
+		return nil, errors.New("user with this email already exists")
 	}
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(request.Password), bcrypt.DefaultCost)
 	if err != nil {
-		return fmt.Errorf("failed to hash password: %w", err)
+		return nil, fmt.Errorf("failed to hash password: %w", err)
 	}
 
 	hashedPasswordStr := string(hashedPassword)
@@ -67,39 +67,45 @@ func (s *UserService) SignUp(request *users_dto.SignUpRequestDTO) error {
 			existingUser.ID,
 			hashedPasswordStr,
 		); err != nil {
-			return fmt.Errorf("failed to set password: %w", err)
+			return nil, fmt.Errorf("failed to set password: %w", err)
 		}
 
 		if err := s.userRepository.UpdateUserStatus(
 			existingUser.ID,
 			users_enums.UserStatusActive,
 		); err != nil {
-			return fmt.Errorf("failed to activate user: %w", err)
+			return nil, fmt.Errorf("failed to activate user: %w", err)
 		}
 
 		name := request.Name
 		if err := s.userRepository.UpdateUserInfo(existingUser.ID, &name, nil); err != nil {
-			return fmt.Errorf("failed to update name: %w", err)
+			return nil, fmt.Errorf("failed to update name: %w", err)
+		}
+
+		// Fetch updated user to ensure we have the latest data
+		updatedUser, err := s.userRepository.GetUserByID(existingUser.ID)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get updated user: %w", err)
 		}
 
 		s.auditLogWriter.WriteAuditLog(
-			fmt.Sprintf("Invited user completed registration: %s", existingUser.Email),
-			&existingUser.ID,
+			fmt.Sprintf("Invited user completed registration: %s", updatedUser.Email),
+			&updatedUser.ID,
 			nil,
 		)
 
-		return nil
+		return updatedUser, nil
 	}
 
 	// Get settings to check registration policy for new users
 	settings, err := s.settingsService.GetSettings()
 	if err != nil {
-		return fmt.Errorf("failed to get settings: %w", err)
+		return nil, fmt.Errorf("failed to get settings: %w", err)
 	}
 
 	// Check if external registrations are allowed
 	if !settings.IsAllowExternalRegistrations {
-		return errors.New("external registration is disabled")
+		return nil, errors.New("external registration is disabled")
 	}
 
 	user := &users_models.User{
@@ -114,7 +120,7 @@ func (s *UserService) SignUp(request *users_dto.SignUpRequestDTO) error {
 	}
 
 	if err := s.userRepository.CreateUser(user); err != nil {
-		return fmt.Errorf("failed to create user: %w", err)
+		return nil, fmt.Errorf("failed to create user: %w", err)
 	}
 
 	s.auditLogWriter.WriteAuditLog(
@@ -123,7 +129,7 @@ func (s *UserService) SignUp(request *users_dto.SignUpRequestDTO) error {
 		nil,
 	)
 
-	return nil
+	return user, nil
 }
 
 func (s *UserService) SignIn(
@@ -258,6 +264,7 @@ func (s *UserService) GenerateAccessToken(
 
 	return &users_dto.SignInResponseDTO{
 		UserID: user.ID,
+		Email:  user.Email,
 		Token:  tokenString,
 	}, nil
 }
