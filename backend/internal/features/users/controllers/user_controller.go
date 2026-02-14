@@ -11,6 +11,7 @@ import (
 	user_middleware "databasus-backend/internal/features/users/middleware"
 	users_services "databasus-backend/internal/features/users/services"
 	cache_utils "databasus-backend/internal/util/cache"
+	cloudflare_turnstile "databasus-backend/internal/util/cloudflare_turnstile"
 
 	"github.com/gin-gonic/gin"
 )
@@ -61,6 +62,28 @@ func (c *UserController) SignUp(ctx *gin.Context) {
 		return
 	}
 
+	// Verify Cloudflare Turnstile if enabled
+	turnstileService := cloudflare_turnstile.GetCloudflareTurnstileService()
+	if turnstileService.IsEnabled() {
+		if request.CloudflareTurnstileToken == nil || *request.CloudflareTurnstileToken == "" {
+			ctx.JSON(
+				http.StatusBadRequest,
+				gin.H{"error": "Cloudflare Turnstile verification required"},
+			)
+			return
+		}
+
+		clientIP := ctx.ClientIP()
+		isValid, err := turnstileService.VerifyToken(*request.CloudflareTurnstileToken, clientIP)
+		if err != nil || !isValid {
+			ctx.JSON(
+				http.StatusBadRequest,
+				gin.H{"error": "Cloudflare Turnstile verification failed"},
+			)
+			return
+		}
+	}
+
 	err := c.userService.SignUp(&request)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -86,6 +109,28 @@ func (c *UserController) SignIn(ctx *gin.Context) {
 	if err := ctx.ShouldBindJSON(&request); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request format"})
 		return
+	}
+
+	// Verify Cloudflare Turnstile if enabled
+	turnstileService := cloudflare_turnstile.GetCloudflareTurnstileService()
+	if turnstileService.IsEnabled() {
+		if request.CloudflareTurnstileToken == nil || *request.CloudflareTurnstileToken == "" {
+			ctx.JSON(
+				http.StatusBadRequest,
+				gin.H{"error": "Cloudflare Turnstile verification required"},
+			)
+			return
+		}
+
+		clientIP := ctx.ClientIP()
+		isValid, err := turnstileService.VerifyToken(*request.CloudflareTurnstileToken, clientIP)
+		if err != nil || !isValid {
+			ctx.JSON(
+				http.StatusBadRequest,
+				gin.H{"error": "Cloudflare Turnstile verification failed"},
+			)
+			return
+		}
 	}
 
 	allowed, _ := c.rateLimiter.CheckLimit(request.Email, "signin", 10, 1*time.Minute)
@@ -361,6 +406,28 @@ func (c *UserController) SendResetPasswordCode(ctx *gin.Context) {
 	if err := ctx.ShouldBindJSON(&request); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request format"})
 		return
+	}
+
+	// Verify Cloudflare Turnstile if enabled
+	turnstileService := cloudflare_turnstile.GetCloudflareTurnstileService()
+	if turnstileService.IsEnabled() {
+		if request.CloudflareTurnstileToken == nil || *request.CloudflareTurnstileToken == "" {
+			ctx.JSON(
+				http.StatusBadRequest,
+				gin.H{"error": "Cloudflare Turnstile verification required"},
+			)
+			return
+		}
+
+		clientIP := ctx.ClientIP()
+		isValid, err := turnstileService.VerifyToken(*request.CloudflareTurnstileToken, clientIP)
+		if err != nil || !isValid {
+			ctx.JSON(
+				http.StatusBadRequest,
+				gin.H{"error": "Cloudflare Turnstile verification failed"},
+			)
+			return
+		}
 	}
 
 	allowed, _ := c.rateLimiter.CheckLimit(
