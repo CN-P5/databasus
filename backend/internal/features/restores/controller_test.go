@@ -261,7 +261,7 @@ func Test_RestoreBackup_AuditLogWritten(t *testing.T) {
 
 	found := false
 	for _, log := range auditLogs.AuditLogs {
-		if strings.Contains(log.Message, "Database restored from backup") &&
+		if strings.Contains(log.Message, "Database restored for database") &&
 			strings.Contains(log.Message, database.Name) {
 			found = true
 			break
