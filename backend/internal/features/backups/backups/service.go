@@ -181,11 +181,7 @@ func (s *BackupService) DeleteBackup(
 	}
 
 	s.auditLogService.WriteAuditLog(
-		fmt.Sprintf(
-			"Backup deleted for database: %s (ID: %s)",
-			database.Name,
-			backupID.String(),
-		),
+		fmt.Sprintf("Backup deleted for database: %s", database.Name),
 		&user.ID,
 		database.WorkspaceID,
 	)
@@ -232,11 +228,7 @@ func (s *BackupService) CancelBackup(
 	}
 
 	s.auditLogService.WriteAuditLog(
-		fmt.Sprintf(
-			"Backup cancelled for database: %s (ID: %s)",
-			database.Name,
-			backupID.String(),
-		),
+		fmt.Sprintf("Backup cancelled for database: %s", database.Name),
 		&user.ID,
 		database.WorkspaceID,
 	)
@@ -276,11 +268,7 @@ func (s *BackupService) GetBackupFile(
 	}
 
 	s.auditLogService.WriteAuditLog(
-		fmt.Sprintf(
-			"Backup file downloaded for database: %s (ID: %s)",
-			database.Name,
-			backupID.String(),
-		),
+		fmt.Sprintf("Backup file downloaded for database: %s", database.Name),
 		&user.ID,
 		database.WorkspaceID,
 	)
@@ -490,11 +478,7 @@ func (s *BackupService) WriteAuditLogForDownload(
 	database *databases.Database,
 ) {
 	s.auditLogService.WriteAuditLog(
-		fmt.Sprintf(
-			"Backup file downloaded for database: %s (ID: %s)",
-			database.Name,
-			backup.ID.String(),
-		),
+		fmt.Sprintf("Backup file downloaded for database: %s", database.Name),
 		&userID,
 		database.WorkspaceID,
 	)

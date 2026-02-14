@@ -390,7 +390,7 @@ func (s *UserService) InviteUser(
 
 	message := fmt.Sprintf("User invited: %s", request.Email)
 	if request.IntendedWorkspaceID != nil {
-		message += fmt.Sprintf(" for workspace %s", request.IntendedWorkspaceID.String())
+		message += " for workspace"
 	}
 	s.auditLogWriter.WriteAuditLog(
 		message,
@@ -437,6 +437,9 @@ func (s *UserService) UpdateUserInfo(
 		return fmt.Errorf("failed to get user: %w", err)
 	}
 
+	oldEmail := user.Email
+	oldName := user.Name
+
 	if user.Email == "admin" && request.Email != nil && *request.Email != user.Email {
 		return errors.New("admin email cannot be changed")
 	}
@@ -455,7 +458,28 @@ func (s *UserService) UpdateUserInfo(
 		return fmt.Errorf("failed to update user info: %w", err)
 	}
 
-	s.auditLogWriter.WriteAuditLog("User info updated", &userID, nil)
+	var auditMessages []string
+	if request.Email != nil && *request.Email != oldEmail {
+		auditMessages = append(
+			auditMessages,
+			fmt.Sprintf("Email changed from '%s' to '%s'", oldEmail, *request.Email),
+		)
+	}
+	if request.Name != nil && *request.Name != oldName {
+		auditMessages = append(
+			auditMessages,
+			fmt.Sprintf("Name changed from '%s' to '%s'", oldName, *request.Name),
+		)
+	}
+
+	if len(auditMessages) > 0 {
+		for _, message := range auditMessages {
+			s.auditLogWriter.WriteAuditLog(message, &userID, nil)
+		}
+	} else {
+		s.auditLogWriter.WriteAuditLog("User info updated", &userID, nil)
+	}
+
 	return nil
 }
 
