@@ -152,7 +152,7 @@ func (uc *RestorePostgresqlBackupUsecase) restoreViaStdin(
 		"--no-acl",
 	}
 
-	ctx, cancel := context.WithTimeout(parentCtx, 60*time.Minute)
+	ctx, cancel := context.WithTimeout(parentCtx, 23*time.Hour)
 	defer cancel()
 
 	// Monitor for shutdown and parent cancellation
@@ -429,7 +429,7 @@ func (uc *RestorePostgresqlBackupUsecase) restoreFromStorage(
 		isExcludeExtensions,
 	)
 
-	ctx, cancel := context.WithTimeout(parentCtx, 60*time.Minute)
+	ctx, cancel := context.WithTimeout(parentCtx, 23*time.Hour)
 	defer cancel()
 
 	// Monitor for shutdown and parent cancellation

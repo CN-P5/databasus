@@ -106,7 +106,7 @@ func (uc *RestoreMariadbBackupUsecase) restoreFromStorage(
 	storage *storages.Storage,
 	mdbConfig *mariadbtypes.MariadbDatabase,
 ) error {
-	ctx, cancel := context.WithTimeout(parentCtx, 60*time.Minute)
+	ctx, cancel := context.WithTimeout(parentCtx, 23*time.Hour)
 	defer cancel()
 
 	go func() {
