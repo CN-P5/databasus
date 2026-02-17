@@ -69,6 +69,8 @@
 - **Encryption for secrets**: Any sensitive data is encrypted and never exposed, even in logs or error messages
 - **Read-only user**: Databasus uses a read-only user by default for backups and never stores anything that can modify your data
 
+It is also important for Databasus that you are able to decrypt and restore backups from storages (local, S3, etc.) without Databasus itself. To do so, read our guide on [how to recover directly from storage](https://databasus.com/how-to-recover-without-databasus). We avoid "vendor lock-in" even to open source tool!
+
 ### 👥 **Suitable for teams** <a href="https://databasus.com/access-management">(docs)</a>
 
 - **Workspaces**: Group databases, notifiers and storages for different projects or teams
@@ -231,55 +233,21 @@ docker exec -it databasus ./main --new-password="YourNewSecurePassword123" --ema
 
 Replace `admin` with the actual email address of the user whose password you want to reset.
 
+### 💾 Backuping Databasus itself
+
+After installation, it is also recommended to <a href="https://databasus.com/faq/#backup-databasus">backup your Databasus itself</a> or, at least, to copy secret key used for encryption (30 seconds is needed). So you are able to restore from your encrypted backups if you lose access to the server with Databasus or it is corrupted.
+
 ---
 
 ## 📝 License
 
 This project is licensed under the Apache 2.0 License - see the [LICENSE](LICENSE) file for details
 
----
-
 ## 🤝 Contributing
 
 Contributions are welcome! Read the <a href="https://databasus.com/contribute">contributing guide</a> for more details, priorities and rules. If you want to contribute but don't know where to start, message me on Telegram [@rostislav_dugin](https://t.me/rostislav_dugin)
 
 Also you can join our large community of developers, DBAs and DevOps engineers on Telegram [@databasus_community](https://t.me/databasus_community).
-
---
-
-## 📖 Migration guide
-
-Databasus is the new name for Postgresus. You can stay with latest version of Postgresus if you wish. If you want to migrate - follow installation steps for Databasus itself.
-
-Just renaming an image is not enough as Postgresus and Databasus use different data folders and internal database naming.
-
-You can put a new Databasus image with updated volume near the old Postgresus and run it (stop Postgresus before):
-
-```
-services:
-  databasus:
-    container_name: databasus
-    image: databasus/databasus:latest
-    ports:
-      - "4005:4005"
-    volumes:
-      - ./databasus-data:/databasus-data
-    restart: unless-stopped
-```
-
-Then manually move databases from Postgresus to Databasus.
-
-### Why was Postgresus renamed to Databasus?
-
-Databasus has been developed since 2023. It was internal tool to backup production and home projects databases. In start of 2025 it was released as open source project on GitHub. By the end of 2025 it became popular and the time for renaming has come in December 2025.
-
-It was an important step for the project to grow. Actually, there are a couple of reasons:
-
-1. Postgresus is no longer a little tool that just adds UI for pg_dump for little projects. It became a tool both for individual users, DevOps, DBAs, teams, companies and even large enterprises. Tens of thousands of users use Postgresus every day. Postgresus grew into a reliable backup management tool. Initial positioning is no longer suitable: the project is not just a UI wrapper, it's a solid backup management system now (despite it's still easy to use).
-
-2. New databases are supported: although the primary focus is PostgreSQL (with 100% support in the most efficient way) and always will be, Databasus added support for MySQL, MariaDB and MongoDB. Later more databases will be supported.
-
-3. Trademark issue: "postgres" is a trademark of PostgreSQL Inc. and cannot be used in the project name. So for safety and legal reasons, we had to rename the project.
 
 ## AI disclaimer
 

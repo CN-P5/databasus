@@ -482,7 +482,9 @@ func (uc *CreatePostgresqlBackupUsecase) setupBackupEncryption(
 	backupConfig *backups_config.BackupConfig,
 	storageWriter io.WriteCloser,
 ) (io.Writer, *backup_encryption.EncryptionWriter, common.BackupMetadata, error) {
-	metadata := common.BackupMetadata{}
+	metadata := common.BackupMetadata{
+		BackupID: backupID,
+	}
 
 	if backupConfig.Encryption != backups_config.BackupEncryptionEncrypted {
 		metadata.Encryption = backups_config.BackupEncryptionNone
