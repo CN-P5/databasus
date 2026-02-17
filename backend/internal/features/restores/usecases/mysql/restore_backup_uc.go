@@ -105,7 +105,7 @@ func (uc *RestoreMysqlBackupUsecase) restoreFromStorage(
 	storage *storages.Storage,
 	myConfig *mysqltypes.MysqlDatabase,
 ) error {
-	ctx, cancel := context.WithTimeout(parentCtx, 60*time.Minute)
+	ctx, cancel := context.WithTimeout(parentCtx, 23*time.Hour)
 	defer cancel()
 
 	go func() {
