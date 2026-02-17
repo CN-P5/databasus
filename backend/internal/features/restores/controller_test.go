@@ -752,7 +752,7 @@ func createTestBackup(
 		context.Background(),
 		fieldEncryptor,
 		logger,
-		backup.ID,
+		backup.ID.String(),
 		reader,
 	); err != nil {
 		panic(fmt.Sprintf("Failed to create test backup file: %v", err))

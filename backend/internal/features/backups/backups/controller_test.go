@@ -32,6 +32,7 @@ import (
 	workspaces_models "databasus-backend/internal/features/workspaces/models"
 	workspaces_testing "databasus-backend/internal/features/workspaces/testing"
 	"databasus-backend/internal/util/encryption"
+	files_utils "databasus-backend/internal/util/files"
 	test_utils "databasus-backend/internal/util/testing"
 	"databasus-backend/internal/util/tools"
 )
@@ -956,7 +957,7 @@ func Test_SanitizeFilename(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.input, func(t *testing.T) {
-			result := sanitizeFilename(tt.input)
+			result := files_utils.SanitizeFilename(tt.input)
 			assert.Equal(t, tt.expected, result)
 		})
 	}
@@ -1407,7 +1408,7 @@ func createTestBackup(
 		context.Background(),
 		encryption.GetFieldEncryptor(),
 		logger,
-		backup.ID,
+		backup.ID.String(),
 		reader,
 	); err != nil {
 		panic(fmt.Sprintf("Failed to create test backup file: %v", err))
