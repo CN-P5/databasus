@@ -269,6 +269,7 @@ func (uc *CreateMongodbBackupUsecase) setupBackupEncryption(
 	storageWriter io.WriteCloser,
 ) (io.Writer, *backup_encryption.EncryptionWriter, common.BackupMetadata, error) {
 	backupMetadata := common.BackupMetadata{
+		BackupID:   backupID,
 		Encryption: backups_config.BackupEncryptionNone,
 	}
 
@@ -305,6 +306,7 @@ func (uc *CreateMongodbBackupUsecase) setupBackupEncryption(
 	saltBase64 := base64.StdEncoding.EncodeToString(salt)
 	nonceBase64 := base64.StdEncoding.EncodeToString(nonce)
 
+	backupMetadata.BackupID = backupID
 	backupMetadata.Encryption = backups_config.BackupEncryptionEncrypted
 	backupMetadata.EncryptionSalt = &saltBase64
 	backupMetadata.EncryptionIV = &nonceBase64
