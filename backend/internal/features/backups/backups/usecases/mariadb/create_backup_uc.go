@@ -19,6 +19,7 @@ import (
 
 	"databasus-backend/internal/config"
 	common "databasus-backend/internal/features/backups/backups/common"
+	backups_core "databasus-backend/internal/features/backups/backups/core"
 	backup_encryption "databasus-backend/internal/features/backups/backups/encryption"
 	backups_config "databasus-backend/internal/features/backups/config"
 	"databasus-backend/internal/features/databases"
@@ -52,7 +53,7 @@ type writeResult struct {
 
 func (uc *CreateMariadbBackupUsecase) Execute(
 	ctx context.Context,
-	backupID uuid.UUID,
+	backup *backups_core.Backup,
 	backupConfig *backups_config.BackupConfig,
 	db *databases.Database,
 	storage *storages.Storage,
@@ -82,7 +83,7 @@ func (uc *CreateMariadbBackupUsecase) Execute(
 
 	return uc.streamToStorage(
 		ctx,
-		backupID,
+		backup,
 		backupConfig,
 		tools.GetMariadbExecutable(
 			tools.MariadbExecutableMariadbDump,
@@ -136,7 +137,7 @@ func (uc *CreateMariadbBackupUsecase) buildMariadbDumpArgs(
 
 func (uc *CreateMariadbBackupUsecase) streamToStorage(
 	parentCtx context.Context,
-	backupID uuid.UUID,
+	backup *backups_core.Backup,
 	backupConfig *backups_config.BackupConfig,
 	mariadbBin string,
 	args []string,
@@ -187,7 +188,7 @@ func (uc *CreateMariadbBackupUsecase) streamToStorage(
 	storageReader, storageWriter := io.Pipe()
 
 	finalWriter, encryptionWriter, backupMetadata, err := uc.setupBackupEncryption(
-		backupID,
+		backup.ID,
 		backupConfig,
 		storageWriter,
 	)
@@ -204,7 +205,13 @@ func (uc *CreateMariadbBackupUsecase) streamToStorage(
 
 	saveErrCh := make(chan error, 1)
 	go func() {
-		saveErr := storage.SaveFile(ctx, uc.fieldEncryptor, uc.logger, backupID, storageReader)
+		saveErr := storage.SaveFile(
+			ctx,
+			uc.fieldEncryptor,
+			uc.logger,
+			backup.FileName,
+			storageReader,
+		)
 		saveErrCh <- saveErr
 	}()
 

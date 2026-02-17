@@ -79,7 +79,7 @@ func (c *BackupCleaner) DeleteBackup(backup *backups_core.Backup) error {
 		return err
 	}
 
-	err = storage.DeleteFile(c.fieldEncryptor, backup.ID)
+	err = storage.DeleteFile(c.fieldEncryptor, backup.ID.String())
 	if err != nil {
 		// we do not return error here, because sometimes clean up performed
 		// before unavailable storage removal or change - therefore we should
