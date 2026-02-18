@@ -325,7 +325,7 @@ func (s *BackupService) getBackupReader(backupID uuid.UUID) (io.ReadCloser, erro
 		return nil, fmt.Errorf("failed to get storage: %w", err)
 	}
 
-	fileReader, err := storage.GetFile(s.fieldEncryptor, backup.ID.String())
+	fileReader, err := storage.GetFile(s.fieldEncryptor, backup.FileName)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get backup file: %w", err)
 	}

@@ -305,7 +305,6 @@ func (c *BackupController) GetFile(ctx *gin.Context) {
 	_, err = io.Copy(ctx.Writer, rateLimitedReader)
 	if err != nil {
 		fmt.Printf("Error streaming file: %v\n", err)
-		return
 	}
 
 	c.backupService.WriteAuditLogForDownload(downloadToken.UserID, backup, database)

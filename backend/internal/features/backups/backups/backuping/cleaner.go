@@ -79,13 +79,18 @@ func (c *BackupCleaner) DeleteBackup(backup *backups_core.Backup) error {
 		return err
 	}
 
-	err = storage.DeleteFile(c.fieldEncryptor, backup.ID.String())
+	err = storage.DeleteFile(c.fieldEncryptor, backup.FileName)
 	if err != nil {
 		// we do not return error here, because sometimes clean up performed
 		// before unavailable storage removal or change - therefore we should
 		// proceed even in case of error. It's possible that some S3 or
 		// storage is not available yet, it should not block us
 		c.logger.Error("Failed to delete backup file", "error", err)
+	}
+
+	metadataFileName := backup.FileName + ".metadata"
+	if err := storage.DeleteFile(c.fieldEncryptor, metadataFileName); err != nil {
+		c.logger.Error("Failed to delete backup metadata file", "error", err)
 	}
 
 	return c.backupRepository.DeleteByID(backup.ID)

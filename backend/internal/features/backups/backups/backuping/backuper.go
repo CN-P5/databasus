@@ -265,7 +265,7 @@ func (n *BackuperNode) MakeBackup(backupID uuid.UUID, isCallNotifier bool) {
 			// Delete partial backup from storage
 			storage, storageErr := n.storageService.GetStorageByID(backup.StorageID)
 			if storageErr == nil {
-				if deleteErr := storage.DeleteFile(n.fieldEncryptor, backup.ID.String()); deleteErr != nil {
+				if deleteErr := storage.DeleteFile(n.fieldEncryptor, backup.FileName); deleteErr != nil {
 					n.logger.Error(
 						"Failed to delete partial backup file",
 						"backupId",
