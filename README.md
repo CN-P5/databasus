@@ -55,7 +55,7 @@
 - **Time period**: Keep backups for a fixed duration (e.g., 7 days, 3 months, 1 year)
 - **Count**: Keep a fixed number of the most recent backups (e.g., last 30)
 - **GFS (Grandfather-Father-Son)**: Layered retention — keep hourly, daily, weekly, monthly and yearly backups independently for fine-grained long-term history (enterprises requirement)
-- **Size limits**: Set per-backup and total storage size caps to control storage гыфпу
+- **Size limits**: Set per-backup and total storage size caps to control storage usage
 
 ### 🗄️ **Multiple storage destinations** <a href="https://databasus.com/storages">(view supported)</a>
 
