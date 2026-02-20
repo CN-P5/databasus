@@ -57,6 +57,7 @@ export const BackupsComponent = ({ database, isCanManageDBs, scrollContainerRef 
   const [showingRestoresBackupId, setShowingRestoresBackupId] = useState<string | undefined>();
 
   const lastRequestTimeRef = useRef<number>(0);
+  const isBackupsRequestInFlightRef = useRef(false);
 
   const [downloadingBackupId, setDownloadingBackupId] = useState<string | undefined>();
   const [cancellingBackupId, setCancellingBackupId] = useState<string | undefined>();
@@ -72,6 +73,9 @@ export const BackupsComponent = ({ database, isCanManageDBs, scrollContainerRef 
   };
 
   const loadBackups = async (limit?: number) => {
+    if (isBackupsRequestInFlightRef.current) return;
+    isBackupsRequestInFlightRef.current = true;
+
     const requestTime = Date.now();
     lastRequestTimeRef.current = requestTime;
 
@@ -89,6 +93,8 @@ export const BackupsComponent = ({ database, isCanManageDBs, scrollContainerRef 
       if (lastRequestTimeRef.current === requestTime) {
         alert((e as Error).message);
       }
+    } finally {
+      isBackupsRequestInFlightRef.current = false;
     }
   };
 
