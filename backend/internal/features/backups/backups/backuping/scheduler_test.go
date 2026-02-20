@@ -57,7 +57,8 @@ func Test_RunPendingBackups_WhenLastBackupWasYesterday_CreatesNewBackup(t *testi
 		TimeOfDay: &timeOfDay,
 	}
 	backupConfig.IsBackupsEnabled = true
-	backupConfig.StorePeriod = period.PeriodWeek
+	backupConfig.RetentionPolicyType = backups_config.RetentionPolicyTypeTimePeriod
+	backupConfig.RetentionTimePeriod = period.PeriodWeek
 	backupConfig.Storage = storage
 	backupConfig.StorageID = &storage.ID
 
@@ -126,7 +127,8 @@ func Test_RunPendingBackups_WhenLastBackupWasRecentlyCompleted_SkipsBackup(t *te
 		TimeOfDay: &timeOfDay,
 	}
 	backupConfig.IsBackupsEnabled = true
-	backupConfig.StorePeriod = period.PeriodWeek
+	backupConfig.RetentionPolicyType = backups_config.RetentionPolicyTypeTimePeriod
+	backupConfig.RetentionTimePeriod = period.PeriodWeek
 	backupConfig.Storage = storage
 	backupConfig.StorageID = &storage.ID
 
@@ -194,7 +196,8 @@ func Test_RunPendingBackups_WhenLastBackupFailedAndRetriesDisabled_SkipsBackup(t
 		TimeOfDay: &timeOfDay,
 	}
 	backupConfig.IsBackupsEnabled = true
-	backupConfig.StorePeriod = period.PeriodWeek
+	backupConfig.RetentionPolicyType = backups_config.RetentionPolicyTypeTimePeriod
+	backupConfig.RetentionTimePeriod = period.PeriodWeek
 	backupConfig.Storage = storage
 	backupConfig.StorageID = &storage.ID
 	backupConfig.IsRetryIfFailed = false
@@ -266,7 +269,8 @@ func Test_RunPendingBackups_WhenLastBackupFailedAndRetriesEnabled_CreatesNewBack
 		TimeOfDay: &timeOfDay,
 	}
 	backupConfig.IsBackupsEnabled = true
-	backupConfig.StorePeriod = period.PeriodWeek
+	backupConfig.RetentionPolicyType = backups_config.RetentionPolicyTypeTimePeriod
+	backupConfig.RetentionTimePeriod = period.PeriodWeek
 	backupConfig.Storage = storage
 	backupConfig.StorageID = &storage.ID
 	backupConfig.IsRetryIfFailed = true
@@ -339,7 +343,8 @@ func Test_RunPendingBackups_WhenFailedBackupsExceedMaxRetries_SkipsBackup(t *tes
 		TimeOfDay: &timeOfDay,
 	}
 	backupConfig.IsBackupsEnabled = true
-	backupConfig.StorePeriod = period.PeriodWeek
+	backupConfig.RetentionPolicyType = backups_config.RetentionPolicyTypeTimePeriod
+	backupConfig.RetentionTimePeriod = period.PeriodWeek
 	backupConfig.Storage = storage
 	backupConfig.StorageID = &storage.ID
 	backupConfig.IsRetryIfFailed = true
@@ -410,7 +415,8 @@ func Test_RunPendingBackups_WhenBackupsDisabled_SkipsBackup(t *testing.T) {
 		TimeOfDay: &timeOfDay,
 	}
 	backupConfig.IsBackupsEnabled = false
-	backupConfig.StorePeriod = period.PeriodWeek
+	backupConfig.RetentionPolicyType = backups_config.RetentionPolicyTypeTimePeriod
+	backupConfig.RetentionTimePeriod = period.PeriodWeek
 	backupConfig.Storage = storage
 	backupConfig.StorageID = &storage.ID
 
@@ -479,7 +485,8 @@ func Test_CheckDeadNodesAndFailBackups_WhenNodeDies_FailsBackupAndCleansUpRegist
 		TimeOfDay: &timeOfDay,
 	}
 	backupConfig.IsBackupsEnabled = true
-	backupConfig.StorePeriod = period.PeriodWeek
+	backupConfig.RetentionPolicyType = backups_config.RetentionPolicyTypeTimePeriod
+	backupConfig.RetentionTimePeriod = period.PeriodWeek
 	backupConfig.Storage = storage
 	backupConfig.StorageID = &storage.ID
 
@@ -582,7 +589,8 @@ func Test_OnBackupCompleted_WhenTaskIsNotBackup_SkipsProcessing(t *testing.T) {
 		TimeOfDay: &timeOfDay,
 	}
 	backupConfig.IsBackupsEnabled = true
-	backupConfig.StorePeriod = period.PeriodWeek
+	backupConfig.RetentionPolicyType = backups_config.RetentionPolicyTypeTimePeriod
+	backupConfig.RetentionTimePeriod = period.PeriodWeek
 	backupConfig.Storage = storage
 	backupConfig.StorageID = &storage.ID
 
@@ -759,7 +767,8 @@ func Test_FailBackupsInProgress_WhenSchedulerStarts_CancelsBackupsAndUpdatesStat
 		TimeOfDay: &timeOfDay,
 	}
 	backupConfig.IsBackupsEnabled = true
-	backupConfig.StorePeriod = period.PeriodWeek
+	backupConfig.RetentionPolicyType = backups_config.RetentionPolicyTypeTimePeriod
+	backupConfig.RetentionTimePeriod = period.PeriodWeek
 	backupConfig.Storage = storage
 	backupConfig.StorageID = &storage.ID
 
@@ -872,7 +881,8 @@ func Test_StartBackup_WhenBackupCompletes_DecrementsActiveTaskCount(t *testing.T
 		TimeOfDay: &timeOfDay,
 	}
 	backupConfig.IsBackupsEnabled = true
-	backupConfig.StorePeriod = period.PeriodWeek
+	backupConfig.RetentionPolicyType = backups_config.RetentionPolicyTypeTimePeriod
+	backupConfig.RetentionTimePeriod = period.PeriodWeek
 	backupConfig.Storage = storage
 	backupConfig.StorageID = &storage.ID
 
@@ -975,7 +985,8 @@ func Test_StartBackup_WhenBackupFails_DecrementsActiveTaskCount(t *testing.T) {
 		TimeOfDay: &timeOfDay,
 	}
 	backupConfig.IsBackupsEnabled = true
-	backupConfig.StorePeriod = period.PeriodWeek
+	backupConfig.RetentionPolicyType = backups_config.RetentionPolicyTypeTimePeriod
+	backupConfig.RetentionTimePeriod = period.PeriodWeek
 	backupConfig.Storage = storage
 	backupConfig.StorageID = &storage.ID
 
@@ -1069,7 +1080,8 @@ func Test_StartBackup_WhenBackupAlreadyInProgress_SkipsNewBackup(t *testing.T) {
 		TimeOfDay: &timeOfDay,
 	}
 	backupConfig.IsBackupsEnabled = true
-	backupConfig.StorePeriod = period.PeriodWeek
+	backupConfig.RetentionPolicyType = backups_config.RetentionPolicyTypeTimePeriod
+	backupConfig.RetentionTimePeriod = period.PeriodWeek
 	backupConfig.Storage = storage
 	backupConfig.StorageID = &storage.ID
 
@@ -1140,7 +1152,8 @@ func Test_RunPendingBackups_WhenLastBackupFailedWithIsSkipRetry_SkipsBackupEvenW
 		TimeOfDay: &timeOfDay,
 	}
 	backupConfig.IsBackupsEnabled = true
-	backupConfig.StorePeriod = period.PeriodWeek
+	backupConfig.RetentionPolicyType = backups_config.RetentionPolicyTypeTimePeriod
+	backupConfig.RetentionTimePeriod = period.PeriodWeek
 	backupConfig.Storage = storage
 	backupConfig.StorageID = &storage.ID
 	backupConfig.IsRetryIfFailed = true
@@ -1242,7 +1255,8 @@ func Test_StartBackup_When2BackupsStartedForDifferentDatabases_BothUseCasesAreCa
 		TimeOfDay: &timeOfDay,
 	}
 	backupConfig1.IsBackupsEnabled = true
-	backupConfig1.StorePeriod = period.PeriodWeek
+	backupConfig1.RetentionPolicyType = backups_config.RetentionPolicyTypeTimePeriod
+	backupConfig1.RetentionTimePeriod = period.PeriodWeek
 	backupConfig1.Storage = storage
 	backupConfig1.StorageID = &storage.ID
 
@@ -1259,7 +1273,8 @@ func Test_StartBackup_When2BackupsStartedForDifferentDatabases_BothUseCasesAreCa
 		TimeOfDay: &timeOfDay,
 	}
 	backupConfig2.IsBackupsEnabled = true
-	backupConfig2.StorePeriod = period.PeriodWeek
+	backupConfig2.RetentionPolicyType = backups_config.RetentionPolicyTypeTimePeriod
+	backupConfig2.RetentionTimePeriod = period.PeriodWeek
 	backupConfig2.Storage = storage
 	backupConfig2.StorageID = &storage.ID
 
