@@ -50,6 +50,13 @@
 - **Precise timing**: run backups at specific times (e.g., 4 AM during low traffic)
 - **Smart compression**: 4-8x space savings with balanced compression (~20% overhead)
 
+### 🗑️ **Retention policies**
+
+- **Time period**: Keep backups for a fixed duration (e.g., 7 days, 3 months, 1 year)
+- **Count**: Keep a fixed number of the most recent backups (e.g., last 30)
+- **GFS (Grandfather-Father-Son)**: Layered retention — keep hourly, daily, weekly, monthly and yearly backups independently for fine-grained long-term history (enterprises requirement)
+- **Size limits**: Set per-backup and total storage size caps to control storage гыфпу
+
 ### 🗄️ **Multiple storage destinations** <a href="https://databasus.com/storages">(view supported)</a>
 
 - **Local storage**: Keep backups on your VPS/server
@@ -220,8 +227,9 @@ For more options (NodePort, TLS, HTTPRoute for Gateway API), see the [Helm chart
 3. **Configure schedule**: Choose from hourly, daily, weekly, monthly or cron intervals
 4. **Set database connection**: Enter your database credentials and connection details
 5. **Choose storage**: Select where to store your backups (local, S3, Google Drive, etc.)
-6. **Add notifications** (optional): Configure email, Telegram, Slack, or webhook notifications
-7. **Save and start**: Databasus will validate settings and begin the backup schedule
+6. **Configure retention policy**: Choose time period, count or GFS to control how long backups are kept
+7. **Add notifications** (optional): Configure email, Telegram, Slack, or webhook notifications
+8. **Save and start**: Databasus will validate settings and begin the backup schedule
 
 ### 🔑 Resetting password <a href="https://databasus.com/password">(docs)</a>
 
