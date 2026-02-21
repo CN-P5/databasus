@@ -136,7 +136,7 @@ export class MongodbConnectionStringParser {
       }
 
       const useTls = this.isTlsEnabled(tls);
-      const isDirectConnection = params['isDirectConnection'] === 'true';
+      const isDirectConnection = params['directConnection'] === 'true';
 
       return {
         host,
