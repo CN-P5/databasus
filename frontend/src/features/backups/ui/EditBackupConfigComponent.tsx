@@ -253,9 +253,14 @@ export const EditBackupConfigComponent = ({
               timeOfDay: '00:00',
             },
             storage: undefined,
-            retentionPolicyType: RetentionPolicyType.GFS,
-            retentionTimePeriod:
-              plan.maxStoragePeriod === Period.FOREVER ? Period.THREE_MONTH : plan.maxStoragePeriod,
+            retentionPolicyType: IS_CLOUD
+              ? RetentionPolicyType.GFS
+              : RetentionPolicyType.TimePeriod,
+            retentionTimePeriod: IS_CLOUD
+              ? plan.maxStoragePeriod === Period.FOREVER
+                ? Period.THREE_MONTH
+                : plan.maxStoragePeriod
+              : Period.THREE_MONTH,
             retentionCount: 100,
             retentionGfsHours: 24,
             retentionGfsDays: 7,
