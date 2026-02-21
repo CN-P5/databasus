@@ -25,16 +25,16 @@ type MongodbDatabase struct {
 
 	Version tools.MongodbVersion `json:"version" gorm:"type:text;not null"`
 
-	Host             string `json:"host"             gorm:"type:text;not null"`
-	Port             *int   `json:"port"             gorm:"type:int"`
-	Username         string `json:"username"         gorm:"type:text;not null"`
-	Password         string `json:"password"         gorm:"type:text;not null"`
-	Database         string `json:"database"         gorm:"type:text;not null"`
-	AuthDatabase     string `json:"authDatabase"     gorm:"type:text;not null;default:'admin'"`
-	IsHttps          bool   `json:"isHttps"          gorm:"type:boolean;default:false"`
-	IsSrv            bool   `json:"isSrv"            gorm:"column:is_srv;type:boolean;not null;default:false"`
-	DirectConnection bool   `json:"directConnection" gorm:"column:direct_connection;type:boolean;not null;default:false"`
-	CpuCount         int    `json:"cpuCount"         gorm:"column:cpu_count;type:int;not null;default:1"`
+	Host               string `json:"host"               gorm:"type:text;not null"`
+	Port               *int   `json:"port"               gorm:"type:int"`
+	Username           string `json:"username"           gorm:"type:text;not null"`
+	Password           string `json:"password"           gorm:"type:text;not null"`
+	Database           string `json:"database"           gorm:"type:text;not null"`
+	AuthDatabase       string `json:"authDatabase"       gorm:"type:text;not null;default:'admin'"`
+	IsHttps            bool   `json:"isHttps"            gorm:"type:boolean;default:false"`
+	IsSrv              bool   `json:"isSrv"              gorm:"column:is_srv;type:boolean;not null;default:false"`
+	IsDirectConnection bool   `json:"isDirectConnection" gorm:"column:is_direct_connection;type:boolean;not null;default:false"`
+	CpuCount           int    `json:"cpuCount"           gorm:"column:cpu_count;type:int;not null;default:1"`
 }
 
 func (m *MongodbDatabase) TableName() string {
@@ -133,7 +133,7 @@ func (m *MongodbDatabase) Update(incoming *MongodbDatabase) {
 	m.AuthDatabase = incoming.AuthDatabase
 	m.IsHttps = incoming.IsHttps
 	m.IsSrv = incoming.IsSrv
-	m.DirectConnection = incoming.DirectConnection
+	m.IsDirectConnection = incoming.IsDirectConnection
 	m.CpuCount = incoming.CpuCount
 
 	if incoming.Password != "" {
@@ -463,7 +463,7 @@ func (m *MongodbDatabase) buildConnectionURI(password string) string {
 	if m.IsHttps {
 		extraParams += "&tls=true&tlsInsecure=true"
 	}
-	if m.DirectConnection {
+	if m.IsDirectConnection {
 		extraParams += "&directConnection=true"
 	}
 
@@ -507,7 +507,7 @@ func (m *MongodbDatabase) BuildMongodumpURI(password string) string {
 	if m.IsHttps {
 		extraParams += "&tls=true&tlsInsecure=true"
 	}
-	if m.DirectConnection {
+	if m.IsDirectConnection {
 		extraParams += "&directConnection=true"
 	}
 

@@ -634,15 +634,15 @@ func Test_Validate_SrvConnection_AllowsNullPort(t *testing.T) {
 func Test_BuildConnectionURI_WithDirectConnection_ReturnsCorrectUri(t *testing.T) {
 	port := 27017
 	model := &MongodbDatabase{
-		Host:             "mongo.example.local",
-		Port:             &port,
-		Username:         "testuser",
-		Password:         "testpass123",
-		Database:         "mydb",
-		AuthDatabase:     "admin",
-		IsHttps:          false,
-		IsSrv:            false,
-		DirectConnection: true,
+		Host:               "mongo.example.local",
+		Port:               &port,
+		Username:           "testuser",
+		Password:           "testpass123",
+		Database:           "mydb",
+		AuthDatabase:       "admin",
+		IsHttps:            false,
+		IsSrv:              false,
+		IsDirectConnection: true,
 	}
 
 	uri := model.buildConnectionURI("testpass123")
@@ -656,15 +656,15 @@ func Test_BuildConnectionURI_WithDirectConnection_ReturnsCorrectUri(t *testing.T
 func Test_BuildConnectionURI_WithoutDirectConnection_OmitsParam(t *testing.T) {
 	port := 27017
 	model := &MongodbDatabase{
-		Host:             "localhost",
-		Port:             &port,
-		Username:         "testuser",
-		Password:         "testpass123",
-		Database:         "mydb",
-		AuthDatabase:     "admin",
-		IsHttps:          false,
-		IsSrv:            false,
-		DirectConnection: false,
+		Host:               "localhost",
+		Port:               &port,
+		Username:           "testuser",
+		Password:           "testpass123",
+		Database:           "mydb",
+		AuthDatabase:       "admin",
+		IsHttps:            false,
+		IsSrv:              false,
+		IsDirectConnection: false,
 	}
 
 	uri := model.buildConnectionURI("testpass123")
@@ -675,15 +675,15 @@ func Test_BuildConnectionURI_WithoutDirectConnection_OmitsParam(t *testing.T) {
 func Test_BuildMongodumpURI_WithDirectConnection_ReturnsCorrectUri(t *testing.T) {
 	port := 27017
 	model := &MongodbDatabase{
-		Host:             "mongo.example.local",
-		Port:             &port,
-		Username:         "testuser",
-		Password:         "testpass123",
-		Database:         "mydb",
-		AuthDatabase:     "admin",
-		IsHttps:          false,
-		IsSrv:            false,
-		DirectConnection: true,
+		Host:               "mongo.example.local",
+		Port:               &port,
+		Username:           "testuser",
+		Password:           "testpass123",
+		Database:           "mydb",
+		AuthDatabase:       "admin",
+		IsHttps:            false,
+		IsSrv:              false,
+		IsDirectConnection: true,
 	}
 
 	uri := model.BuildMongodumpURI("testpass123")
@@ -696,15 +696,15 @@ func Test_BuildMongodumpURI_WithDirectConnection_ReturnsCorrectUri(t *testing.T)
 func Test_BuildConnectionURI_WithDirectConnectionAndTls_ReturnsBothParams(t *testing.T) {
 	port := 27017
 	model := &MongodbDatabase{
-		Host:             "mongo.example.local",
-		Port:             &port,
-		Username:         "testuser",
-		Password:         "testpass123",
-		Database:         "mydb",
-		AuthDatabase:     "admin",
-		IsHttps:          true,
-		IsSrv:            false,
-		DirectConnection: true,
+		Host:               "mongo.example.local",
+		Port:               &port,
+		Username:           "testuser",
+		Password:           "testpass123",
+		Database:           "mydb",
+		AuthDatabase:       "admin",
+		IsHttps:            true,
+		IsSrv:              false,
+		IsDirectConnection: true,
 	}
 
 	uri := model.buildConnectionURI("testpass123")

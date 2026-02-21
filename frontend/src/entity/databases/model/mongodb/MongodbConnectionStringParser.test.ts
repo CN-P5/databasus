@@ -464,35 +464,35 @@ describe('MongodbConnectionStringParser', () => {
         ),
       );
 
-      expect(result.directConnection).toBe(true);
+      expect(result.isDirectConnection).toBe(true);
     });
 
-    it('should default directConnection to false when not specified in URI', () => {
+    it('should default isDirectConnection to false when not specified in URI', () => {
       const result = expectSuccess(
         MongodbConnectionStringParser.parse('mongodb://user:pass@host:27017/db'),
       );
 
-      expect(result.directConnection).toBe(false);
+      expect(result.isDirectConnection).toBe(false);
     });
 
-    it('should parse directConnection=true from key-value format', () => {
+    it('should parse isDirectConnection=true from key-value format', () => {
       const result = expectSuccess(
         MongodbConnectionStringParser.parse(
           'host=localhost port=27017 database=mydb user=admin password=secret directConnection=true',
         ),
       );
 
-      expect(result.directConnection).toBe(true);
+      expect(result.isDirectConnection).toBe(true);
     });
 
-    it('should default directConnection to false in key-value format when not specified', () => {
+    it('should default isDirectConnection to false in key-value format when not specified', () => {
       const result = expectSuccess(
         MongodbConnectionStringParser.parse(
           'host=localhost port=27017 database=mydb user=admin password=secret',
         ),
       );
 
-      expect(result.directConnection).toBe(false);
+      expect(result.isDirectConnection).toBe(false);
     });
   });
 

@@ -49,7 +49,7 @@ export const EditMongoDbSpecificDataComponent = ({
   const hasAdvancedValues =
     !!database.mongodb?.authDatabase ||
     !!database.mongodb?.isSrv ||
-    !!database.mongodb?.directConnection;
+    !!database.mongodb?.isDirectConnection;
   const [isShowAdvanced, setShowAdvanced] = useState(hasAdvancedValues);
 
   const parseFromClipboard = async () => {
@@ -83,12 +83,12 @@ export const EditMongoDbSpecificDataComponent = ({
           authDatabase: result.authDatabase,
           isHttps: result.useTls,
           isSrv: result.isSrv,
-          directConnection: result.directConnection,
+          isDirectConnection: result.isDirectConnection,
           cpuCount: 1,
         },
       };
 
-      if (result.isSrv || result.directConnection) {
+      if (result.isSrv || result.isDirectConnection) {
         setShowAdvanced(true);
       }
 
@@ -415,13 +415,13 @@ export const EditMongoDbSpecificDataComponent = ({
             <div className="min-w-[150px]">Direct connection</div>
             <div className="flex items-center">
               <Switch
-                checked={editingDatabase.mongodb?.directConnection || false}
+                checked={editingDatabase.mongodb?.isDirectConnection || false}
                 onChange={(checked) => {
                   if (!editingDatabase.mongodb) return;
 
                   setEditingDatabase({
                     ...editingDatabase,
-                    mongodb: { ...editingDatabase.mongodb, directConnection: checked },
+                    mongodb: { ...editingDatabase.mongodb, isDirectConnection: checked },
                   });
                   setIsConnectionTested(false);
                 }}
@@ -429,7 +429,7 @@ export const EditMongoDbSpecificDataComponent = ({
               />
               <Tooltip
                 className="cursor-pointer"
-                title="Connect directly to a single server, skipping replica set discovery. Useful when the server is behind a load balancer, proxy, or tunnel."
+                title="Connect directly to a single server, skipping replica set discovery. Useful when the server is behind a load balancer, proxy or tunnel."
               >
                 <InfoCircleOutlined className="ml-2" style={{ color: 'gray' }} />
               </Tooltip>
