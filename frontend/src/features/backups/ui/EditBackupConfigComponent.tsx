@@ -14,6 +14,7 @@ import {
 import { CronExpressionParser } from 'cron-parser';
 import dayjs, { Dayjs } from 'dayjs';
 import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { IS_CLOUD } from '../../../constants';
 import {
@@ -28,7 +29,6 @@ import { Period } from '../../../entity/databases/model/Period';
 import { type Interval, IntervalType } from '../../../entity/intervals';
 import { type Storage, getStorageLogoFromType, storageApi } from '../../../entity/storages';
 import type { UserProfile } from '../../../entity/users';
-import { useTranslation } from 'react-i18next';
 import { getUserTimeFormat } from '../../../shared/time';
 import {
   getUserTimeFormat as getIs12Hour,
@@ -80,7 +80,7 @@ export const EditBackupConfigComponent = ({
       { value: 6, label: t('sat') },
       { value: 7, label: t('sun') },
     ],
-    [t]
+    [t],
   );
 
   const [backupConfig, setBackupConfig] = useState<BackupConfig>();
@@ -398,9 +398,7 @@ export const EditBackupConfigComponent = ({
                     className="cursor-pointer"
                     title={
                       <div>
-                        <div className="font-bold">
-                          {t('cronFormat')}
-                        </div>
+                        <div className="font-bold">{t('cronFormat')}</div>
                         <div className="mt-1">{t('examples')}</div>
                         <div>• {t('dailyAt2AmUtc')}</div>
                         <div>• {t('every6Hours')}</div>
@@ -526,10 +524,7 @@ export const EditBackupConfigComponent = ({
               ]}
             />
 
-            <Tooltip
-              className="cursor-pointer"
-              title={t('encryptionTooltip')}
-            >
+            <Tooltip className="cursor-pointer" title={t('encryptionTooltip')}>
               <InfoCircleOutlined className="ml-2" style={{ color: 'gray' }} />
             </Tooltip>
           </div>
@@ -547,10 +542,7 @@ export const EditBackupConfigComponent = ({
             options={availablePeriods}
           />
 
-          <Tooltip
-            className="cursor-pointer"
-            title={t('storePeriodTooltip')}
-          >
+          <Tooltip className="cursor-pointer" title={t('storePeriodTooltip')}>
             <InfoCircleOutlined className="ml-2" style={{ color: 'gray' }} />
           </Tooltip>
         </div>
@@ -627,10 +619,7 @@ export const EditBackupConfigComponent = ({
                 onChange={(checked) => updateBackupConfig({ isRetryIfFailed: checked })}
               />
 
-              <Tooltip
-                className="cursor-pointer"
-                title={t('retryBackupIfFailedTooltip')}
-              >
+              <Tooltip className="cursor-pointer" title={t('retryBackupIfFailedTooltip')}>
                 <InfoCircleOutlined className="ml-2" style={{ color: 'gray' }} />
               </Tooltip>
             </div>
@@ -649,10 +638,7 @@ export const EditBackupConfigComponent = ({
                   className="w-full max-w-[75px] grow"
                 />
 
-                <Tooltip
-                  className="cursor-pointer"
-                  title={t('maxFailedTriesCountTooltip')}
-                >
+                <Tooltip className="cursor-pointer" title={t('maxFailedTriesCountTooltip')}>
                   <InfoCircleOutlined className="ml-2" style={{ color: 'gray' }} />
                 </Tooltip>
               </div>
@@ -673,10 +659,7 @@ export const EditBackupConfigComponent = ({
                 }}
               />
 
-              <Tooltip
-                className="cursor-pointer"
-                title={t('maxBackupSizeLimitTooltip')}
-              >
+              <Tooltip className="cursor-pointer" title={t('maxBackupSizeLimitTooltip')}>
                 <InfoCircleOutlined className="ml-2" style={{ color: 'gray' }} />
               </Tooltip>
             </div>
@@ -730,10 +713,7 @@ export const EditBackupConfigComponent = ({
                 }}
               />
 
-              <Tooltip
-                className="cursor-pointer"
-                title={t('limitTotalBackupsSizeTooltip')}
-              >
+              <Tooltip className="cursor-pointer" title={t('limitTotalBackupsSizeTooltip')}>
                 <InfoCircleOutlined className="ml-2" style={{ color: 'gray' }} />
               </Tooltip>
             </div>

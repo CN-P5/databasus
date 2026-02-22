@@ -83,10 +83,7 @@ export function EditTelegramNotifierComponent({ notifier, setNotifier, setUnsave
             placeholder="-1001234567890"
           />
 
-          <Tooltip
-            className="cursor-pointer"
-            title={t('theChatWhereYouWantToReceiveMessage')}
-          >
+          <Tooltip className="cursor-pointer" title={t('theChatWhereYouWantToReceiveMessage')}>
             <InfoCircleOutlined className="ml-2" style={{ color: 'gray' }} />
           </Tooltip>
         </div>
@@ -192,11 +189,12 @@ export function EditTelegramNotifierComponent({ notifier, setNotifier, setUnsave
               <br />
               <br />
               <strong>{t('example')}</strong> {t('ifThreadLinkIs')}{' '}
-              <code className="rounded bg-gray-100 px-1">https://t.me/c/2831948048/3</code>, {t('threadIdIs')}{' '}
-              <code className="rounded bg-gray-100 px-1">3</code>
+              <code className="rounded bg-gray-100 px-1">https://t.me/c/2831948048/3</code>,{' '}
+              {t('threadIdIs')} <code className="rounded bg-gray-100 px-1">3</code>
               <br />
               <br />
-              <strong>{t('note')}</strong> {t('threadFunctionalityOnlyWorksInGroupChatsNotInPrivateChats')}
+              <strong>{t('note')}</strong>{' '}
+              {t('threadFunctionalityOnlyWorksInGroupChatsNotInPrivateChats')}
             </div>
           </div>
         </>

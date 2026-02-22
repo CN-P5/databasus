@@ -1,13 +1,14 @@
 import { CopyOutlined, DownOutlined, InfoCircleOutlined, UpOutlined } from '@ant-design/icons';
 import { App, Button, Checkbox, Input, InputNumber, Switch, Tooltip } from 'antd';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+
+import { SshTunnelConfigComponent } from '../components/SshTunnelConfigComponent';
 
 import { IS_CLOUD } from '../../../../constants';
 import { type Database, databaseApi } from '../../../../entity/databases';
 import { MariadbConnectionStringParser } from '../../../../entity/databases/model/mariadb/MariadbConnectionStringParser';
 import { ToastHelper } from '../../../../shared/toast';
-import { useTranslation } from 'react-i18next';
-import { SshTunnelConfigComponent } from '../components/SshTunnelConfigComponent';
 
 interface Props {
   database: Database;
@@ -357,10 +358,7 @@ export const EditMariaDbSpecificDataComponent = ({
               {t('databases:skipEvents')}
             </Checkbox>
 
-            <Tooltip
-              className="cursor-pointer"
-              title={t('databases:skipBackingUpEvents')}
-            >
+            <Tooltip className="cursor-pointer" title={t('databases:skipBackingUpEvents')}>
               <InfoCircleOutlined className="ml-2" style={{ color: 'gray' }} />
             </Tooltip>
           </div>

@@ -1,13 +1,14 @@
 import { CopyOutlined } from '@ant-design/icons';
 import { App, Button, Input, InputNumber, Switch } from 'antd';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+
+import { SshTunnelConfigComponent } from '../components/SshTunnelConfigComponent';
 
 import { IS_CLOUD } from '../../../../constants';
 import { type Database, databaseApi } from '../../../../entity/databases';
 import { MySqlConnectionStringParser } from '../../../../entity/databases/model/mysql/MySqlConnectionStringParser';
 import { ToastHelper } from '../../../../shared/toast';
-import { useTranslation } from 'react-i18next';
-import { SshTunnelConfigComponent } from '../components/SshTunnelConfigComponent';
 
 interface Props {
   database: Database;

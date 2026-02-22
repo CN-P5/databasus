@@ -99,7 +99,10 @@ export const CreateWorkspaceDialogComponent = ({
       ]}
     >
       <div className="mb-4">
-        <div className="dark:text-gray-300" dangerouslySetInnerHTML={{ __html: t('workspaceDescription') }} />
+        <div
+          className="dark:text-gray-300"
+          dangerouslySetInnerHTML={{ __html: t('workspaceDescription') }}
+        />
 
         <label className="mt-5 mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
           {t('workspaceNameLabel')}

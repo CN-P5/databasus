@@ -1,6 +1,7 @@
+import { useTranslation } from 'react-i18next';
+
 import type { Notifier, WebhookHeader } from '../../../../../entity/notifiers';
 import { WebhookMethod } from '../../../../../entity/notifiers';
-import { useTranslation } from 'react-i18next';
 
 interface Props {
   notifier: Notifier;

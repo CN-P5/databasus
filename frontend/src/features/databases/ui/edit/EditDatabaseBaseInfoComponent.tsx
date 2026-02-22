@@ -1,5 +1,6 @@
 import { Button, Input, Select } from 'antd';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import {
   type Database,
@@ -11,7 +12,6 @@ import {
   databaseApi,
   getDatabaseLogoFromType,
 } from '../../../../entity/databases';
-import { useTranslation } from 'react-i18next';
 
 interface Props {
   database: Database;

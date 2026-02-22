@@ -1,11 +1,11 @@
 import { LoadingOutlined } from '@ant-design/icons';
 import { App, Button, Spin, Switch } from 'antd';
 import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { IS_CLOUD, getApplicationServer } from '../../../constants';
 import { settingsApi } from '../../../entity/users/api/settingsApi';
 import type { UsersSettings } from '../../../entity/users/model/UsersSettings';
-import { useTranslation } from 'react-i18next';
 import { AuditLogsComponent } from './AuditLogsComponent';
 
 interface Props {

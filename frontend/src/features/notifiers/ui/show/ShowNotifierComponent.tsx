@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next';
+
 import { type Notifier, NotifierType } from '../../../../entity/notifiers';
 import { getNotifierLogoFromType } from '../../../../entity/notifiers/models/getNotifierLogoFromType';
 import { getNotifierNameFromType } from '../../../../entity/notifiers/models/getNotifierNameFromType';

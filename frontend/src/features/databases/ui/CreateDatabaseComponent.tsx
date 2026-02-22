@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { type BackupConfig, backupConfigApi, backupsApi } from '../../../entity/backups';
 import {
@@ -12,7 +13,6 @@ import {
   databaseApi,
 } from '../../../entity/databases';
 import type { UserProfile } from '../../../entity/users';
-import { useTranslation } from 'react-i18next';
 import { EditBackupConfigComponent } from '../../backups';
 import { CreateReadOnlyComponent } from './edit/CreateReadOnlyComponent';
 import { EditDatabaseBaseInfoComponent } from './edit/EditDatabaseBaseInfoComponent';

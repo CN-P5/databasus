@@ -14,7 +14,7 @@ declare global {
 export function getApplicationServer() {
   const origin = window.location.origin;
   const url = new URL(origin);
-  
+
   const isDevelopment = import.meta.env.MODE === 'development';
 
   if (isDevelopment) {

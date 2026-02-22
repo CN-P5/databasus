@@ -1,9 +1,9 @@
 import { Button, Modal, Spin } from 'antd';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { IS_CLOUD } from '../../../../constants';
 import { type Database, DatabaseType, databaseApi } from '../../../../entity/databases';
-import { useTranslation } from 'react-i18next';
 
 interface Props {
   database: Database;
@@ -165,9 +165,7 @@ export const CreateReadOnlyComponent = ({
 
         <p className="mt-3">
           {privileges.length === 0 ? (
-            <>
-              {t('databases:currentUserNoWritePrivileges', { privileges: privilegesLabel })}
-            </>
+            <>{t('databases:currentUserNoWritePrivileges', { privileges: privilegesLabel })}</>
           ) : (
             <>
               {t('databases:currentUserHasWritePrivileges', { privileges: privilegesLabel })}{' '}
@@ -220,13 +218,9 @@ export const CreateReadOnlyComponent = ({
         <div className="mb-5">
           <p className="mb-2">{t('databases:skipReadOnlyUserConfirmation')}</p>
 
-          <p className="mb-2">
-            {t('databases:skipReadOnlyUserWarning')}
-          </p>
+          <p className="mb-2">{t('databases:skipReadOnlyUserWarning')}</p>
 
-          <p>
-            {t('databases:skipReadOnlyUserRisk')}
-          </p>
+          <p>{t('databases:skipReadOnlyUserRisk')}</p>
         </div>
 
         <div className="flex justify-end">

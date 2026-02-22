@@ -1,9 +1,9 @@
 import { Button, Modal, Select, Spin } from 'antd';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { type Database, databaseApi } from '../../../../entity/databases';
 import { type Notifier, notifierApi } from '../../../../entity/notifiers';
-import { useTranslation } from 'react-i18next';
 import { EditNotifierComponent } from '../../../notifiers/ui/edit/EditNotifierComponent';
 
 interface Props {

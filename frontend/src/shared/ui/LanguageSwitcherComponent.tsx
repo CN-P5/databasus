@@ -1,6 +1,5 @@
 import { GlobalOutlined } from '@ant-design/icons';
 import { Select } from 'antd';
-
 import { useTranslation } from 'react-i18next';
 
 const LANGUAGE_OPTIONS = [

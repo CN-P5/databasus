@@ -398,10 +398,7 @@ export function EditStorageComponent({
               size="small"
             />
 
-            <Tooltip
-              className="cursor-pointer"
-              title={tStorages('systemStorageTooltip')}
-            >
+            <Tooltip className="cursor-pointer" title={tStorages('systemStorageTooltip')}>
               <InfoCircleOutlined className="ml-2" style={{ color: 'gray' }} />
             </Tooltip>
           </div>

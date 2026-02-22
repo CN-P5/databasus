@@ -1,5 +1,6 @@
-import type { Notifier } from '../../../../../entity/notifiers';
 import { useTranslation } from 'react-i18next';
+
+import type { Notifier } from '../../../../../entity/notifiers';
 
 interface Props {
   notifier: Notifier;

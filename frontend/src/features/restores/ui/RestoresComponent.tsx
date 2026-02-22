@@ -147,7 +147,9 @@ export const RestoresComponent = ({ database, backup }: Props) => {
     return (
       <>
         <div className="my-5 text-sm">
-          {t('enterInfoOfDatabaseWeWillRestoreBackupTo')} <u>{t('theEmptyDatabaseForRestoreShouldBeCreatedBeforeRestore')}</u>. {t('duringTheRestoreAllCurrentDataWillBeCleared')}
+          {t('enterInfoOfDatabaseWeWillRestoreBackupTo')}{' '}
+          <u>{t('theEmptyDatabaseForRestoreShouldBeCreatedBeforeRestore')}</u>.{' '}
+          {t('duringTheRestoreAllCurrentDataWillBeCleared')}
           <br />
           <br />
           {t('makeSureDatabaseIsNotUsedRightNow')}
@@ -304,7 +306,8 @@ export const RestoresComponent = ({ database, backup }: Props) => {
                           {t('expectedRestorationTime')}
                           <br />
                           <br />
-                          {t('soItIsExpectedToTakeUpTo')} {expectedRestoreDuration} {t('usuallySignificantlyFaster')}
+                          {t('soItIsExpectedToTakeUpTo')} {expectedRestoreDuration}{' '}
+                          {t('usuallySignificantlyFaster')}
                         </div>
                       </div>
                     </div>
@@ -337,7 +340,8 @@ export const RestoresComponent = ({ database, backup }: Props) => {
           {showingRestoreError.failMessage?.includes('must be owner of extension') && (
             <div className="mb-4 rounded border border-yellow-300 bg-yellow-50 p-3 text-sm dark:border-yellow-600 dark:bg-yellow-900/30">
               <strong>💡 {t('tip')}</strong> {t('thisErrorTypicallyOccurs')}{' '}
-              <strong>&quot;{tDatabases('excludeExtensions')}&quot;</strong> {t('inAdvancedSettingsBeforeRestoring')}
+              <strong>&quot;{tDatabases('excludeExtensions')}&quot;</strong>{' '}
+              {t('inAdvancedSettingsBeforeRestoring')}
             </div>
           )}
           <div className="overflow-y-auto text-sm whitespace-pre-wrap" style={{ height: '400px' }}>

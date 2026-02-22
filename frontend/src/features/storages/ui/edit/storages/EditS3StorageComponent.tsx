@@ -212,10 +212,7 @@ export function EditS3StorageComponent({
                 disabled={!!storage.id}
               />
 
-              <Tooltip
-                className="cursor-pointer"
-                title={t('optionalPrefixForAllObjectKeys')}
-              >
+              <Tooltip className="cursor-pointer" title={t('optionalPrefixForAllObjectKeys')}>
                 <InfoCircleOutlined className="ml-4" style={{ color: 'gray' }} />
               </Tooltip>
             </div>
@@ -242,10 +239,7 @@ export function EditS3StorageComponent({
                 {t('useVirtualStyledDomains')}
               </Checkbox>
 
-              <Tooltip
-                className="cursor-pointer"
-                title={t('useVirtualHostedStyleUrls')}
-              >
+              <Tooltip className="cursor-pointer" title={t('useVirtualHostedStyleUrls')}>
                 <InfoCircleOutlined className="ml-2" style={{ color: 'gray' }} />
               </Tooltip>
             </div>
@@ -272,10 +266,7 @@ export function EditS3StorageComponent({
                 {t('skipTLS')}
               </Checkbox>
 
-              <Tooltip
-                className="cursor-pointer"
-                title={t('skipTLSCertificateVerification')}
-              >
+              <Tooltip className="cursor-pointer" title={t('skipTLSCertificateVerification')}>
                 <InfoCircleOutlined className="ml-2" style={{ color: 'gray' }} />
               </Tooltip>
             </div>

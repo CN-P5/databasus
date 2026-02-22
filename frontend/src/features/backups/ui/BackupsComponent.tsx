@@ -13,6 +13,7 @@ import { Button, Modal, Spin, Table, Tooltip } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import dayjs from 'dayjs';
 import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import {
   type Backup,
@@ -23,7 +24,6 @@ import {
   backupsApi,
 } from '../../../entity/backups';
 import { type Database, DatabaseType } from '../../../entity/databases';
-import { useTranslation } from 'react-i18next';
 import { getUserTimeFormat } from '../../../shared/time';
 import { ConfirmationComponent } from '../../../shared/ui';
 import { RestoresComponent } from '../../restores';
@@ -483,10 +483,7 @@ export const BackupsComponent = ({ database, isCanManageDBs, scrollContainerRef 
       title: (
         <div className="flex items-center">
           {t('size')}
-          <Tooltip
-            className="ml-1"
-            title={t('fileSizeDescription')}
-          >
+          <Tooltip className="ml-1" title={t('fileSizeDescription')}>
             <InfoCircleOutlined />
           </Tooltip>
         </div>
@@ -524,9 +521,7 @@ export const BackupsComponent = ({ database, isCanManageDBs, scrollContainerRef 
       <h2 className="text-lg font-bold md:text-xl dark:text-white">{t('backups')}</h2>
 
       {!isBackupConfigLoading && !backupConfig?.isBackupsEnabled && (
-        <div className="text-sm text-red-600">
-          {t('scheduledBackupsDisabled')}
-        </div>
+        <div className="text-sm text-red-600">{t('scheduledBackupsDisabled')}</div>
       )}
 
       <div className="mt-5" />
@@ -561,7 +556,9 @@ export const BackupsComponent = ({ database, isCanManageDBs, scrollContainerRef 
                   <div className="space-y-3">
                     <div className="flex items-start justify-between">
                       <div>
-                        <div className="text-xs text-gray-500 dark:text-gray-400">{t('createdAt')}</div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400">
+                          {t('createdAt')}
+                        </div>
                         <div className="text-sm font-medium">
                           {dayjs.utc(backup.createdAt).local().format(getUserTimeFormat().format)}
                         </div>
@@ -578,7 +575,9 @@ export const BackupsComponent = ({ database, isCanManageDBs, scrollContainerRef 
                         <div className="text-sm font-medium">{formatSize(backup.backupSizeMb)}</div>
                       </div>
                       <div>
-                        <div className="text-xs text-gray-500 dark:text-gray-400">{t('duration')}</div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400">
+                          {t('duration')}
+                        </div>
                         <div className="text-sm font-medium">
                           {formatDuration(backup.backupDurationMs)}
                         </div>
@@ -605,7 +604,9 @@ export const BackupsComponent = ({ database, isCanManageDBs, scrollContainerRef 
             </div>
           )}
           {!isBackupsLoading && backups.length === 0 && (
-            <div className="py-8 text-center text-gray-500 dark:text-gray-400">{t('noBackupsYet')}</div>
+            <div className="py-8 text-center text-gray-500 dark:text-gray-400">
+              {t('noBackupsYet')}
+            </div>
           )}
         </div>
 

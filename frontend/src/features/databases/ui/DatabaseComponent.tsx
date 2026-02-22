@@ -1,10 +1,10 @@
 import { Spin } from 'antd';
 import { useRef, useState } from 'react';
 import { useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { type Database, databaseApi } from '../../../entity/databases';
 import type { UserProfile } from '../../../entity/users';
-import { useTranslation } from 'react-i18next';
 import { BackupsComponent } from '../../backups';
 import { HealthckeckAttemptsComponent } from '../../healthcheck';
 import { DatabaseConfigComponent } from './DatabaseConfigComponent';

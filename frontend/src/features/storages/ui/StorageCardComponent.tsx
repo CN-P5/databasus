@@ -1,9 +1,9 @@
 import { InfoCircleOutlined } from '@ant-design/icons';
+import { useTranslation } from 'react-i18next';
 
 import { type Storage } from '../../../entity/storages';
 import { getStorageLogoFromType } from '../../../entity/storages/models/getStorageLogoFromType';
 import { getStorageNameFromType } from '../../../entity/storages/models/getStorageNameFromType';
-import { useTranslation } from 'react-i18next';
 
 interface Props {
   storage: Storage;

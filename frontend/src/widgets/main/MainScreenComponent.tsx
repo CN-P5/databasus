@@ -1,6 +1,7 @@
 import { LoadingOutlined, MenuOutlined } from '@ant-design/icons';
 import { App, Button, Spin, Tooltip } from 'antd';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { APP_VERSION } from '../../constants';
 import { type DiskUsage, diskApi } from '../../entity/disk';
@@ -24,10 +25,9 @@ import {
   WorkspaceSettingsComponent,
 } from '../../features/workspaces';
 import { useIsMobile, useScreenHeight } from '../../shared/hooks';
+import { LanguageSwitcher } from '../../shared/ui/LanguageSwitcherComponent';
 import { StarButtonComponent } from '../../shared/ui/StarButtonComponent';
 import { ThemeToggleComponent } from '../../shared/ui/ThemeToggleComponent';
-import { LanguageSwitcher } from '../../shared/ui/LanguageSwitcherComponent';
-import { useTranslation } from 'react-i18next';
 import { SidebarComponent } from './SidebarComponent';
 import { WorkspaceSelectionComponent } from './WorkspaceSelectionComponent';
 

@@ -128,7 +128,10 @@ export function WorkspaceSettingsComponent({ workspaceResponse, user, contentHei
       content: (
         <div>
           <p>
-            {t('deleteWorkspaceConfirmation').replace('{name}', `<strong>${workspace.name}</strong>`)}
+            {t('deleteWorkspaceConfirmation').replace(
+              '{name}',
+              `<strong>${workspace.name}</strong>`,
+            )}
           </p>
           <p className="mt-2 text-red-600">
             <strong>{t('thisActionCannotBeUndone')}</strong> {t('deleteWorkspaceWarning')}
@@ -146,7 +149,10 @@ export function WorkspaceSettingsComponent({ workspaceResponse, user, contentHei
 
           if (databases && databases.length > 0) {
             message.error(
-              t('cannotDeleteWorkspacePleaseRemoveAllDatabasesFirst').replace('{count}', String(databases.length)),
+              t('cannotDeleteWorkspacePleaseRemoveAllDatabasesFirst').replace(
+                '{count}',
+                String(databases.length),
+              ),
             );
             return;
           }

@@ -176,10 +176,7 @@ export function EditSFTPStorageComponent({ storage, setStorage, setUnsaved }: Pr
               placeholder="-----BEGIN OPENSSH PRIVATE KEY-----"
               rows={4}
             />
-            <Tooltip
-              className="mt-1 cursor-pointer"
-              title={t('pasteYourSshPrivateKey')}
-            >
+            <Tooltip className="mt-1 cursor-pointer" title={t('pasteYourSshPrivateKey')}>
               <InfoCircleOutlined style={{ color: 'gray' }} />
             </Tooltip>
           </div>
@@ -213,10 +210,7 @@ export function EditSFTPStorageComponent({ storage, setStorage, setUnsaved }: Pr
             placeholder="backups (optional)"
           />
 
-          <Tooltip
-            className="cursor-pointer"
-            title={t('remoteDirectoryPathForStoringBackups')}
-          >
+          <Tooltip className="cursor-pointer" title={t('remoteDirectoryPathForStoringBackups')}>
             <InfoCircleOutlined className="ml-2" style={{ color: 'gray' }} />
           </Tooltip>
         </div>
@@ -260,10 +254,7 @@ export function EditSFTPStorageComponent({ storage, setStorage, setUnsaved }: Pr
                 {t('skipHostKeyVerification')}
               </Checkbox>
 
-              <Tooltip
-                className="cursor-pointer"
-                title={t('skipSshHostKeyVerification')}
-              >
+              <Tooltip className="cursor-pointer" title={t('skipSshHostKeyVerification')}>
                 <InfoCircleOutlined className="ml-2" style={{ color: 'gray' }} />
               </Tooltip>
             </div>

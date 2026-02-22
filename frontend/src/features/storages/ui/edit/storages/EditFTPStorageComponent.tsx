@@ -139,10 +139,7 @@ export function EditFTPStorageComponent({ storage, setStorage, setUnsaved }: Pro
             placeholder="backups (optional)"
           />
 
-          <Tooltip
-            className="cursor-pointer"
-            title={t('remoteDirectoryPathForStoringBackups')}
-          >
+          <Tooltip className="cursor-pointer" title={t('remoteDirectoryPathForStoringBackups')}>
             <InfoCircleOutlined className="ml-2" style={{ color: 'gray' }} />
           </Tooltip>
         </div>
@@ -217,10 +214,7 @@ export function EditFTPStorageComponent({ storage, setStorage, setUnsaved }: Pro
                   {t('skipCertificateVerification')}
                 </Checkbox>
 
-                <Tooltip
-                  className="cursor-pointer"
-                  title={t('skipTlsCertificateVerification')}
-                >
+                <Tooltip className="cursor-pointer" title={t('skipTlsCertificateVerification')}>
                   <InfoCircleOutlined className="ml-2" style={{ color: 'gray' }} />
                 </Tooltip>
               </div>

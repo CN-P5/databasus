@@ -1,6 +1,7 @@
+import { useTranslation } from 'react-i18next';
+
 import { type Database } from '../../../../entity/databases';
 import { getNotifierLogoFromType } from '../../../../entity/notifiers/models/getNotifierLogoFromType';
-import { useTranslation } from 'react-i18next';
 
 interface Props {
   database: Database;

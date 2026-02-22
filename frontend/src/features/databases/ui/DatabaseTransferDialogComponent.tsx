@@ -1,6 +1,7 @@
 import { CheckCircleOutlined, ExclamationCircleOutlined, SwapOutlined } from '@ant-design/icons';
 import { Button, Modal, Radio, Select, Spin } from 'antd';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { backupConfigApi } from '../../../entity/backups';
 import type { TransferDatabaseRequest } from '../../../entity/backups';
@@ -11,7 +12,6 @@ import { type Storage, getStorageLogoFromType, storageApi } from '../../../entit
 import type { UserProfile } from '../../../entity/users';
 import { type WorkspaceResponse, workspaceApi } from '../../../entity/workspaces';
 import { ToastHelper } from '../../../shared/toast';
-import { useTranslation } from 'react-i18next';
 import { EditNotifierComponent } from '../../notifiers/ui/edit/EditNotifierComponent';
 import { EditStorageComponent } from '../../storages/ui/edit/EditStorageComponent';
 
@@ -308,7 +308,9 @@ export const DatabaseTransferDialogComponent = ({
                       <Radio value="transfer">{t('databases:transferNotifiersWithDatabase')}</Radio>
                     </div>
                     <div>
-                      <Radio value="select">{t('databases:selectNotifiersFromTargetWorkspace')}</Radio>
+                      <Radio value="select">
+                        {t('databases:selectNotifiersFromTargetWorkspace')}
+                      </Radio>
                     </div>
                   </Radio.Group>
 
@@ -341,7 +343,8 @@ export const DatabaseTransferDialogComponent = ({
                               <ul className="ml-5 list-disc">
                                 {notifiersBlockingTransfer.map((info) => (
                                   <li key={info.notifier.id}>
-                                    {info.notifier.name} ({t('databases:usedByDatabases', { count: info.databaseCount })})
+                                    {info.notifier.name} (
+                                    {t('databases:usedByDatabases', { count: info.databaseCount })})
                                   </li>
                                 ))}
                               </ul>

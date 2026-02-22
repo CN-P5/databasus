@@ -182,10 +182,7 @@ export function EditNASStorageComponent({ storage, setStorage, setUnsaved }: Pro
             placeholder="WORKGROUP (optional)"
           />
 
-          <Tooltip
-            className="cursor-pointer"
-            title={t('windowsDomainNameOptional')}
-          >
+          <Tooltip className="cursor-pointer" title={t('windowsDomainNameOptional')}>
             <InfoCircleOutlined className="ml-2" style={{ color: 'gray' }} />
           </Tooltip>
         </div>

@@ -1,11 +1,11 @@
 import type { Notifier } from '../../notifiers';
 import type { DatabaseType } from './DatabaseType';
 import type { HealthStatus } from './HealthStatus';
+import type { SshTunnel } from './SshTunnel';
 import type { MariadbDatabase } from './mariadb/MariadbDatabase';
 import type { MongodbDatabase } from './mongodb/MongodbDatabase';
 import type { MysqlDatabase } from './mysql/MysqlDatabase';
 import type { PostgresqlDatabase } from './postgresql/PostgresqlDatabase';
-import type { SshTunnel } from './SshTunnel';
 
 export interface Database {
   id: string;

@@ -72,9 +72,7 @@ export const StorageTransferDialogComponent = ({ storage, onClose, onTransferred
         </div>
       ) : isStorageInUse ? (
         <div className="py-3">
-          <div className="text-gray-700 dark:text-gray-300">
-            {t('storageUsedByDatabases')}
-          </div>
+          <div className="text-gray-700 dark:text-gray-300">{t('storageUsedByDatabases')}</div>
 
           <div className="mt-5">
             <Button type="primary" onClick={onClose}>

@@ -1,8 +1,8 @@
 import { Modal } from 'antd';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { type Database, DatabaseType, databaseApi } from '../../../../entity/databases';
-import { useTranslation } from 'react-i18next';
 import { CreateReadOnlyComponent } from './CreateReadOnlyComponent';
 import { EditMariaDbSpecificDataComponent } from './EditMariaDbSpecificDataComponent';
 import { EditMongoDbSpecificDataComponent } from './EditMongoDbSpecificDataComponent';

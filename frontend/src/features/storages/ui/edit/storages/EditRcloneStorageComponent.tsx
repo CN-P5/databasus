@@ -44,10 +44,7 @@ region = us-east-1`}
               style={{ resize: 'vertical' }}
             />
 
-            <Tooltip
-              className="cursor-pointer"
-              title={t('pasteYourRcloneConfContentHere')}
-            >
+            <Tooltip className="cursor-pointer" title={t('pasteYourRcloneConfContentHere')}>
               <InfoCircleOutlined className="mt-2 ml-2" style={{ color: 'gray' }} />
             </Tooltip>
           </div>

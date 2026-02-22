@@ -28,37 +28,46 @@ export const ShowBackupConfigComponent = ({ database }: Props) => {
   const { t } = useTranslation('backups');
   const [backupConfig, setBackupConfig] = useState<BackupConfig>();
 
-  const weekdayLabels = useMemo(() => ({
-    1: t('mon'),
-    2: t('tue'),
-    3: t('wed'),
-    4: t('thu'),
-    5: t('fri'),
-    6: t('sat'),
-    7: t('sun'),
-  }), [t]);
+  const weekdayLabels = useMemo(
+    () => ({
+      1: t('mon'),
+      2: t('tue'),
+      3: t('wed'),
+      4: t('thu'),
+      5: t('fri'),
+      6: t('sat'),
+      7: t('sun'),
+    }),
+    [t],
+  );
 
-  const intervalLabels = useMemo(() => ({
-    [IntervalType.HOURLY]: t('hourly'),
-    [IntervalType.DAILY]: t('daily'),
-    [IntervalType.WEEKLY]: t('weekly'),
-    [IntervalType.MONTHLY]: t('monthly'),
-    [IntervalType.CRON]: t('cron'),
-  }), [t]);
+  const intervalLabels = useMemo(
+    () => ({
+      [IntervalType.HOURLY]: t('hourly'),
+      [IntervalType.DAILY]: t('daily'),
+      [IntervalType.WEEKLY]: t('weekly'),
+      [IntervalType.MONTHLY]: t('monthly'),
+      [IntervalType.CRON]: t('cron'),
+    }),
+    [t],
+  );
 
-  const periodLabels = useMemo(() => ({
-    [Period.DAY]: t('1day'),
-    [Period.WEEK]: t('1week'),
-    [Period.MONTH]: t('1month'),
-    [Period.THREE_MONTH]: t('3months'),
-    [Period.SIX_MONTH]: t('6months'),
-    [Period.YEAR]: t('1year'),
-    [Period.TWO_YEARS]: t('2years'),
-    [Period.THREE_YEARS]: t('3years'),
-    [Period.FOUR_YEARS]: t('4years'),
-    [Period.FIVE_YEARS]: t('5years'),
-    [Period.FOREVER]: t('forever'),
-  }), [t]);
+  const periodLabels = useMemo(
+    () => ({
+      [Period.DAY]: t('1day'),
+      [Period.WEEK]: t('1week'),
+      [Period.MONTH]: t('1month'),
+      [Period.THREE_MONTH]: t('3months'),
+      [Period.SIX_MONTH]: t('6months'),
+      [Period.YEAR]: t('1year'),
+      [Period.TWO_YEARS]: t('2years'),
+      [Period.THREE_YEARS]: t('3years'),
+      [Period.FOUR_YEARS]: t('4years'),
+      [Period.FIVE_YEARS]: t('5years'),
+      [Period.FOREVER]: t('forever'),
+    }),
+    [t],
+  );
 
   // Detect user's preferred time format (12-hour vs 24-hour)
   const timeFormat = useMemo(() => {
@@ -212,13 +221,12 @@ export const ShowBackupConfigComponent = ({ database }: Props) => {
             <div className="mb-1 flex w-full items-center">
               <div className="min-w-[150px]">{t('encryption')}</div>
               <div>
-                {backupConfig.encryption === BackupEncryption.ENCRYPTED ? t('encrypted') : t('none')}
+                {backupConfig.encryption === BackupEncryption.ENCRYPTED
+                  ? t('encrypted')
+                  : t('none')}
               </div>
 
-              <Tooltip
-                className="cursor-pointer"
-                title={t('encryptionTooltip')}
-              >
+              <Tooltip className="cursor-pointer" title={t('encryptionTooltip')}>
                 <InfoCircleOutlined className="ml-2" style={{ color: 'gray' }} />
               </Tooltip>
             </div>

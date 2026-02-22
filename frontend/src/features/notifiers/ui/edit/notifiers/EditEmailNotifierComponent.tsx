@@ -37,10 +37,7 @@ export function EditEmailNotifierComponent({ notifier, setNotifier, setUnsaved }
             placeholder="example@gmail.com"
           />
 
-          <Tooltip
-            className="cursor-pointer"
-            title={t('theEmailWhereYouWantToReceiveMessage')}
-          >
+          <Tooltip className="cursor-pointer" title={t('theEmailWhereYouWantToReceiveMessage')}>
             <InfoCircleOutlined className="ml-2" style={{ color: 'gray' }} />
           </Tooltip>
         </div>
@@ -158,10 +155,7 @@ export function EditEmailNotifierComponent({ notifier, setNotifier, setUnsaved }
             placeholder="example@example.com"
           />
 
-          <Tooltip
-            className="cursor-pointer"
-            title={t('optionalEmailAddressToUseAsSender')}
-          >
+          <Tooltip className="cursor-pointer" title={t('optionalEmailAddressToUseAsSender')}>
             <InfoCircleOutlined className="ml-2" style={{ color: 'gray' }} />
           </Tooltip>
         </div>

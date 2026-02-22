@@ -43,7 +43,8 @@ export function OauthStorageComponent() {
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(
-          errorData.error_description || `${t('common:oauthExchangeFailed')} ${response.statusText}`,
+          errorData.error_description ||
+            `${t('common:oauthExchangeFailed')} ${response.statusText}`,
         );
       }
 

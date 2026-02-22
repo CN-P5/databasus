@@ -77,10 +77,7 @@ export const EditHealthcheckConfigComponent = ({ databaseId, onClose }: Props) =
           size="small"
         />
 
-        <Tooltip
-          className="cursor-pointer"
-          title={t('enableHealthcheckTooltip')}
-        >
+        <Tooltip className="cursor-pointer" title={t('enableHealthcheckTooltip')}>
           <InfoCircleOutlined className="ml-2" style={{ color: 'gray' }} />
         </Tooltip>
       </div>
@@ -102,10 +99,7 @@ export const EditHealthcheckConfigComponent = ({ databaseId, onClose }: Props) =
               size="small"
             />
 
-            <Tooltip
-              className="cursor-pointer"
-              title={t('notifyWhenUnavailableTooltip')}
-            >
+            <Tooltip className="cursor-pointer" title={t('notifyWhenUnavailableTooltip')}>
               <InfoCircleOutlined className="ml-2" style={{ color: 'gray' }} />
             </Tooltip>
           </div>
@@ -132,10 +126,7 @@ export const EditHealthcheckConfigComponent = ({ databaseId, onClose }: Props) =
               min={1}
             />
 
-            <Tooltip
-              className="cursor-pointer"
-              title={t('checkIntervalMinutesTooltip')}
-            >
+            <Tooltip className="cursor-pointer" title={t('checkIntervalMinutesTooltip')}>
               <InfoCircleOutlined className="ml-2" style={{ color: 'gray' }} />
             </Tooltip>
           </div>
@@ -162,10 +153,7 @@ export const EditHealthcheckConfigComponent = ({ databaseId, onClose }: Props) =
               min={1}
             />
 
-            <Tooltip
-              className="cursor-pointer"
-              title={t('attemptsBeforeDownTooltip')}
-            >
+            <Tooltip className="cursor-pointer" title={t('attemptsBeforeDownTooltip')}>
               <InfoCircleOutlined className="ml-2" style={{ color: 'gray' }} />
             </Tooltip>
           </div>
@@ -192,10 +180,7 @@ export const EditHealthcheckConfigComponent = ({ databaseId, onClose }: Props) =
               min={1}
             />
 
-            <Tooltip
-              className="cursor-pointer"
-              title={t('storeAttemptsDaysTooltip')}
-            >
+            <Tooltip className="cursor-pointer" title={t('storeAttemptsDaysTooltip')}>
               <InfoCircleOutlined className="ml-2" style={{ color: 'gray' }} />
             </Tooltip>
           </div>

@@ -122,9 +122,7 @@ export function ProfileComponent({ contentHeight }: Props) {
           message.success(t('successfullySignedInWithNewPassword'));
         } catch (signInError: unknown) {
           const errorMessage =
-            signInError instanceof Error
-              ? signInError.message
-              : t('failedToSignInWithNewPassword');
+            signInError instanceof Error ? signInError.message : t('failedToSignInWithNewPassword');
           message.error(errorMessage);
           // If sign in fails, logout and redirect to login page
           userApi.logout();
@@ -218,7 +216,9 @@ export function ProfileComponent({ contentHeight }: Props) {
                     <div className="text-xs font-semibold dark:text-gray-200">{t('userId')}</div>
                     <div className="mb-4 text-sm text-gray-600 dark:text-gray-400">{user.id}</div>
 
-                    <div className="mb-1 text-xs font-semibold dark:text-gray-200">{t('userName')}</div>
+                    <div className="mb-1 text-xs font-semibold dark:text-gray-200">
+                      {t('userName')}
+                    </div>
                     <Input
                       value={editName}
                       onChange={(e) => {
@@ -230,7 +230,9 @@ export function ProfileComponent({ contentHeight }: Props) {
                       className="mb-4"
                     />
 
-                    <div className="mt-2 mb-1 text-xs font-semibold dark:text-gray-200">{t('userEmail')}</div>
+                    <div className="mt-2 mb-1 text-xs font-semibold dark:text-gray-200">
+                      {t('userEmail')}
+                    </div>
                     <Input
                       value={editEmail}
                       onChange={(e) => {
@@ -249,7 +251,9 @@ export function ProfileComponent({ contentHeight }: Props) {
                       </div>
                     )}
 
-                    <div className="mt-2 mb-1 text-xs font-semibold dark:text-gray-200">{t('userRole')}</div>
+                    <div className="mt-2 mb-1 text-xs font-semibold dark:text-gray-200">
+                      {t('userRole')}
+                    </div>
                     <div className="mb-4">
                       <span className="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800 dark:bg-blue-900 dark:text-blue-200">
                         {getRoleDisplayText(user.role)}
@@ -277,7 +281,9 @@ export function ProfileComponent({ contentHeight }: Props) {
                 </div>
 
                 <div className="max-w-xs">
-                  <h3 className="mb-4 text-lg font-semibold dark:text-white">{t('changePassword')}</h3>
+                  <h3 className="mb-4 text-lg font-semibold dark:text-white">
+                    {t('changePassword')}
+                  </h3>
 
                   <div className="max-w-sm">
                     <div className="my-1 text-xs font-semibold dark:text-gray-200">

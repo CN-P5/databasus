@@ -1,13 +1,13 @@
 import { InfoCircleOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { backupConfigApi } from '../../../entity/backups';
 import { type Database } from '../../../entity/databases';
 import { HealthStatus } from '../../../entity/databases/model/HealthStatus';
 import type { Storage } from '../../../entity/storages';
 import { getStorageLogoFromType } from '../../../entity/storages/models/getStorageLogoFromType';
-import { useTranslation } from 'react-i18next';
 
 interface Props {
   database: Database;
@@ -44,7 +44,9 @@ export const DatabaseCardComponent = ({
                 database.healthStatus === HealthStatus.AVAILABLE ? 'bg-green-500' : 'bg-red-500'
               }`}
             >
-              {database.healthStatus === HealthStatus.AVAILABLE ? t('databases:healthy') : t('databases:unhealthy')}
+              {database.healthStatus === HealthStatus.AVAILABLE
+                ? t('databases:healthy')
+                : t('databases:unhealthy')}
             </div>
           </div>
         )}

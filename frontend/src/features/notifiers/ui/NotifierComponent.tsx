@@ -213,9 +213,7 @@ export const NotifierComponent = ({
                 <div className="mt-3 text-sm break-words whitespace-pre-wrap text-gray-500 dark:text-gray-400">
                   {t('toCleanThisErrorChooseAny')}
                   <ul>
-                    <li>
-                      {t('sendTestNotificationViaButtonBelow')}
-                    </li>
+                    <li>{t('sendTestNotificationViaButtonBelow')}</li>
                     <li>{t('waitUntilNextNotificationSentWithoutErrors')}</li>
                   </ul>
                 </div>

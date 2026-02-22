@@ -573,7 +573,9 @@ export function WorkspaceMembershipComponent({ workspaceResponse, user }: Props)
       >
         <div className="py-4">
           <div className="mb-4">
-            <div className="mb-2 font-medium text-gray-900 dark:text-white">{t('emailIsRequired')}</div>
+            <div className="mb-2 font-medium text-gray-900 dark:text-white">
+              {t('emailIsRequired')}
+            </div>
             {user.role === UserRole.ADMIN ? (
               <AutoComplete
                 value={addMemberForm.email}
@@ -708,7 +710,9 @@ export function WorkspaceMembershipComponent({ workspaceResponse, user }: Props)
             </div>
           ) : (
             <div className="mb-4">
-              <div className="mb-2 font-medium text-gray-900 dark:text-white">{t('selectNewOwner')}</div>
+              <div className="mb-2 font-medium text-gray-900 dark:text-white">
+                {t('selectNewOwner')}
+              </div>
               <Select
                 value={transferForm.selectedMemberId || undefined}
                 onChange={(memberId) => {

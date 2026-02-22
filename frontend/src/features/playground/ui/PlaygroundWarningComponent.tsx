@@ -79,7 +79,10 @@ export const PlaygroundWarningComponent = (): JSX.Element => {
       <div className="space-y-6 py-4">
         <div>
           <h3 className="mb-2 text-lg font-semibold">{t('whatIsPlayground')}</h3>
-          <p className="text-gray-700 dark:text-gray-300" dangerouslySetInnerHTML={{ __html: t('playgroundDescription') }} />
+          <p
+            className="text-gray-700 dark:text-gray-300"
+            dangerouslySetInnerHTML={{ __html: t('playgroundDescription') }}
+          />
         </div>
 
         <div>
@@ -92,19 +95,23 @@ export const PlaygroundWarningComponent = (): JSX.Element => {
 
         <div>
           <h3 className="mb-2 text-lg font-semibold">{t('isItSecure')}</h3>
-          <p className="text-gray-700 dark:text-gray-300" dangerouslySetInnerHTML={{ __html: t('securityDescription') }} />
+          <p
+            className="text-gray-700 dark:text-gray-300"
+            dangerouslySetInnerHTML={{ __html: t('securityDescription') }}
+          />
         </div>
 
         <div>
           <h3 className="mb-2 text-lg font-semibold">{t('canMyDataBeCorrupted')}</h3>
-          <p className="text-gray-700 dark:text-gray-300">
-            {t('corruptionDescription')}
-          </p>
+          <p className="text-gray-700 dark:text-gray-300">{t('corruptionDescription')}</p>
         </div>
 
         <div>
           <h3 className="mb-2 text-lg font-semibold">{t('whatIfISeeAnIssue')}</h3>
-          <p className="text-gray-700 dark:text-gray-300" dangerouslySetInnerHTML={{ __html: t('issueDescription') }} />
+          <p
+            className="text-gray-700 dark:text-gray-300"
+            dangerouslySetInnerHTML={{ __html: t('issueDescription') }}
+          />
         </div>
       </div>
     </Modal>

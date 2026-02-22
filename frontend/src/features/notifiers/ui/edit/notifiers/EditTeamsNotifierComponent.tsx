@@ -51,10 +51,7 @@ export function EditTeamsNotifierComponent({ notifier, setNotifier, setUnsaved }
             placeholder="https://prod-00.westeurope.logic.azure.com:443/workflows/....."
           />
 
-          <Tooltip
-            className="cursor-pointer"
-            title={t('httpEndpointFromYourPowerAutomateFlow')}
-          >
+          <Tooltip className="cursor-pointer" title={t('httpEndpointFromYourPowerAutomateFlow')}>
             <InfoCircleOutlined className="ml-2" style={{ color: 'gray' }} />
           </Tooltip>
         </div>

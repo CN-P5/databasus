@@ -333,7 +333,9 @@ export function UsersComponent({ contentHeight }: Props) {
                   value: UserRole.ADMIN,
                 },
                 {
-                  label: <span style={{ color: getRoleColor(UserRole.MEMBER) }}>{t('member')}</span>,
+                  label: (
+                    <span style={{ color: getRoleColor(UserRole.MEMBER) }}>{t('member')}</span>
+                  ),
                   value: UserRole.MEMBER,
                 },
               ]}

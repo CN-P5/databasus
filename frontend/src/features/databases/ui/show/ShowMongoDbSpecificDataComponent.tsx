@@ -1,5 +1,6 @@
-import { type Database } from '../../../../entity/databases';
 import { useTranslation } from 'react-i18next';
+
+import { type Database } from '../../../../entity/databases';
 
 interface Props {
   database: Database;

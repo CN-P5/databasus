@@ -225,10 +225,7 @@ export function EditAzureBlobStorageComponent({ storage, setStorage, setUnsaved 
                 placeholder="my-prefix/ (optional)"
               />
 
-              <Tooltip
-                className="cursor-pointer"
-                title={t('optionalPrefixForAllBlobNames')}
-              >
+              <Tooltip className="cursor-pointer" title={t('optionalPrefixForAllBlobNames')}>
                 <InfoCircleOutlined className="ml-2" style={{ color: 'gray' }} />
               </Tooltip>
             </div>

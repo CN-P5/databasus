@@ -1,7 +1,8 @@
-import { StarButtonComponent } from '../../../shared/ui/StarButtonComponent';
-import { LanguageSwitcher } from '../../../shared/ui/LanguageSwitcherComponent';
-import { ThemeToggleComponent } from '../../../shared/ui/ThemeToggleComponent';
 import { useTranslation } from 'react-i18next';
+
+import { LanguageSwitcher } from '../../../shared/ui/LanguageSwitcherComponent';
+import { StarButtonComponent } from '../../../shared/ui/StarButtonComponent';
+import { ThemeToggleComponent } from '../../../shared/ui/ThemeToggleComponent';
 
 export function AuthNavbarComponent() {
   const { t } = useTranslation('users');

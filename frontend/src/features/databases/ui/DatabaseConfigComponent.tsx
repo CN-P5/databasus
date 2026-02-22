@@ -7,11 +7,11 @@ import {
 } from '@ant-design/icons';
 import { Button, Input } from 'antd';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { backupConfigApi } from '../../../entity/backups';
 import { type Database, databaseApi } from '../../../entity/databases';
 import type { UserProfile } from '../../../entity/users';
-import { useTranslation } from 'react-i18next';
 import { ToastHelper } from '../../../shared/toast';
 import { ConfirmationComponent } from '../../../shared/ui';
 import { EditBackupConfigComponent, ShowBackupConfigComponent } from '../../backups';
