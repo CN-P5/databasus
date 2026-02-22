@@ -33,9 +33,9 @@ export function AuthNavbarComponent() {
         </a>
 
         <div className="flex items-center gap-2">
-          <LanguageSwitcher />
-
           <StarButtonComponent />
+
+          <LanguageSwitcher />
 
           <ThemeToggleComponent />
         </div>

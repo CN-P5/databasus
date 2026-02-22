@@ -247,9 +247,9 @@ export const MainScreenComponent = () => {
           )}
 
           <div className="flex items-center gap-2">
-            <LanguageSwitcher />
-
             <StarButtonComponent />
+
+            <LanguageSwitcher />
 
             <ThemeToggleComponent />
           </div>

@@ -1,6 +1,7 @@
 import { EyeInvisibleOutlined, EyeTwoTone } from '@ant-design/icons';
 import { Button, Input } from 'antd';
 import { type JSX, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { useCloudflareTurnstile } from '../../../shared/hooks/useCloudflareTurnstile';
 
@@ -21,6 +22,8 @@ export function SignInComponent({
   onSwitchToSignUp,
   onSwitchToResetPassword,
 }: SignInComponentProps): JSX.Element {
+  const { t } = useTranslation('auth');
+  
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [passwordVisible, setPasswordVisible] = useState(false);
@@ -77,7 +80,7 @@ export function SignInComponent({
 
   return (
     <div className="w-full max-w-[300px]">
-      <div className="mb-5 text-center text-2xl font-bold">Sign in</div>
+      <div className="mb-5 text-center text-2xl font-bold">{t('signIn')}</div>
 
       <div className="mt-4">
         <div className="space-y-2">
@@ -93,15 +96,15 @@ export function SignInComponent({
           </div>
           <div className="relative flex justify-center text-sm">
             <span className="bg-white px-2 text-gray-500 dark:bg-gray-900 dark:text-gray-400">
-              or continue
+              {t('continueWithEmail')}
             </span>
           </div>
         </div>
       )}
 
-      <div className="my-1 text-xs font-semibold">Your email</div>
+      <div className="my-1 text-xs font-semibold">{t('yourEmail')}</div>
       <Input
-        placeholder="your@email.com"
+        placeholder={t('emailPlaceholder')}
         value={email}
         onChange={(e) => {
           setEmailError(false);
@@ -111,7 +114,7 @@ export function SignInComponent({
         type="email"
       />
 
-      <div className="my-1 text-xs font-semibold">Password</div>
+      <div className="my-1 text-xs font-semibold">{t('password')}</div>
       <Input.Password
         placeholder="********"
         value={password}
@@ -137,7 +140,7 @@ export function SignInComponent({
         }}
         type="primary"
       >
-        Sign in
+        {t('signIn')}
       </Button>
 
       {signInError && (
@@ -147,13 +150,13 @@ export function SignInComponent({
       )}
 
       <div className="mt-4 text-center text-sm text-gray-600 dark:text-gray-400">
-        Don&apos;t have an account?{' '}
+        {t('dontHaveAccount')}{' '}
         <button
           type="button"
           onClick={onSwitchToSignUp}
           className="cursor-pointer font-medium text-blue-600 hover:text-blue-700 dark:!text-blue-500"
         >
-          Sign up
+          {t('signUp')}
         </button>
         <br />
         {IS_EMAIL_CONFIGURED && (
@@ -162,7 +165,7 @@ export function SignInComponent({
             onClick={onSwitchToResetPassword}
             className="cursor-pointer font-medium text-blue-600 hover:text-blue-700 dark:!text-blue-500"
           >
-            Forgot password?
+            {t('forgotPassword')}
           </button>
         )}
       </div>
