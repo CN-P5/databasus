@@ -656,7 +656,12 @@ func connectWithSSHTunnelMySQL(
 	return db, cleanup, nil
 }
 
-func (m *MysqlDatabase) buildDSNWithHostPort(password string, database string, host string, port int) string {
+func (m *MysqlDatabase) buildDSNWithHostPort(
+	password string,
+	database string,
+	host string,
+	port int,
+) string {
 	tlsConfig := "false"
 	allowCleartext := ""
 

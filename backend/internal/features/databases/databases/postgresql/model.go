@@ -680,7 +680,14 @@ func testSingleDatabaseConnection(
 		return fmt.Errorf("failed to decrypt password: %w", err)
 	}
 
-	conn, cleanup, err := connectWithSSHTunnel(ctx, postgresDb, password, sshTunnel, encryptor, databaseID)
+	conn, cleanup, err := connectWithSSHTunnel(
+		ctx,
+		postgresDb,
+		password,
+		sshTunnel,
+		encryptor,
+		databaseID,
+	)
 	if err != nil {
 		return fmt.Errorf("failed to connect to database '%s': %w", *postgresDb.Database, err)
 	}
@@ -966,7 +973,13 @@ func connectWithSSHTunnel(
 	return conn, cleanup, nil
 }
 
-func buildConnectionStringForDBWithHostPort(p *PostgresqlDatabase, dbName string, password string, host string, port int) string {
+func buildConnectionStringForDBWithHostPort(
+	p *PostgresqlDatabase,
+	dbName string,
+	password string,
+	host string,
+	port int,
+) string {
 	sslMode := "disable"
 	if p.IsHttps {
 		sslMode = "require"

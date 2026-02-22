@@ -99,7 +99,7 @@ func (uc *CreatePostgresqlBackupUsecase) Execute(
 		if err := tunnel.Start(ctx, pg.Host, pg.Port); err != nil {
 			return nil, fmt.Errorf("failed to start SSH tunnel: %w", err)
 		}
-		defer tunnel.Stop()
+		defer func() { _ = tunnel.Stop() }()
 
 		host = "127.0.0.1"
 		port = tunnel.GetLocalPort()
@@ -357,7 +357,11 @@ func (uc *CreatePostgresqlBackupUsecase) copyWithShutdownCheck(
 	return totalBytesWritten, nil
 }
 
-func (uc *CreatePostgresqlBackupUsecase) buildPgDumpArgsWithHostPort(pg *pgtypes.PostgresqlDatabase, host string, port int) []string {
+func (uc *CreatePostgresqlBackupUsecase) buildPgDumpArgsWithHostPort(
+	pg *pgtypes.PostgresqlDatabase,
+	host string,
+	port int,
+) []string {
 	args := []string{
 		"-Fc",
 		"--no-password",

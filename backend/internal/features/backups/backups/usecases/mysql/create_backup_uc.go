@@ -93,7 +93,7 @@ func (uc *CreateMysqlBackupUsecase) Execute(
 		if err := tunnel.Start(ctx, my.Host, my.Port); err != nil {
 			return nil, fmt.Errorf("failed to start SSH tunnel: %w", err)
 		}
-		defer tunnel.Stop()
+		defer func() { _ = tunnel.Stop() }()
 
 		host = "127.0.0.1"
 		port = tunnel.GetLocalPort()
@@ -126,7 +126,11 @@ func (uc *CreateMysqlBackupUsecase) Execute(
 	)
 }
 
-func (uc *CreateMysqlBackupUsecase) buildMysqldumpArgsWithHostPort(my *mysqltypes.MysqlDatabase, host string, port int) []string {
+func (uc *CreateMysqlBackupUsecase) buildMysqldumpArgsWithHostPort(
+	my *mysqltypes.MysqlDatabase,
+	host string,
+	port int,
+) []string {
 	args := []string{
 		"--host=" + host,
 		"--port=" + strconv.Itoa(port),

@@ -465,7 +465,11 @@ func (m *MongodbDatabase) BuildMongodumpURI(password string) string {
 	)
 }
 
-func (m *MongodbDatabase) BuildMongodumpURIWithHostPort(password string, host string, port int) string {
+func (m *MongodbDatabase) BuildMongodumpURIWithHostPort(
+	password string,
+	host string,
+	port int,
+) string {
 	authDB := m.AuthDatabase
 	if authDB == "" {
 		authDB = "admin"
@@ -750,7 +754,11 @@ func connectWithSSHTunnelMongoDB(
 	return client, cleanup, nil
 }
 
-func (m *MongodbDatabase) buildConnectionURIWithHostPort(password string, host string, port int) string {
+func (m *MongodbDatabase) buildConnectionURIWithHostPort(
+	password string,
+	host string,
+	port int,
+) string {
 	authDB := m.AuthDatabase
 	if authDB == "" {
 		authDB = "admin"

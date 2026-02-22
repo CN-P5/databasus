@@ -70,7 +70,10 @@ func (s *SSHTunnelConfig) ToSSHConfig() *ssh.Config {
 	}
 }
 
-func (s *SSHTunnelConfig) ToSSHConfigWithDecrypt(encryptor encryption.FieldEncryptor, databaseID uuid.UUID) (*ssh.Config, error) {
+func (s *SSHTunnelConfig) ToSSHConfigWithDecrypt(
+	encryptor encryption.FieldEncryptor,
+	databaseID uuid.UUID,
+) (*ssh.Config, error) {
 	if err := s.DecryptSensitiveFields(databaseID, encryptor); err != nil {
 		return nil, err
 	}
@@ -83,7 +86,10 @@ func (s *SSHTunnelConfig) HideSensitiveData() {
 	s.Passphrase = ""
 }
 
-func (s *SSHTunnelConfig) EncryptSensitiveFields(databaseID uuid.UUID, encryptor encryption.FieldEncryptor) error {
+func (s *SSHTunnelConfig) EncryptSensitiveFields(
+	databaseID uuid.UUID,
+	encryptor encryption.FieldEncryptor,
+) error {
 	if s.Password != "" {
 		encrypted, err := encryptor.Encrypt(databaseID, s.Password)
 		if err != nil {
@@ -111,7 +117,10 @@ func (s *SSHTunnelConfig) EncryptSensitiveFields(databaseID uuid.UUID, encryptor
 	return nil
 }
 
-func (s *SSHTunnelConfig) DecryptSensitiveFields(databaseID uuid.UUID, encryptor encryption.FieldEncryptor) error {
+func (s *SSHTunnelConfig) DecryptSensitiveFields(
+	databaseID uuid.UUID,
+	encryptor encryption.FieldEncryptor,
+) error {
 	if s.Password != "" {
 		decrypted, err := encryptor.Decrypt(databaseID, s.Password)
 		if err != nil {

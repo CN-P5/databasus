@@ -685,7 +685,12 @@ func connectWithSSHTunnelMariaDB(
 	return db, cleanup, nil
 }
 
-func (m *MariadbDatabase) buildDSNWithHostPort(password string, database string, host string, port int) string {
+func (m *MariadbDatabase) buildDSNWithHostPort(
+	password string,
+	database string,
+	host string,
+	port int,
+) string {
 	tlsConfig := "false"
 
 	if m.IsHttps {
