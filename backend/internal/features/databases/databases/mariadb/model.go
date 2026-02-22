@@ -166,7 +166,14 @@ func (m *MariadbDatabase) PopulateDbData(
 		return fmt.Errorf("failed to decrypt password: %w", err)
 	}
 
-	db, cleanup, err := connectWithSSHTunnelMariaDB(ctx, m, password, sshTunnel, encryptor, databaseID)
+	db, cleanup, err := connectWithSSHTunnelMariaDB(
+		ctx,
+		m,
+		password,
+		sshTunnel,
+		encryptor,
+		databaseID,
+	)
 	if err != nil {
 		return fmt.Errorf("failed to connect to database: %w", err)
 	}
@@ -643,7 +650,7 @@ func connectWithSSHTunnelMariaDB(
 	db, err := sql.Open("mysql", dsn)
 	if err != nil {
 		if tunnel != nil {
-			tunnel.Stop()
+			_ = tunnel.Stop()
 		}
 		return nil, func() {}, err
 	}

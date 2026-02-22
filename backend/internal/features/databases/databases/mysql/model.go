@@ -166,7 +166,14 @@ func (m *MysqlDatabase) PopulateDbData(
 		return fmt.Errorf("failed to decrypt password: %w", err)
 	}
 
-	db, cleanup, err := connectWithSSHTunnelMySQL(ctx, m, password, sshTunnel, encryptor, databaseID)
+	db, cleanup, err := connectWithSSHTunnelMySQL(
+		ctx,
+		m,
+		password,
+		sshTunnel,
+		encryptor,
+		databaseID,
+	)
 	if err != nil {
 		return fmt.Errorf("failed to connect to database: %w", err)
 	}

@@ -171,7 +171,14 @@ func (m *MongodbDatabase) PopulateVersion(
 		return fmt.Errorf("failed to decrypt password: %w", err)
 	}
 
-	client, cleanup, err := connectWithSSHTunnelMongoDB(ctx, m, password, sshTunnel, encryptor, databaseID)
+	client, cleanup, err := connectWithSSHTunnelMongoDB(
+		ctx,
+		m,
+		password,
+		sshTunnel,
+		encryptor,
+		databaseID,
+	)
 	if err != nil {
 		return fmt.Errorf("failed to connect to database: %w", err)
 	}

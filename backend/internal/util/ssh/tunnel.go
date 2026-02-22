@@ -50,7 +50,12 @@ func (t *Tunnel) Start(ctx context.Context, targetHost string, targetPort int) e
 		return fmt.Errorf("failed to create local listener: %w", err)
 	}
 	t.listener = listener
-	t.localPort = listener.Addr().(*net.TCPAddr).Port
+	tcpAddr, ok := listener.Addr().(*net.TCPAddr)
+	if !ok {
+		_ = sshClient.Close()
+		return fmt.Errorf("failed to get TCP address")
+	}
+	t.localPort = tcpAddr.Port
 
 	go t.forwardLoop(targetHost, targetPort)
 

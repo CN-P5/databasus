@@ -943,7 +943,7 @@ func connectWithSSHTunnel(
 		port = tunnel.GetLocalPort()
 
 		cleanup = func() {
-			tunnel.Stop()
+			_ = tunnel.Stop()
 		}
 	}
 
@@ -952,7 +952,7 @@ func connectWithSSHTunnel(
 	conn, err := pgx.Connect(ctx, connStr)
 	if err != nil {
 		if tunnel != nil {
-			tunnel.Stop()
+			_ = tunnel.Stop()
 		}
 		return nil, func() {}, err
 	}
