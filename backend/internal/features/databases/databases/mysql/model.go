@@ -73,7 +73,14 @@ func (m *MysqlDatabase) TestConnection(
 		return fmt.Errorf("failed to decrypt password: %w", err)
 	}
 
-	db, cleanup, err := connectWithSSHTunnelMySQL(ctx, m, password, sshTunnel, encryptor, databaseID)
+	db, cleanup, err := connectWithSSHTunnelMySQL(
+		ctx,
+		m,
+		password,
+		sshTunnel,
+		encryptor,
+		databaseID,
+	)
 	if err != nil {
 		return fmt.Errorf("failed to connect to MySQL database '%s': %w", *m.Database, err)
 	}
@@ -374,35 +381,6 @@ func HasPrivilege(privileges, priv string) bool {
 	return false
 }
 
-func (m *MysqlDatabase) buildDSN(password string, database string) string {
-	tlsConfig := "false"
-	allowCleartext := ""
-
-	if m.IsHttps {
-		err := mysql.RegisterTLSConfig("mysql-skip-verify", &tls.Config{
-			InsecureSkipVerify: true,
-		})
-		if err != nil {
-			// Config might already be registered, which is fine
-			_ = err
-		}
-
-		tlsConfig = "mysql-skip-verify"
-		allowCleartext = "&allowCleartextPasswords=1"
-	}
-
-	return fmt.Sprintf(
-		"%s:%s@tcp(%s:%d)/%s?parseTime=true&timeout=15s&tls=%s&charset=utf8mb4%s",
-		m.Username,
-		password,
-		m.Host,
-		m.Port,
-		database,
-		tlsConfig,
-		allowCleartext,
-	)
-}
-
 // detectMysqlVersion parses VERSION() output to detect MySQL version
 // Minor versions are mapped to the closest supported version (e.g., 8.1 → 8.0, 8.4+ → 8.4)
 func detectMysqlVersion(ctx context.Context, db *sql.DB) (tools.MysqlVersion, error) {
@@ -627,7 +605,7 @@ func connectWithSSHTunnelMySQL(
 		port = tunnel.GetLocalPort()
 
 		cleanup = func() {
-			tunnel.Stop()
+			_ = tunnel.Stop()
 		}
 	}
 
@@ -636,14 +614,14 @@ func connectWithSSHTunnelMySQL(
 	db, err := sql.Open("mysql", dsn)
 	if err != nil {
 		if tunnel != nil {
-			tunnel.Stop()
+			_ = tunnel.Stop()
 		}
 		return nil, func() {}, err
 	}
 
 	originalCleanup := cleanup
 	cleanup = func() {
-		db.Close()
+		_ = db.Close()
 		originalCleanup()
 	}
 

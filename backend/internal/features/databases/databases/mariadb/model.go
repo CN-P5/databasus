@@ -73,7 +73,14 @@ func (m *MariadbDatabase) TestConnection(
 		return fmt.Errorf("failed to decrypt password: %w", err)
 	}
 
-	db, cleanup, err := connectWithSSHTunnelMariaDB(ctx, m, password, sshTunnel, encryptor, databaseID)
+	db, cleanup, err := connectWithSSHTunnelMariaDB(
+		ctx,
+		m,
+		password,
+		sshTunnel,
+		encryptor,
+		databaseID,
+	)
 	if err != nil {
 		return fmt.Errorf("failed to connect to MariaDB database '%s': %w", *m.Database, err)
 	}
@@ -372,31 +379,6 @@ func HasPrivilege(privileges, priv string) bool {
 	return false
 }
 
-func (m *MariadbDatabase) buildDSN(password string, database string) string {
-	tlsConfig := "false"
-
-	if m.IsHttps {
-		err := mysql.RegisterTLSConfig("mariadb-skip-verify", &tls.Config{
-			InsecureSkipVerify: true,
-		})
-		if err != nil {
-			// Config might already be registered, which is fine
-			_ = err
-		}
-		tlsConfig = "mariadb-skip-verify"
-	}
-
-	return fmt.Sprintf(
-		"%s:%s@tcp(%s:%d)/%s?parseTime=true&timeout=15s&tls=%s&charset=utf8mb4",
-		m.Username,
-		password,
-		m.Host,
-		m.Port,
-		database,
-		tlsConfig,
-	)
-}
-
 // detectMariadbVersion parses VERSION() output to detect MariaDB version
 // MariaDB returns strings like "10.11.6-MariaDB" or "11.4.2-MariaDB-1:11.4.2+maria~ubu2204"
 // Minor versions are mapped to the closest supported version (e.g., 12.1 → 12.0)
@@ -652,7 +634,7 @@ func connectWithSSHTunnelMariaDB(
 		port = tunnel.GetLocalPort()
 
 		cleanup = func() {
-			tunnel.Stop()
+			_ = tunnel.Stop()
 		}
 	}
 
@@ -668,7 +650,7 @@ func connectWithSSHTunnelMariaDB(
 
 	originalCleanup := cleanup
 	cleanup = func() {
-		db.Close()
+		_ = db.Close()
 		originalCleanup()
 	}
 

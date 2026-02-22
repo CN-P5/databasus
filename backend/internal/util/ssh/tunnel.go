@@ -46,7 +46,7 @@ func (t *Tunnel) Start(ctx context.Context, targetHost string, targetPort int) e
 
 	listener, err := net.Listen("tcp", "127.0.0.1:0")
 	if err != nil {
-		sshClient.Close()
+		_ = sshClient.Close()
 		return fmt.Errorf("failed to create local listener: %w", err)
 	}
 	t.listener = listener
@@ -80,7 +80,7 @@ func (t *Tunnel) connectSSH(ctx context.Context) (*ssh.Client, error) {
 
 	sshConn, chans, reqs, err := ssh.NewClientConn(conn, address, config)
 	if err != nil {
-		conn.Close()
+		_ = conn.Close()
 		return nil, fmt.Errorf("failed to create SSH connection: %w", err)
 	}
 
@@ -135,23 +135,23 @@ func (t *Tunnel) forwardLoop(targetHost string, targetPort int) {
 }
 
 func (t *Tunnel) handleConnection(localConn net.Conn, targetHost string, targetPort int) {
-	defer localConn.Close()
+	defer func() { _ = localConn.Close() }()
 
 	remoteConn, err := t.sshClient.Dial("tcp", fmt.Sprintf("%s:%d", targetHost, targetPort))
 	if err != nil {
 		return
 	}
-	defer remoteConn.Close()
+	defer func() { _ = remoteConn.Close() }()
 
 	done := make(chan struct{}, 2)
 
 	go func() {
-		io.Copy(localConn, remoteConn)
+		_, _ = io.Copy(localConn, remoteConn)
 		done <- struct{}{}
 	}()
 
 	go func() {
-		io.Copy(remoteConn, localConn)
+		_, _ = io.Copy(remoteConn, localConn)
 		done <- struct{}{}
 	}()
 
@@ -224,16 +224,16 @@ func TestConnection(ctx context.Context, config *Config) error {
 	if err != nil {
 		return fmt.Errorf("failed to dial SSH server: %w", err)
 	}
-	defer conn.Close()
+	defer func() { _ = conn.Close() }()
 
 	sshConn, chans, reqs, err := ssh.NewClientConn(conn, address, sshConfig)
 	if err != nil {
 		return fmt.Errorf("failed to create SSH connection: %w", err)
 	}
-	defer sshConn.Close()
+	defer func() { _ = sshConn.Close() }()
 
 	sshClient := ssh.NewClient(sshConn, chans, reqs)
-	defer sshClient.Close()
+	defer func() { _ = sshClient.Close() }()
 
 	return nil
 }

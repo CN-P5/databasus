@@ -76,7 +76,14 @@ func (m *MongodbDatabase) TestConnection(
 		return fmt.Errorf("failed to decrypt password: %w", err)
 	}
 
-	client, cleanup, err := connectWithSSHTunnelMongoDB(ctx, m, password, sshTunnel, encryptor, databaseID)
+	client, cleanup, err := connectWithSSHTunnelMongoDB(
+		ctx,
+		m,
+		password,
+		sshTunnel,
+		encryptor,
+		databaseID,
+	)
 	if err != nil {
 		return fmt.Errorf("failed to connect to MongoDB: %w", err)
 	}
@@ -414,30 +421,6 @@ func (m *MongodbDatabase) CreateReadOnlyUser(
 	return "", "", errors.New("failed to generate unique username after 3 attempts")
 }
 
-// buildConnectionURI builds a MongoDB connection URI
-func (m *MongodbDatabase) buildConnectionURI(password string) string {
-	authDB := m.AuthDatabase
-	if authDB == "" {
-		authDB = "admin"
-	}
-
-	tlsParams := ""
-	if m.IsHttps {
-		tlsParams = "&tls=true&tlsInsecure=true"
-	}
-
-	return fmt.Sprintf(
-		"mongodb://%s:%s@%s:%d/%s?authSource=%s&connectTimeoutMS=15000%s",
-		url.QueryEscape(m.Username),
-		url.QueryEscape(password),
-		m.Host,
-		m.Port,
-		m.Database,
-		authDB,
-		tlsParams,
-	)
-}
-
 // BuildMongodumpURI builds a URI suitable for mongodump (without database in path)
 func (m *MongodbDatabase) BuildMongodumpURI(password string) string {
 	authDB := m.AuthDatabase
@@ -739,7 +722,7 @@ func connectWithSSHTunnelMongoDB(
 
 	originalCleanup := cleanup
 	cleanup = func() {
-		client.Disconnect(ctx)
+		_ = client.Disconnect(ctx)
 		originalCleanup()
 	}
 

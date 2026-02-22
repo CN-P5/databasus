@@ -861,24 +861,6 @@ func checkBackupPermissions(
 	return nil
 }
 
-// buildConnectionStringForDB builds connection string for specific database
-func buildConnectionStringForDB(p *PostgresqlDatabase, dbName string, password string) string {
-	sslMode := "disable"
-	if p.IsHttps {
-		sslMode = "require"
-	}
-
-	return fmt.Sprintf(
-		"host=%s port=%d user=%s password='%s' dbname=%s sslmode=%s default_query_exec_mode=simple_protocol standard_conforming_strings=on client_encoding=UTF8",
-		p.Host,
-		p.Port,
-		p.Username,
-		escapeConnectionStringValue(password),
-		dbName,
-		sslMode,
-	)
-}
-
 func escapeConnectionStringValue(value string) string {
 	value = strings.ReplaceAll(value, `\`, `\\`)
 	value = strings.ReplaceAll(value, `'`, `\'`)
@@ -977,7 +959,7 @@ func connectWithSSHTunnel(
 
 	originalCleanup := cleanup
 	cleanup = func() {
-		conn.Close(ctx)
+		_ = conn.Close(ctx)
 		originalCleanup()
 	}
 
