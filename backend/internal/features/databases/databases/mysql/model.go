@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"databasus-backend/internal/util/encryption"
+	"databasus-backend/internal/util/ssh"
 	"databasus-backend/internal/util/tools"
 
 	"github.com/go-sql-driver/mysql"
@@ -58,6 +59,7 @@ func (m *MysqlDatabase) TestConnection(
 	logger *slog.Logger,
 	encryptor encryption.FieldEncryptor,
 	databaseID uuid.UUID,
+	sshTunnel *ssh.Config,
 ) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
@@ -71,17 +73,11 @@ func (m *MysqlDatabase) TestConnection(
 		return fmt.Errorf("failed to decrypt password: %w", err)
 	}
 
-	dsn := m.buildDSN(password, *m.Database)
-
-	db, err := sql.Open("mysql", dsn)
+	db, cleanup, err := connectWithSSHTunnelMySQL(ctx, m, password, sshTunnel, encryptor, databaseID)
 	if err != nil {
 		return fmt.Errorf("failed to connect to MySQL database '%s': %w", *m.Database, err)
 	}
-	defer func() {
-		if closeErr := db.Close(); closeErr != nil {
-			logger.Error("Failed to close MySQL connection", "error", closeErr)
-		}
-	}()
+	defer cleanup()
 
 	db.SetConnMaxLifetime(15 * time.Second)
 	db.SetMaxOpenConns(1)
@@ -149,6 +145,7 @@ func (m *MysqlDatabase) PopulateDbData(
 	logger *slog.Logger,
 	encryptor encryption.FieldEncryptor,
 	databaseID uuid.UUID,
+	sshTunnel *ssh.Config,
 ) error {
 	if m.Database == nil || *m.Database == "" {
 		return nil
@@ -162,17 +159,11 @@ func (m *MysqlDatabase) PopulateDbData(
 		return fmt.Errorf("failed to decrypt password: %w", err)
 	}
 
-	dsn := m.buildDSN(password, *m.Database)
-
-	db, err := sql.Open("mysql", dsn)
+	db, cleanup, err := connectWithSSHTunnelMySQL(ctx, m, password, sshTunnel, encryptor, databaseID)
 	if err != nil {
 		return fmt.Errorf("failed to connect to database: %w", err)
 	}
-	defer func() {
-		if closeErr := db.Close(); closeErr != nil {
-			logger.Error("Failed to close connection", "error", closeErr)
-		}
-	}()
+	defer cleanup()
 
 	detectedVersion, err := detectMysqlVersion(ctx, db)
 	if err != nil {
@@ -193,6 +184,7 @@ func (m *MysqlDatabase) PopulateVersion(
 	logger *slog.Logger,
 	encryptor encryption.FieldEncryptor,
 	databaseID uuid.UUID,
+	sshTunnel *ssh.Config,
 ) error {
 	if m.Database == nil || *m.Database == "" {
 		return nil
@@ -206,17 +198,11 @@ func (m *MysqlDatabase) PopulateVersion(
 		return fmt.Errorf("failed to decrypt password: %w", err)
 	}
 
-	dsn := m.buildDSN(password, *m.Database)
-
-	db, err := sql.Open("mysql", dsn)
+	db, cleanup, err := connectWithSSHTunnelMySQL(ctx, m, password, sshTunnel, encryptor, databaseID)
 	if err != nil {
 		return fmt.Errorf("failed to connect to database: %w", err)
 	}
-	defer func() {
-		if closeErr := db.Close(); closeErr != nil {
-			logger.Error("Failed to close connection", "error", closeErr)
-		}
-	}()
+	defer cleanup()
 
 	detectedVersion, err := detectMysqlVersion(ctx, db)
 	if err != nil {
@@ -232,23 +218,18 @@ func (m *MysqlDatabase) IsUserReadOnly(
 	logger *slog.Logger,
 	encryptor encryption.FieldEncryptor,
 	databaseID uuid.UUID,
+	sshTunnel *ssh.Config,
 ) (bool, []string, error) {
 	password, err := decryptPasswordIfNeeded(m.Password, encryptor, databaseID)
 	if err != nil {
 		return false, nil, fmt.Errorf("failed to decrypt password: %w", err)
 	}
 
-	dsn := m.buildDSN(password, *m.Database)
-
-	db, err := sql.Open("mysql", dsn)
+	db, cleanup, err := connectWithSSHTunnelMySQL(ctx, m, password, sshTunnel, encryptor, databaseID)
 	if err != nil {
 		return false, nil, fmt.Errorf("failed to connect to database: %w", err)
 	}
-	defer func() {
-		if closeErr := db.Close(); closeErr != nil {
-			logger.Error("Failed to close connection", "error", closeErr)
-		}
-	}()
+	defer cleanup()
 
 	rows, err := db.QueryContext(ctx, "SHOW GRANTS FOR CURRENT_USER()")
 	if err != nil {
@@ -298,23 +279,18 @@ func (m *MysqlDatabase) CreateReadOnlyUser(
 	logger *slog.Logger,
 	encryptor encryption.FieldEncryptor,
 	databaseID uuid.UUID,
+	sshTunnel *ssh.Config,
 ) (string, string, error) {
 	password, err := decryptPasswordIfNeeded(m.Password, encryptor, databaseID)
 	if err != nil {
 		return "", "", fmt.Errorf("failed to decrypt password: %w", err)
 	}
 
-	dsn := m.buildDSN(password, *m.Database)
-
-	db, err := sql.Open("mysql", dsn)
+	db, cleanup, err := connectWithSSHTunnelMySQL(ctx, m, password, sshTunnel, encryptor, databaseID)
 	if err != nil {
 		return "", "", fmt.Errorf("failed to connect to database: %w", err)
 	}
-	defer func() {
-		if closeErr := db.Close(); closeErr != nil {
-			logger.Error("Failed to close connection", "error", closeErr)
-		}
-	}()
+	defer cleanup()
 
 	maxRetries := 3
 	for attempt := range maxRetries {
@@ -584,4 +560,120 @@ func decryptPasswordIfNeeded(
 		return password, nil
 	}
 	return encryptor.Decrypt(databaseID, password)
+}
+
+func decryptSSHTunnelCredentials(
+	sshConfig *ssh.Config,
+	encryptor encryption.FieldEncryptor,
+	databaseID uuid.UUID,
+) error {
+	if sshConfig == nil || encryptor == nil {
+		return nil
+	}
+
+	if sshConfig.Password != "" {
+		decrypted, err := encryptor.Decrypt(databaseID, sshConfig.Password)
+		if err != nil {
+			return fmt.Errorf("failed to decrypt SSH password: %w", err)
+		}
+		sshConfig.Password = decrypted
+	}
+
+	if sshConfig.PrivateKey != "" {
+		decrypted, err := encryptor.Decrypt(databaseID, sshConfig.PrivateKey)
+		if err != nil {
+			return fmt.Errorf("failed to decrypt SSH private key: %w", err)
+		}
+		sshConfig.PrivateKey = decrypted
+	}
+
+	if sshConfig.Passphrase != "" {
+		decrypted, err := encryptor.Decrypt(databaseID, sshConfig.Passphrase)
+		if err != nil {
+			return fmt.Errorf("failed to decrypt SSH passphrase: %w", err)
+		}
+		sshConfig.Passphrase = decrypted
+	}
+
+	return nil
+}
+
+func connectWithSSHTunnelMySQL(
+	ctx context.Context,
+	m *MysqlDatabase,
+	password string,
+	sshConfig *ssh.Config,
+	encryptor encryption.FieldEncryptor,
+	databaseID uuid.UUID,
+) (*sql.DB, func(), error) {
+	host := m.Host
+	port := m.Port
+
+	var tunnel *ssh.Tunnel
+	cleanup := func() {}
+
+	if sshConfig != nil && sshConfig.HasAuth() {
+		if err := decryptSSHTunnelCredentials(sshConfig, encryptor, databaseID); err != nil {
+			return nil, cleanup, err
+		}
+
+		tunnel = ssh.NewTunnel(sshConfig)
+
+		if err := tunnel.Start(ctx, m.Host, m.Port); err != nil {
+			return nil, cleanup, fmt.Errorf("failed to start SSH tunnel: %w", err)
+		}
+
+		host = "127.0.0.1"
+		port = tunnel.GetLocalPort()
+
+		cleanup = func() {
+			tunnel.Stop()
+		}
+	}
+
+	dsn := m.buildDSNWithHostPort(password, *m.Database, host, port)
+
+	db, err := sql.Open("mysql", dsn)
+	if err != nil {
+		if tunnel != nil {
+			tunnel.Stop()
+		}
+		return nil, func() {}, err
+	}
+
+	originalCleanup := cleanup
+	cleanup = func() {
+		db.Close()
+		originalCleanup()
+	}
+
+	return db, cleanup, nil
+}
+
+func (m *MysqlDatabase) buildDSNWithHostPort(password string, database string, host string, port int) string {
+	tlsConfig := "false"
+	allowCleartext := ""
+
+	if m.IsHttps {
+		err := mysql.RegisterTLSConfig("mysql-skip-verify", &tls.Config{
+			InsecureSkipVerify: true,
+		})
+		if err != nil {
+			_ = err
+		}
+
+		tlsConfig = "mysql-skip-verify"
+		allowCleartext = "&allowCleartextPasswords=1"
+	}
+
+	return fmt.Sprintf(
+		"%s:%s@tcp(%s:%d)/%s?parseTime=true&timeout=15s&tls=%s&charset=utf8mb4%s",
+		m.Username,
+		password,
+		host,
+		port,
+		database,
+		tlsConfig,
+		allowCleartext,
+	)
 }

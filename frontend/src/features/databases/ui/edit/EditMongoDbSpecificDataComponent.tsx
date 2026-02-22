@@ -6,6 +6,8 @@ import { IS_CLOUD } from '../../../../constants';
 import { type Database, databaseApi } from '../../../../entity/databases';
 import { MongodbConnectionStringParser } from '../../../../entity/databases/model/mongodb/MongodbConnectionStringParser';
 import { ToastHelper } from '../../../../shared/toast';
+import { useTranslation } from 'react-i18next';
+import { SshTunnelConfigComponent } from '../components/SshTunnelConfigComponent';
 
 interface Props {
   database: Database;
@@ -37,6 +39,7 @@ export const EditMongoDbSpecificDataComponent = ({
   onSaved,
   isShowDbName = true,
 }: Props) => {
+  const { t } = useTranslation(['common', 'databases']);
   const { message } = App.useApp();
 
   const [editingDatabase, setEditingDatabase] = useState<Database>();
@@ -46,10 +49,7 @@ export const EditMongoDbSpecificDataComponent = ({
   const [isTestingConnection, setIsTestingConnection] = useState(false);
   const [isConnectionFailed, setIsConnectionFailed] = useState(false);
 
-  const hasAdvancedValues =
-    !!database.mongodb?.authDatabase ||
-    !!database.mongodb?.isSrv ||
-    !!database.mongodb?.isDirectConnection;
+  const hasAdvancedValues = !!database.mongodb?.authDatabase;
   const [isShowAdvanced, setShowAdvanced] = useState(hasAdvancedValues);
 
   const parseFromClipboard = async () => {
@@ -58,7 +58,7 @@ export const EditMongoDbSpecificDataComponent = ({
       const trimmedText = text.trim();
 
       if (!trimmedText) {
-        message.error('Clipboard is empty');
+        message.error(t('databases:clipboardIsEmpty'));
         return;
       }
 
@@ -78,32 +78,19 @@ export const EditMongoDbSpecificDataComponent = ({
           host: result.host,
           port: result.port,
           username: result.username,
-          password: result.password || '',
+          password: result.password,
           database: result.database,
           authDatabase: result.authDatabase,
           isHttps: result.useTls,
-          isSrv: result.isSrv,
-          isDirectConnection: result.isDirectConnection,
           cpuCount: 1,
         },
       };
 
-      if (result.isSrv || result.isDirectConnection) {
-        setShowAdvanced(true);
-      }
-
       setEditingDatabase(updatedDatabase);
       setIsConnectionTested(false);
-
-      if (!result.password) {
-        message.warning(
-          'Connection string parsed successfully. Please enter the password manually.',
-        );
-      } else {
-        message.success('Connection string parsed successfully');
-      }
+      message.success(t('databases:connectionStringParsedSuccessfully'));
     } catch {
-      message.error('Failed to read clipboard. Please check browser permissions.');
+      message.error(t('databases:failedToReadClipboard'));
     }
   };
 
@@ -124,8 +111,8 @@ export const EditMongoDbSpecificDataComponent = ({
       await databaseApi.testDatabaseConnectionDirect(trimmedDatabase);
       setIsConnectionTested(true);
       ToastHelper.showToast({
-        title: 'Connection test passed',
-        description: 'You can continue with the next step',
+        title: t('databases:connectionTestPassed'),
+        description: t('databases:youCanContinueWithNextStep'),
       });
     } catch (e) {
       setIsConnectionFailed(true);
@@ -172,11 +159,9 @@ export const EditMongoDbSpecificDataComponent = ({
 
   if (!editingDatabase) return null;
 
-  const isSrvConnection = editingDatabase.mongodb?.isSrv || false;
-
   let isAllFieldsFilled = true;
   if (!editingDatabase.mongodb?.host) isAllFieldsFilled = false;
-  if (!isSrvConnection && !editingDatabase.mongodb?.port) isAllFieldsFilled = false;
+  if (!editingDatabase.mongodb?.port) isAllFieldsFilled = false;
   if (!editingDatabase.mongodb?.username) isAllFieldsFilled = false;
   if (!editingDatabase.id && !editingDatabase.mongodb?.password) isAllFieldsFilled = false;
   if (!editingDatabase.mongodb?.database) isAllFieldsFilled = false;
@@ -194,12 +179,12 @@ export const EditMongoDbSpecificDataComponent = ({
           onClick={parseFromClipboard}
         >
           <CopyOutlined className="mr-1" />
-          Parse from clipboard
+          {t('databases:parseFromClipboard')}
         </div>
       </div>
 
       <div className="mb-1 flex w-full items-center">
-        <div className="min-w-[150px]">Host</div>
+        <div className="min-w-[150px]">{t('databases:host')}</div>
         <Input
           value={editingDatabase.mongodb?.host}
           onChange={(e) => {
@@ -216,7 +201,7 @@ export const EditMongoDbSpecificDataComponent = ({
           }}
           size="small"
           className="max-w-[200px] grow"
-          placeholder="Enter MongoDB host"
+          placeholder={t('databases:hostPlaceholder')}
         />
       </div>
 
@@ -224,44 +209,42 @@ export const EditMongoDbSpecificDataComponent = ({
         <div className="mb-1 flex">
           <div className="min-w-[150px]" />
           <div className="max-w-[200px] text-xs text-gray-500 dark:text-gray-400">
-            Please{' '}
+            {t('databases:please')}{' '}
             <a
               href="https://databasus.com/faq/localhost"
               target="_blank"
               rel="noreferrer"
               className="!text-blue-600 dark:!text-blue-400"
             >
-              read this document
+              {t('databases:readThisDocument')}
             </a>{' '}
-            to study how to backup local database
+            {t('databases:toStudyHowToBackupLocalDatabase')}
           </div>
         </div>
       )}
 
-      {!isSrvConnection && (
-        <div className="mb-1 flex w-full items-center">
-          <div className="min-w-[150px]">Port</div>
-          <InputNumber
-            type="number"
-            value={editingDatabase.mongodb?.port}
-            onChange={(e) => {
-              if (!editingDatabase.mongodb || e === null) return;
+      <div className="mb-1 flex w-full items-center">
+        <div className="min-w-[150px]">{t('databases:port')}</div>
+        <InputNumber
+          type="number"
+          value={editingDatabase.mongodb?.port}
+          onChange={(e) => {
+            if (!editingDatabase.mongodb || e === null) return;
 
-              setEditingDatabase({
-                ...editingDatabase,
-                mongodb: { ...editingDatabase.mongodb, port: e },
-              });
-              setIsConnectionTested(false);
-            }}
-            size="small"
-            className="max-w-[200px] grow"
-            placeholder="27017"
-          />
-        </div>
-      )}
+            setEditingDatabase({
+              ...editingDatabase,
+              mongodb: { ...editingDatabase.mongodb, port: e },
+            });
+            setIsConnectionTested(false);
+          }}
+          size="small"
+          className="max-w-[200px] grow"
+          placeholder="27017"
+        />
+      </div>
 
       <div className="mb-1 flex w-full items-center">
-        <div className="min-w-[150px]">Username</div>
+        <div className="min-w-[150px]">{t('databases:username')}</div>
         <Input
           value={editingDatabase.mongodb?.username}
           onChange={(e) => {
@@ -275,12 +258,12 @@ export const EditMongoDbSpecificDataComponent = ({
           }}
           size="small"
           className="max-w-[200px] grow"
-          placeholder="Enter MongoDB username"
+          placeholder={t('databases:usernamePlaceholder')}
         />
       </div>
 
       <div className="mb-1 flex w-full items-center">
-        <div className="min-w-[150px]">Password</div>
+        <div className="min-w-[150px]">{t('databases:databasePassword')}</div>
         <Input.Password
           value={editingDatabase.mongodb?.password}
           onChange={(e) => {
@@ -294,7 +277,7 @@ export const EditMongoDbSpecificDataComponent = ({
           }}
           size="small"
           className="max-w-[200px] grow"
-          placeholder="Enter MongoDB password"
+          placeholder={t('databases:databasePasswordPlaceholder')}
           autoComplete="off"
           data-1p-ignore
           data-lpignore="true"
@@ -304,7 +287,7 @@ export const EditMongoDbSpecificDataComponent = ({
 
       {isShowDbName && (
         <div className="mb-1 flex w-full items-center">
-          <div className="min-w-[150px]">DB name</div>
+          <div className="min-w-[150px]">{t('databases:databaseName')}</div>
           <Input
             value={editingDatabase.mongodb?.database}
             onChange={(e) => {
@@ -318,13 +301,13 @@ export const EditMongoDbSpecificDataComponent = ({
             }}
             size="small"
             className="max-w-[200px] grow"
-            placeholder="Enter MongoDB database name"
+            placeholder={t('databases:databaseNamePlaceholder')}
           />
         </div>
       )}
 
       <div className="mb-1 flex w-full items-center">
-        <div className="min-w-[150px]">Use HTTPS</div>
+        <div className="min-w-[150px]">{t('databases:useHttps')}</div>
         <Switch
           checked={editingDatabase.mongodb?.isHttps}
           onChange={(checked) => {
@@ -341,7 +324,7 @@ export const EditMongoDbSpecificDataComponent = ({
       </div>
 
       <div className="mb-5 flex w-full items-center">
-        <div className="min-w-[150px]">CPU count</div>
+        <div className="min-w-[150px]">{t('databases:cpuCount')}</div>
         <div className="flex items-center">
           <InputNumber
             min={1}
@@ -362,7 +345,7 @@ export const EditMongoDbSpecificDataComponent = ({
 
           <Tooltip
             className="cursor-pointer"
-            title="Number of CPU cores to use for backup and restore operations. Higher values may speed up operations but use more resources."
+            title={t('databases:cpuCountDescription')}
           >
             <InfoCircleOutlined className="ml-2" style={{ color: 'gray' }} />
           </Tooltip>
@@ -374,7 +357,7 @@ export const EditMongoDbSpecificDataComponent = ({
           className="flex cursor-pointer items-center text-sm text-blue-600 hover:text-blue-800"
           onClick={() => setShowAdvanced(!isShowAdvanced)}
         >
-          <span className="mr-2">Advanced settings</span>
+          <span className="mr-2">{t('databases:advancedSettings')}</span>
 
           {isShowAdvanced ? (
             <UpOutlined style={{ fontSize: '12px' }} />
@@ -387,57 +370,7 @@ export const EditMongoDbSpecificDataComponent = ({
       {isShowAdvanced && (
         <>
           <div className="mb-1 flex w-full items-center">
-            <div className="min-w-[150px]">Use SRV connection</div>
-            <div className="flex items-center">
-              <Switch
-                checked={editingDatabase.mongodb?.isSrv || false}
-                onChange={(checked) => {
-                  if (!editingDatabase.mongodb) return;
-
-                  setEditingDatabase({
-                    ...editingDatabase,
-                    mongodb: { ...editingDatabase.mongodb, isSrv: checked },
-                  });
-                  setIsConnectionTested(false);
-                }}
-                size="small"
-              />
-              <Tooltip
-                className="cursor-pointer"
-                title="Enable for MongoDB Atlas SRV connections (mongodb+srv://). Port is not required for SRV connections."
-              >
-                <InfoCircleOutlined className="ml-2" style={{ color: 'gray' }} />
-              </Tooltip>
-            </div>
-          </div>
-
-          <div className="mb-1 flex w-full items-center">
-            <div className="min-w-[150px]">Direct connection</div>
-            <div className="flex items-center">
-              <Switch
-                checked={editingDatabase.mongodb?.isDirectConnection || false}
-                onChange={(checked) => {
-                  if (!editingDatabase.mongodb) return;
-
-                  setEditingDatabase({
-                    ...editingDatabase,
-                    mongodb: { ...editingDatabase.mongodb, isDirectConnection: checked },
-                  });
-                  setIsConnectionTested(false);
-                }}
-                size="small"
-              />
-              <Tooltip
-                className="cursor-pointer"
-                title="Connect directly to a single server, skipping replica set discovery. Useful when the server is behind a load balancer, proxy or tunnel."
-              >
-                <InfoCircleOutlined className="ml-2" style={{ color: 'gray' }} />
-              </Tooltip>
-            </div>
-          </div>
-
-          <div className="mb-1 flex w-full items-center">
-            <div className="min-w-[150px]">Auth database</div>
+            <div className="min-w-[150px]">{t('databases:authDatabase')}</div>
             <Input
               value={editingDatabase.mongodb?.authDatabase}
               onChange={(e) => {
@@ -457,16 +390,27 @@ export const EditMongoDbSpecificDataComponent = ({
         </>
       )}
 
+      <SshTunnelConfigComponent
+        sshTunnel={editingDatabase.sshTunnel}
+        onChange={(sshTunnel) => {
+          setEditingDatabase({
+            ...editingDatabase,
+            sshTunnel,
+          });
+          setIsConnectionTested(false);
+        }}
+      />
+
       <div className="mt-5 flex">
         {isShowCancelButton && (
           <Button className="mr-1" danger ghost onClick={() => onCancel()}>
-            Cancel
+            {t('common:cancel')}
           </Button>
         )}
 
         {isShowBackButton && (
           <Button className="mr-auto" type="primary" ghost onClick={() => onBack()}>
-            Back
+            {t('common:back')}
           </Button>
         )}
 
@@ -478,7 +422,7 @@ export const EditMongoDbSpecificDataComponent = ({
             disabled={!isAllFieldsFilled}
             className="mr-5"
           >
-            Test connection
+            {t('databases:testConnection')}
           </Button>
         )}
 
@@ -490,15 +434,14 @@ export const EditMongoDbSpecificDataComponent = ({
             disabled={!isAllFieldsFilled}
             className="mr-5"
           >
-            {saveButtonText || 'Save'}
+            {saveButtonText || t('common:save')}
           </Button>
         )}
       </div>
 
       {isConnectionFailed && !IS_CLOUD && (
         <div className="mt-3 text-sm text-gray-500 dark:text-gray-400">
-          If your database uses IP whitelist, make sure Databasus server IP is added to the allowed
-          list.
+          {t('databases:ifYourDatabaseUsesIpWhitelist')}
         </div>
       )}
     </div>

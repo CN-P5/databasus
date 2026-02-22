@@ -1,6 +1,7 @@
 import { InfoCircleOutlined } from '@ant-design/icons';
 import { Button, Input, Spin, Switch, Tooltip } from 'antd';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { healthcheckConfigApi } from '../../../entity/healthcheck';
 import type { HealthcheckConfig } from '../../../entity/healthcheck';
@@ -11,6 +12,9 @@ interface Props {
 }
 
 export const EditHealthcheckConfigComponent = ({ databaseId, onClose }: Props) => {
+  const { t } = useTranslation('databases');
+  const { t: tCommon } = useTranslation('common');
+
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isUnsaved, setIsUnsaved] = useState(false);
@@ -60,7 +64,7 @@ export const EditHealthcheckConfigComponent = ({ databaseId, onClose }: Props) =
   return (
     <div className="space-y-4">
       <div className="mb-1 flex items-center">
-        <div className="min-w-[180px]">Enable healthcheck</div>
+        <div className="min-w-[180px]">{t('enableHealthcheck')}</div>
         <Switch
           checked={healthcheckConfig.isHealthcheckEnabled}
           onChange={(checked) => {
@@ -75,7 +79,7 @@ export const EditHealthcheckConfigComponent = ({ databaseId, onClose }: Props) =
 
         <Tooltip
           className="cursor-pointer"
-          title="Enable or disable healthcheck monitoring for this database"
+          title={t('enableHealthcheckTooltip')}
         >
           <InfoCircleOutlined className="ml-2" style={{ color: 'gray' }} />
         </Tooltip>
@@ -84,7 +88,7 @@ export const EditHealthcheckConfigComponent = ({ databaseId, onClose }: Props) =
       {healthcheckConfig.isHealthcheckEnabled && (
         <>
           <div className="mb-1 flex items-center">
-            <div className="min-w-[180px]">Notify when unavailable</div>
+            <div className="min-w-[180px]">{t('notifyWhenUnavailable')}</div>
 
             <Switch
               checked={healthcheckConfig.isSentNotificationWhenUnavailable}
@@ -100,14 +104,14 @@ export const EditHealthcheckConfigComponent = ({ databaseId, onClose }: Props) =
 
             <Tooltip
               className="cursor-pointer"
-              title="Send notifications when database becomes unavailable"
+              title={t('notifyWhenUnavailableTooltip')}
             >
               <InfoCircleOutlined className="ml-2" style={{ color: 'gray' }} />
             </Tooltip>
           </div>
 
           <div className="mb-1 flex items-center">
-            <div className="min-w-[180px]">Check interval (minutes)</div>
+            <div className="min-w-[180px]">{t('checkIntervalMinutes')}</div>
 
             <Input
               type="number"
@@ -130,14 +134,14 @@ export const EditHealthcheckConfigComponent = ({ databaseId, onClose }: Props) =
 
             <Tooltip
               className="cursor-pointer"
-              title="How often to check database health (in minutes)"
+              title={t('checkIntervalMinutesTooltip')}
             >
               <InfoCircleOutlined className="ml-2" style={{ color: 'gray' }} />
             </Tooltip>
           </div>
 
           <div className="mb-1 flex items-center">
-            <div className="min-w-[180px]">Attempts before down</div>
+            <div className="min-w-[180px]">{t('attemptsBeforeDown')}</div>
 
             <Input
               type="number"
@@ -160,14 +164,14 @@ export const EditHealthcheckConfigComponent = ({ databaseId, onClose }: Props) =
 
             <Tooltip
               className="cursor-pointer"
-              title="Number of failed attempts before marking database as down"
+              title={t('attemptsBeforeDownTooltip')}
             >
               <InfoCircleOutlined className="ml-2" style={{ color: 'gray' }} />
             </Tooltip>
           </div>
 
           <div className="mb-1 flex items-center">
-            <div className="min-w-[180px]">Store attempts (days)</div>
+            <div className="min-w-[180px]">{t('storeAttemptsDays')}</div>
 
             <Input
               type="number"
@@ -190,7 +194,7 @@ export const EditHealthcheckConfigComponent = ({ databaseId, onClose }: Props) =
 
             <Tooltip
               className="cursor-pointer"
-              title="How many days to store health check attempt history"
+              title={t('storeAttemptsDaysTooltip')}
             >
               <InfoCircleOutlined className="ml-2" style={{ color: 'gray' }} />
             </Tooltip>
@@ -200,11 +204,11 @@ export const EditHealthcheckConfigComponent = ({ databaseId, onClose }: Props) =
 
       <div className="mt-6 flex justify-end space-x-2">
         <Button onClick={onClose} disabled={isSaving}>
-          Cancel
+          {tCommon('cancel')}
         </Button>
 
         <Button type="primary" onClick={handleSave} loading={isSaving} disabled={!isUnsaved}>
-          Save
+          {tCommon('save')}
         </Button>
       </div>
     </div>

@@ -1,5 +1,6 @@
 import { Button, Modal, Spin } from 'antd';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { notifierApi } from '../../../entity/notifiers';
 import type { Notifier } from '../../../entity/notifiers';
@@ -18,6 +19,8 @@ interface Props {
 const SELECTED_NOTIFIER_STORAGE_KEY = 'selectedNotifierId';
 
 export const NotifiersComponent = ({ contentHeight, workspace, isCanManageNotifiers }: Props) => {
+  const { t } = useTranslation('notifiers');
+
   const isMobile = useIsMobile();
   const [isLoading, setIsLoading] = useState(true);
   const [notifiers, setNotifiers] = useState<Notifier[]>([]);
@@ -82,7 +85,7 @@ export const NotifiersComponent = ({ contentHeight, workspace, isCanManageNotifi
 
   const addNotifierButton = (
     <Button type="primary" className="mb-2 w-full" onClick={() => setIsShowAddNotifier(true)}>
-      Add notifier
+      {t('addNotifier')}
     </Button>
   );
 
@@ -108,7 +111,7 @@ export const NotifiersComponent = ({ contentHeight, workspace, isCanManageNotifi
 
                 <div className="mb-2">
                   <input
-                    placeholder="Search notifier"
+                    placeholder={t('searchNotifier')}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="w-full border-b border-gray-300 p-1 text-gray-500 outline-none dark:text-gray-400"
@@ -128,14 +131,14 @@ export const NotifiersComponent = ({ contentHeight, workspace, isCanManageNotifi
                 ))
               : searchQuery && (
                   <div className="mb-4 text-center text-sm text-gray-500 dark:text-gray-400">
-                    No notifiers found matching &quot;{searchQuery}&quot;
+                    {t('noNotifiersFoundMatching', { searchQuery })}
                   </div>
                 )}
 
             {notifiers.length < 5 && isCanManageNotifiers && addNotifierButton}
 
             <div className="mx-3 text-center text-xs text-gray-500 dark:text-gray-400">
-              Notifier - is a place where notifications will be sent (email, Slack, Telegram, etc.)
+              {t('notifierIsAPlaceWhereNotificationsWillBeSent')}
             </div>
           </div>
         )}
@@ -149,7 +152,7 @@ export const NotifiersComponent = ({ contentHeight, workspace, isCanManageNotifi
                   onClick={() => updateSelectedNotifierId(undefined)}
                   className="w-full"
                 >
-                  ← Back to notifiers
+                  {t('backToNotifiers')}
                 </Button>
               </div>
             )}
@@ -181,14 +184,14 @@ export const NotifiersComponent = ({ contentHeight, workspace, isCanManageNotifi
 
       {isShowAddNotifier && (
         <Modal
-          title="Add notifier"
+          title={t('addNotifier')}
           footer={<div />}
           open={isShowAddNotifier}
           onCancel={() => setIsShowAddNotifier(false)}
           maskClosable={false}
         >
           <div className="my-3 max-w-[250px] text-gray-500 dark:text-gray-400">
-            Notifier - is a place where notifications will be sent (email, Slack, Telegram, etc.)
+            {t('notifierIsAPlaceWhereNotificationsWillBeSent')}
           </div>
 
           <EditNotifierComponent

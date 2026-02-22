@@ -14,13 +14,13 @@ type StorageFileSaver interface {
 		ctx context.Context,
 		encryptor encryption.FieldEncryptor,
 		logger *slog.Logger,
-		fileName string,
+		fileID uuid.UUID,
 		file io.Reader,
 	) error
 
-	GetFile(encryptor encryption.FieldEncryptor, fileName string) (io.ReadCloser, error)
+	GetFile(encryptor encryption.FieldEncryptor, fileID uuid.UUID) (io.ReadCloser, error)
 
-	DeleteFile(encryptor encryption.FieldEncryptor, fileName string) error
+	DeleteFile(encryptor encryption.FieldEncryptor, fileID uuid.UUID) error
 
 	Validate(encryptor encryption.FieldEncryptor) error
 

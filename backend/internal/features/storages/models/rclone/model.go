@@ -41,7 +41,7 @@ func (r *RcloneStorage) SaveFile(
 	ctx context.Context,
 	encryptor encryption.FieldEncryptor,
 	logger *slog.Logger,
-	fileName string,
+	fileID uuid.UUID,
 	file io.Reader,
 ) error {
 	select {
@@ -50,28 +50,28 @@ func (r *RcloneStorage) SaveFile(
 	default:
 	}
 
-	logger.Info("Starting to save file to rclone storage", "fileName", fileName)
+	logger.Info("Starting to save file to rclone storage", "fileId", fileID.String())
 
 	remoteFs, err := r.getFs(ctx, encryptor)
 	if err != nil {
-		logger.Error("Failed to create rclone filesystem", "fileName", fileName, "error", err)
+		logger.Error("Failed to create rclone filesystem", "fileId", fileID.String(), "error", err)
 		return fmt.Errorf("failed to create rclone filesystem: %w", err)
 	}
 
-	filePath := r.getFilePath(fileName)
-	logger.Debug("Uploading file via rclone", "fileName", fileName, "filePath", filePath)
+	filePath := r.getFilePath(fileID.String())
+	logger.Debug("Uploading file via rclone", "fileId", fileID.String(), "filePath", filePath)
 
 	_, err = operations.Rcat(ctx, remoteFs, filePath, io.NopCloser(file), time.Now().UTC(), nil)
 	if err != nil {
 		select {
 		case <-ctx.Done():
-			logger.Info("Rclone upload cancelled", "fileName", fileName)
+			logger.Info("Rclone upload cancelled", "fileId", fileID.String())
 			return ctx.Err()
 		default:
 			logger.Error(
 				"Failed to upload file via rclone",
-				"fileName",
-				fileName,
+				"fileId",
+				fileID.String(),
 				"error",
 				err,
 			)
@@ -81,8 +81,8 @@ func (r *RcloneStorage) SaveFile(
 
 	logger.Info(
 		"Successfully saved file to rclone storage",
-		"fileName",
-		fileName,
+		"fileId",
+		fileID.String(),
 		"filePath",
 		filePath,
 	)
@@ -91,7 +91,7 @@ func (r *RcloneStorage) SaveFile(
 
 func (r *RcloneStorage) GetFile(
 	encryptor encryption.FieldEncryptor,
-	fileName string,
+	fileID uuid.UUID,
 ) (io.ReadCloser, error) {
 	ctx := context.Background()
 
@@ -100,7 +100,7 @@ func (r *RcloneStorage) GetFile(
 		return nil, fmt.Errorf("failed to create rclone filesystem: %w", err)
 	}
 
-	filePath := r.getFilePath(fileName)
+	filePath := r.getFilePath(fileID.String())
 
 	obj, err := remoteFs.NewObject(ctx, filePath)
 	if err != nil {
@@ -115,7 +115,7 @@ func (r *RcloneStorage) GetFile(
 	return reader, nil
 }
 
-func (r *RcloneStorage) DeleteFile(encryptor encryption.FieldEncryptor, fileName string) error {
+func (r *RcloneStorage) DeleteFile(encryptor encryption.FieldEncryptor, fileID uuid.UUID) error {
 	ctx, cancel := context.WithTimeout(context.Background(), rcloneDeleteTimeout)
 	defer cancel()
 
@@ -124,7 +124,7 @@ func (r *RcloneStorage) DeleteFile(encryptor encryption.FieldEncryptor, fileName
 		return fmt.Errorf("failed to create rclone filesystem: %w", err)
 	}
 
-	filePath := r.getFilePath(fileName)
+	filePath := r.getFilePath(fileID.String())
 
 	obj, err := remoteFs.NewObject(ctx, filePath)
 	if err != nil {

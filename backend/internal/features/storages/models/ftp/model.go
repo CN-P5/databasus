@@ -41,7 +41,7 @@ func (f *FTPStorage) SaveFile(
 	ctx context.Context,
 	encryptor encryption.FieldEncryptor,
 	logger *slog.Logger,
-	fileName string,
+	fileID uuid.UUID,
 	file io.Reader,
 ) error {
 	select {
@@ -50,19 +50,19 @@ func (f *FTPStorage) SaveFile(
 	default:
 	}
 
-	logger.Info("Starting to save file to FTP storage", "fileName", fileName, "host", f.Host)
+	logger.Info("Starting to save file to FTP storage", "fileId", fileID.String(), "host", f.Host)
 
 	conn, err := f.connect(encryptor, ftpConnectTimeout)
 	if err != nil {
-		logger.Error("Failed to connect to FTP", "fileName", fileName, "error", err)
+		logger.Error("Failed to connect to FTP", "fileId", fileID.String(), "error", err)
 		return fmt.Errorf("failed to connect to FTP: %w", err)
 	}
 	defer func() {
 		if quitErr := conn.Quit(); quitErr != nil {
 			logger.Error(
 				"Failed to close FTP connection",
-				"fileName",
-				fileName,
+				"fileId",
+				fileID.String(),
 				"error",
 				quitErr,
 			)
@@ -73,8 +73,8 @@ func (f *FTPStorage) SaveFile(
 		if err := f.ensureDirectory(conn, f.Path); err != nil {
 			logger.Error(
 				"Failed to ensure directory",
-				"fileName",
-				fileName,
+				"fileId",
+				fileID.String(),
 				"path",
 				f.Path,
 				"error",
@@ -84,8 +84,8 @@ func (f *FTPStorage) SaveFile(
 		}
 	}
 
-	filePath := f.getFilePath(fileName)
-	logger.Debug("Uploading file to FTP", "fileName", fileName, "filePath", filePath)
+	filePath := f.getFilePath(fileID.String())
+	logger.Debug("Uploading file to FTP", "fileId", fileID.String(), "filePath", filePath)
 
 	ctxReader := &contextReader{ctx: ctx, reader: file}
 
@@ -93,18 +93,18 @@ func (f *FTPStorage) SaveFile(
 	if err != nil {
 		select {
 		case <-ctx.Done():
-			logger.Info("FTP upload cancelled", "fileName", fileName)
+			logger.Info("FTP upload cancelled", "fileId", fileID.String())
 			return ctx.Err()
 		default:
-			logger.Error("Failed to upload file to FTP", "fileName", fileName, "error", err)
+			logger.Error("Failed to upload file to FTP", "fileId", fileID.String(), "error", err)
 			return fmt.Errorf("failed to upload file to FTP: %w", err)
 		}
 	}
 
 	logger.Info(
 		"Successfully saved file to FTP storage",
-		"fileName",
-		fileName,
+		"fileId",
+		fileID.String(),
 		"filePath",
 		filePath,
 	)
@@ -113,14 +113,14 @@ func (f *FTPStorage) SaveFile(
 
 func (f *FTPStorage) GetFile(
 	encryptor encryption.FieldEncryptor,
-	fileName string,
+	fileID uuid.UUID,
 ) (io.ReadCloser, error) {
 	conn, err := f.connect(encryptor, ftpConnectTimeout)
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to FTP: %w", err)
 	}
 
-	filePath := f.getFilePath(fileName)
+	filePath := f.getFilePath(fileID.String())
 
 	resp, err := conn.Retr(filePath)
 	if err != nil {
@@ -134,7 +134,7 @@ func (f *FTPStorage) GetFile(
 	}, nil
 }
 
-func (f *FTPStorage) DeleteFile(encryptor encryption.FieldEncryptor, fileName string) error {
+func (f *FTPStorage) DeleteFile(encryptor encryption.FieldEncryptor, fileID uuid.UUID) error {
 	ctx, cancel := context.WithTimeout(context.Background(), ftpDeleteTimeout)
 	defer cancel()
 
@@ -146,7 +146,7 @@ func (f *FTPStorage) DeleteFile(encryptor encryption.FieldEncryptor, fileName st
 		_ = conn.Quit()
 	}()
 
-	filePath := f.getFilePath(fileName)
+	filePath := f.getFilePath(fileID.String())
 
 	_, err = conn.FileSize(filePath)
 	if err != nil {

@@ -3,6 +3,7 @@ package postgresql
 import (
 	"context"
 	"databasus-backend/internal/util/encryption"
+	"databasus-backend/internal/util/ssh"
 	"databasus-backend/internal/util/tools"
 	"errors"
 	"fmt"
@@ -129,11 +130,12 @@ func (p *PostgresqlDatabase) TestConnection(
 	logger *slog.Logger,
 	encryptor encryption.FieldEncryptor,
 	databaseID uuid.UUID,
+	sshTunnel *ssh.Config,
 ) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
 
-	return testSingleDatabaseConnection(logger, ctx, p, encryptor, databaseID)
+	return testSingleDatabaseConnection(logger, ctx, p, encryptor, databaseID, sshTunnel)
 }
 
 func (p *PostgresqlDatabase) HideSensitiveData() {
@@ -180,15 +182,16 @@ func (p *PostgresqlDatabase) PopulateDbData(
 	logger *slog.Logger,
 	encryptor encryption.FieldEncryptor,
 	databaseID uuid.UUID,
+	sshTunnel *ssh.Config,
 ) error {
-	return p.PopulateVersion(logger, encryptor, databaseID)
+	return p.PopulateVersion(logger, encryptor, databaseID, sshTunnel)
 }
 
-// PopulateVersion detects and sets the PostgreSQL version by querying the database.
 func (p *PostgresqlDatabase) PopulateVersion(
 	logger *slog.Logger,
 	encryptor encryption.FieldEncryptor,
 	databaseID uuid.UUID,
+	sshTunnel *ssh.Config,
 ) error {
 	if p.Database == nil || *p.Database == "" {
 		return nil
@@ -202,17 +205,11 @@ func (p *PostgresqlDatabase) PopulateVersion(
 		return fmt.Errorf("failed to decrypt password: %w", err)
 	}
 
-	connStr := buildConnectionStringForDB(p, *p.Database, password)
-
-	conn, err := pgx.Connect(ctx, connStr)
+	conn, cleanup, err := connectWithSSHTunnel(ctx, p, password, sshTunnel, encryptor, databaseID)
 	if err != nil {
 		return fmt.Errorf("failed to connect to database: %w", err)
 	}
-	defer func() {
-		if closeErr := conn.Close(ctx); closeErr != nil {
-			logger.Error("Failed to close connection", "error", closeErr)
-		}
-	}()
+	defer cleanup()
 
 	detectedVersion, err := detectDatabaseVersion(ctx, conn)
 	if err != nil {
@@ -223,42 +220,23 @@ func (p *PostgresqlDatabase) PopulateVersion(
 	return nil
 }
 
-// IsUserReadOnly checks if the database user has read-only privileges.
-//
-// This method performs a comprehensive security check by examining:
-// - Role-level attributes (superuser, createrole, createdb, bypassrls, replication)
-// - Database-level privileges (CREATE, TEMP)
-// - Schema-level privileges (CREATE on any non-system schema)
-// - Table-level write permissions (INSERT, UPDATE, DELETE, TRUNCATE, REFERENCES, TRIGGER)
-// - Function-level privileges (EXECUTE on SECURITY DEFINER functions)
-//
-// A user is considered read-only only if they have ZERO write privileges
-// across all levels. This ensures the database user follows the
-// principle of least privilege for backup operations.
-//
-// Returns: (isReadOnly, detectedPrivileges, error)
 func (p *PostgresqlDatabase) IsUserReadOnly(
 	ctx context.Context,
 	logger *slog.Logger,
 	encryptor encryption.FieldEncryptor,
 	databaseID uuid.UUID,
+	sshTunnel *ssh.Config,
 ) (bool, []string, error) {
 	password, err := decryptPasswordIfNeeded(p.Password, encryptor, databaseID)
 	if err != nil {
 		return false, nil, fmt.Errorf("failed to decrypt password: %w", err)
 	}
 
-	connStr := buildConnectionStringForDB(p, *p.Database, password)
-
-	conn, err := pgx.Connect(ctx, connStr)
+	conn, cleanup, err := connectWithSSHTunnel(ctx, p, password, sshTunnel, encryptor, databaseID)
 	if err != nil {
 		return false, nil, fmt.Errorf("failed to connect to database: %w", err)
 	}
-	defer func() {
-		if closeErr := conn.Close(ctx); closeErr != nil {
-			logger.Error("Failed to close connection", "error", closeErr)
-		}
-	}()
+	defer cleanup()
 
 	var privileges []string
 
@@ -414,23 +392,18 @@ func (p *PostgresqlDatabase) CreateReadOnlyUser(
 	logger *slog.Logger,
 	encryptor encryption.FieldEncryptor,
 	databaseID uuid.UUID,
+	sshTunnel *ssh.Config,
 ) (string, string, error) {
 	password, err := decryptPasswordIfNeeded(p.Password, encryptor, databaseID)
 	if err != nil {
 		return "", "", fmt.Errorf("failed to decrypt password: %w", err)
 	}
 
-	connStr := buildConnectionStringForDB(p, *p.Database, password)
-
-	conn, err := pgx.Connect(ctx, connStr)
+	conn, cleanup, err := connectWithSSHTunnel(ctx, p, password, sshTunnel, encryptor, databaseID)
 	if err != nil {
 		return "", "", fmt.Errorf("failed to connect to database: %w", err)
 	}
-	defer func() {
-		if closeErr := conn.Close(ctx); closeErr != nil {
-			logger.Error("Failed to close connection", "error", closeErr)
-		}
-	}()
+	defer cleanup()
 
 	// Pre-validate: Check if current user can create roles
 	var canCreateRole, isSuperuser bool
@@ -564,23 +537,12 @@ func (p *PostgresqlDatabase) CreateReadOnlyUser(
 			logger.Warn("Failed to revoke TEMP privilege", "error", err, "username", baseUsername)
 		}
 
-		// Step 4: Discover schemas to grant privileges on
-		// If IncludeSchemas is specified, only use those schemas; otherwise use all non-system schemas
-		var rows pgx.Rows
-		if len(p.IncludeSchemas) > 0 {
-			rows, err = tx.Query(ctx, `
-				SELECT schema_name
-				FROM information_schema.schemata
-				WHERE schema_name NOT IN ('pg_catalog', 'information_schema')
-				AND schema_name = ANY($1::text[])
-			`, p.IncludeSchemas)
-		} else {
-			rows, err = tx.Query(ctx, `
-				SELECT schema_name
-				FROM information_schema.schemata
-				WHERE schema_name NOT IN ('pg_catalog', 'information_schema')
-			`)
-		}
+		// Step 4: Discover all user-created schemas
+		rows, err := tx.Query(ctx, `
+			SELECT schema_name
+			FROM information_schema.schemata
+			WHERE schema_name NOT IN ('pg_catalog', 'information_schema')
+		`)
 		if err != nil {
 			return "", "", fmt.Errorf("failed to get schemas: %w", err)
 		}
@@ -630,197 +592,50 @@ func (p *PostgresqlDatabase) CreateReadOnlyUser(
 		}
 
 		// Step 6: Grant SELECT on ALL existing tables and sequences
-		// Use the already-filtered schemas list from Step 4
-		for _, schema := range schemas {
-			_, err = tx.Exec(
-				ctx,
-				fmt.Sprintf(
-					`GRANT SELECT ON ALL TABLES IN SCHEMA "%s" TO "%s"`,
-					schema,
-					baseUsername,
-				),
-			)
-			if err != nil {
-				return "", "", fmt.Errorf(
-					"failed to grant select on tables in schema %s: %w",
-					schema,
-					err,
-				)
-			}
+		grantSelectSQL := fmt.Sprintf(`
+			DO $$
+			DECLARE
+				schema_rec RECORD;
+			BEGIN
+				FOR schema_rec IN
+					SELECT schema_name
+					FROM information_schema.schemata
+					WHERE schema_name NOT IN ('pg_catalog', 'information_schema')
+				LOOP
+					EXECUTE format('GRANT SELECT ON ALL TABLES IN SCHEMA %%I TO "%s"', schema_rec.schema_name);
+					EXECUTE format('GRANT SELECT ON ALL SEQUENCES IN SCHEMA %%I TO "%s"', schema_rec.schema_name);
+				END LOOP;
+			END $$;
+		`, baseUsername, baseUsername)
 
-			_, err = tx.Exec(
-				ctx,
-				fmt.Sprintf(
-					`GRANT SELECT ON ALL SEQUENCES IN SCHEMA "%s" TO "%s"`,
-					schema,
-					baseUsername,
-				),
-			)
-			if err != nil {
-				return "", "", fmt.Errorf(
-					"failed to grant select on sequences in schema %s: %w",
-					schema,
-					err,
-				)
-			}
+		_, err = tx.Exec(ctx, grantSelectSQL)
+		if err != nil {
+			return "", "", fmt.Errorf("failed to grant select on tables: %w", err)
 		}
 
 		// Step 7: Set default privileges for FUTURE tables and sequences
-		// First, set default privileges for objects created by the current user
-		// Use the already-filtered schemas list from Step 4
-		for _, schema := range schemas {
-			_, err = tx.Exec(
-				ctx,
-				fmt.Sprintf(
-					`ALTER DEFAULT PRIVILEGES IN SCHEMA "%s" GRANT SELECT ON TABLES TO "%s"`,
-					schema,
-					baseUsername,
-				),
-			)
-			if err != nil {
-				return "", "", fmt.Errorf(
-					"failed to set default privileges for tables in schema %s: %w",
-					schema,
-					err,
-				)
-			}
+		defaultPrivilegesSQL := fmt.Sprintf(`
+			DO $$
+			DECLARE
+				schema_rec RECORD;
+			BEGIN
+				FOR schema_rec IN
+					SELECT schema_name
+					FROM information_schema.schemata
+					WHERE schema_name NOT IN ('pg_catalog', 'information_schema')
+				LOOP
+					EXECUTE format('ALTER DEFAULT PRIVILEGES IN SCHEMA %%I GRANT SELECT ON TABLES TO "%s"', schema_rec.schema_name);
+					EXECUTE format('ALTER DEFAULT PRIVILEGES IN SCHEMA %%I GRANT SELECT ON SEQUENCES TO "%s"', schema_rec.schema_name);
+				END LOOP;
+			END $$;
+		`, baseUsername, baseUsername)
 
-			_, err = tx.Exec(
-				ctx,
-				fmt.Sprintf(
-					`ALTER DEFAULT PRIVILEGES IN SCHEMA "%s" GRANT SELECT ON SEQUENCES TO "%s"`,
-					schema,
-					baseUsername,
-				),
-			)
-			if err != nil {
-				return "", "", fmt.Errorf(
-					"failed to set default privileges for sequences in schema %s: %w",
-					schema,
-					err,
-				)
-			}
-		}
-
-		// Step 8: Discover all roles that own objects in each schema
-		// This is needed because ALTER DEFAULT PRIVILEGES only applies to objects created by the current role.
-		// To handle tables created by OTHER users (like the GitHub issue with partitioned tables),
-		// we need to set "ALTER DEFAULT PRIVILEGES FOR ROLE <owner>" for each object owner.
-		// Filter by IncludeSchemas if specified.
-		type SchemaOwner struct {
-			SchemaName string
-			RoleName   string
-		}
-
-		var ownerRows pgx.Rows
-		if len(p.IncludeSchemas) > 0 {
-			ownerRows, err = tx.Query(ctx, `
-				SELECT DISTINCT n.nspname as schema_name, pg_get_userbyid(c.relowner) as role_name
-				FROM pg_class c
-				JOIN pg_namespace n ON c.relnamespace = n.oid
-				WHERE n.nspname NOT IN ('pg_catalog', 'information_schema', 'pg_toast')
-				  AND n.nspname = ANY($1::text[])
-				  AND c.relkind IN ('r', 'p', 'v', 'm', 'f')
-				  AND pg_get_userbyid(c.relowner) != current_user
-				ORDER BY n.nspname, role_name
-			`, p.IncludeSchemas)
-		} else {
-			ownerRows, err = tx.Query(ctx, `
-				SELECT DISTINCT n.nspname as schema_name, pg_get_userbyid(c.relowner) as role_name
-				FROM pg_class c
-				JOIN pg_namespace n ON c.relnamespace = n.oid
-				WHERE n.nspname NOT IN ('pg_catalog', 'information_schema', 'pg_toast')
-				  AND c.relkind IN ('r', 'p', 'v', 'm', 'f')
-				  AND pg_get_userbyid(c.relowner) != current_user
-				ORDER BY n.nspname, role_name
-			`)
-		}
-
+		_, err = tx.Exec(ctx, defaultPrivilegesSQL)
 		if err != nil {
-			// Log warning but continue - this is a best-effort enhancement
-			logger.Warn("Failed to query object owners for default privileges", "error", err)
-		} else {
-			var schemaOwners []SchemaOwner
-			for ownerRows.Next() {
-				var so SchemaOwner
-				if err := ownerRows.Scan(&so.SchemaName, &so.RoleName); err != nil {
-					ownerRows.Close()
-					logger.Warn("Failed to scan schema owner", "error", err)
-					break
-				}
-				schemaOwners = append(schemaOwners, so)
-			}
-			ownerRows.Close()
-
-			if err := ownerRows.Err(); err != nil {
-				logger.Warn("Error iterating schema owners", "error", err)
-			}
-
-			// Step 9: Set default privileges FOR ROLE for each object owner
-			// Note: This may fail for some roles due to permission issues (e.g., roles owned by other superusers)
-			// We log warnings but continue - user creation should succeed even if some roles can't be configured
-			for _, so := range schemaOwners {
-				// Try to set default privileges for tables
-				_, err = tx.Exec(
-					ctx,
-					fmt.Sprintf(
-						`ALTER DEFAULT PRIVILEGES FOR ROLE "%s" IN SCHEMA "%s" GRANT SELECT ON TABLES TO "%s"`,
-						so.RoleName,
-						so.SchemaName,
-						baseUsername,
-					),
-				)
-				if err != nil {
-					logger.Warn(
-						"Failed to set default privileges for role (tables)",
-						"error",
-						err,
-						"role",
-						so.RoleName,
-						"schema",
-						so.SchemaName,
-						"readonly_user",
-						baseUsername,
-					)
-				}
-
-				// Try to set default privileges for sequences
-				_, err = tx.Exec(
-					ctx,
-					fmt.Sprintf(
-						`ALTER DEFAULT PRIVILEGES FOR ROLE "%s" IN SCHEMA "%s" GRANT SELECT ON SEQUENCES TO "%s"`,
-						so.RoleName,
-						so.SchemaName,
-						baseUsername,
-					),
-				)
-				if err != nil {
-					logger.Warn(
-						"Failed to set default privileges for role (sequences)",
-						"error",
-						err,
-						"role",
-						so.RoleName,
-						"schema",
-						so.SchemaName,
-						"readonly_user",
-						baseUsername,
-					)
-				}
-			}
-
-			if len(schemaOwners) > 0 {
-				logger.Info(
-					"Set default privileges for existing object owners",
-					"readonly_user",
-					baseUsername,
-					"owner_count",
-					len(schemaOwners),
-				)
-			}
+			return "", "", fmt.Errorf("failed to set default privileges: %w", err)
 		}
 
-		// Step 10: Verify user creation before committing
+		// Step 8: Verify user creation before committing
 		var verifyUsername string
 		err = tx.QueryRow(ctx, fmt.Sprintf(`SELECT rolname FROM pg_roles WHERE rolname = '%s'`, baseUsername)).
 			Scan(&verifyUsername)
@@ -854,44 +669,29 @@ func testSingleDatabaseConnection(
 	postgresDb *PostgresqlDatabase,
 	encryptor encryption.FieldEncryptor,
 	databaseID uuid.UUID,
+	sshTunnel *ssh.Config,
 ) error {
-	// For single database backup, we need to connect to the specific database
 	if postgresDb.Database == nil || *postgresDb.Database == "" {
 		return errors.New("database name is required for single database backup (pg_dump)")
 	}
 
-	// Decrypt password if needed
 	password, err := decryptPasswordIfNeeded(postgresDb.Password, encryptor, databaseID)
 	if err != nil {
 		return fmt.Errorf("failed to decrypt password: %w", err)
 	}
 
-	// Build connection string for the specific database
-	connStr := buildConnectionStringForDB(postgresDb, *postgresDb.Database, password)
-
-	// Test connection
-	conn, err := pgx.Connect(ctx, connStr)
+	conn, cleanup, err := connectWithSSHTunnel(ctx, postgresDb, password, sshTunnel, encryptor, databaseID)
 	if err != nil {
-		// TODO make more readable errors:
-		// - handle wrong creds
-		// - handle wrong database name
-		// - handle wrong protocol
 		return fmt.Errorf("failed to connect to database '%s': %w", *postgresDb.Database, err)
 	}
-	defer func() {
-		if closeErr := conn.Close(ctx); closeErr != nil {
-			logger.Error("Failed to close connection", "error", closeErr)
-		}
-	}()
+	defer cleanup()
 
-	// Detect and set the database version automatically
 	detectedVersion, err := detectDatabaseVersion(ctx, conn)
 	if err != nil {
 		return err
 	}
 	postgresDb.Version = detectedVersion
 
-	// Verify user has sufficient permissions for backup operations
 	if err := checkBackupPermissions(ctx, conn, postgresDb.IncludeSchemas); err != nil {
 		return err
 	}
@@ -1094,6 +894,111 @@ func decryptPasswordIfNeeded(
 		return password, nil
 	}
 	return encryptor.Decrypt(databaseID, password)
+}
+
+func decryptSSHTunnelCredentials(
+	sshConfig *ssh.Config,
+	encryptor encryption.FieldEncryptor,
+	databaseID uuid.UUID,
+) error {
+	if sshConfig == nil || encryptor == nil {
+		return nil
+	}
+
+	if sshConfig.Password != "" {
+		decrypted, err := encryptor.Decrypt(databaseID, sshConfig.Password)
+		if err != nil {
+			return fmt.Errorf("failed to decrypt SSH password: %w", err)
+		}
+		sshConfig.Password = decrypted
+	}
+
+	if sshConfig.PrivateKey != "" {
+		decrypted, err := encryptor.Decrypt(databaseID, sshConfig.PrivateKey)
+		if err != nil {
+			return fmt.Errorf("failed to decrypt SSH private key: %w", err)
+		}
+		sshConfig.PrivateKey = decrypted
+	}
+
+	if sshConfig.Passphrase != "" {
+		decrypted, err := encryptor.Decrypt(databaseID, sshConfig.Passphrase)
+		if err != nil {
+			return fmt.Errorf("failed to decrypt SSH passphrase: %w", err)
+		}
+		sshConfig.Passphrase = decrypted
+	}
+
+	return nil
+}
+
+func connectWithSSHTunnel(
+	ctx context.Context,
+	p *PostgresqlDatabase,
+	password string,
+	sshConfig *ssh.Config,
+	encryptor encryption.FieldEncryptor,
+	databaseID uuid.UUID,
+) (*pgx.Conn, func(), error) {
+	host := p.Host
+	port := p.Port
+
+	var tunnel *ssh.Tunnel
+	cleanup := func() {}
+
+	if sshConfig != nil && sshConfig.HasAuth() {
+		if err := decryptSSHTunnelCredentials(sshConfig, encryptor, databaseID); err != nil {
+			return nil, cleanup, err
+		}
+
+		tunnel = ssh.NewTunnel(sshConfig)
+
+		if err := tunnel.Start(ctx, p.Host, p.Port); err != nil {
+			return nil, cleanup, fmt.Errorf("failed to start SSH tunnel: %w", err)
+		}
+
+		host = "127.0.0.1"
+		port = tunnel.GetLocalPort()
+
+		cleanup = func() {
+			tunnel.Stop()
+		}
+	}
+
+	connStr := buildConnectionStringForDBWithHostPort(p, *p.Database, password, host, port)
+
+	conn, err := pgx.Connect(ctx, connStr)
+	if err != nil {
+		if tunnel != nil {
+			tunnel.Stop()
+		}
+		return nil, func() {}, err
+	}
+
+	originalCleanup := cleanup
+	cleanup = func() {
+		conn.Close(ctx)
+		originalCleanup()
+	}
+
+	return conn, cleanup, nil
+}
+
+func buildConnectionStringForDBWithHostPort(p *PostgresqlDatabase, dbName string, password string, host string, port int) string {
+	sslMode := "disable"
+	if p.IsHttps {
+		sslMode = "require"
+	}
+
+	return fmt.Sprintf(
+		"host=%s port=%d user=%s password='%s' dbname=%s sslmode=%s default_query_exec_mode=simple_protocol standard_conforming_strings=on client_encoding=UTF8",
+		host,
+		port,
+		p.Username,
+		escapeConnectionStringValue(password),
+		dbName,
+		sslMode,
+	)
 }
 
 func isSupabaseConnection(host, username string) bool {

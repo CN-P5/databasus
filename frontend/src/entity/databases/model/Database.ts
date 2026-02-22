@@ -5,6 +5,7 @@ import type { MariadbDatabase } from './mariadb/MariadbDatabase';
 import type { MongodbDatabase } from './mongodb/MongodbDatabase';
 import type { MysqlDatabase } from './mysql/MysqlDatabase';
 import type { PostgresqlDatabase } from './postgresql/PostgresqlDatabase';
+import type { SshTunnel } from './SshTunnel';
 
 export interface Database {
   id: string;
@@ -16,6 +17,8 @@ export interface Database {
   mysql?: MysqlDatabase;
   mariadb?: MariadbDatabase;
   mongodb?: MongodbDatabase;
+
+  sshTunnel?: SshTunnel;
 
   notifiers: Notifier[];
 

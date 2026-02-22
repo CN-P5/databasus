@@ -8,6 +8,7 @@ import (
 	"databasus-backend/internal/features/databases/databases/postgresql"
 	"databasus-backend/internal/features/notifiers"
 	"databasus-backend/internal/util/encryption"
+	"databasus-backend/internal/util/ssh"
 	"errors"
 	"log/slog"
 	"time"
@@ -29,6 +30,8 @@ type Database struct {
 	Mariadb    *mariadb.MariadbDatabase       `json:"mariadb,omitempty"    gorm:"foreignKey:DatabaseID"`
 	Mongodb    *mongodb.MongodbDatabase       `json:"mongodb,omitempty"    gorm:"foreignKey:DatabaseID"`
 
+	SSHTunnel *SSHTunnelConfig `json:"sshTunnel,omitempty" gorm:"foreignKey:DatabaseID"`
+
 	Notifiers []notifiers.Notifier `json:"notifiers" gorm:"many2many:database_notifiers;"`
 
 	// these fields are not reliable, but
@@ -42,6 +45,12 @@ type Database struct {
 func (d *Database) Validate() error {
 	if d.Name == "" {
 		return errors.New("name is required")
+	}
+
+	if d.SSHTunnel != nil {
+		if err := d.SSHTunnel.Validate(); err != nil {
+			return err
+		}
 	}
 
 	switch d.Type {
@@ -82,7 +91,11 @@ func (d *Database) TestConnection(
 	logger *slog.Logger,
 	encryptor encryption.FieldEncryptor,
 ) error {
-	return d.getSpecificDatabase().TestConnection(logger, encryptor, d.ID)
+	var sshConfig *ssh.Config
+	if d.SSHTunnel != nil && d.SSHTunnel.Enabled {
+		sshConfig = d.SSHTunnel.ToSSHConfig()
+	}
+	return d.getSpecificDatabase().TestConnection(logger, encryptor, d.ID, sshConfig)
 }
 
 func (d *Database) IsUserReadOnly(
@@ -90,15 +103,20 @@ func (d *Database) IsUserReadOnly(
 	logger *slog.Logger,
 	encryptor encryption.FieldEncryptor,
 ) (bool, []string, error) {
+	var sshConfig *ssh.Config
+	if d.SSHTunnel != nil && d.SSHTunnel.Enabled {
+		sshConfig = d.SSHTunnel.ToSSHConfig()
+	}
+
 	switch d.Type {
 	case DatabaseTypePostgres:
-		return d.Postgresql.IsUserReadOnly(ctx, logger, encryptor, d.ID)
+		return d.Postgresql.IsUserReadOnly(ctx, logger, encryptor, d.ID, sshConfig)
 	case DatabaseTypeMysql:
-		return d.Mysql.IsUserReadOnly(ctx, logger, encryptor, d.ID)
+		return d.Mysql.IsUserReadOnly(ctx, logger, encryptor, d.ID, sshConfig)
 	case DatabaseTypeMariadb:
-		return d.Mariadb.IsUserReadOnly(ctx, logger, encryptor, d.ID)
+		return d.Mariadb.IsUserReadOnly(ctx, logger, encryptor, d.ID, sshConfig)
 	case DatabaseTypeMongodb:
-		return d.Mongodb.IsUserReadOnly(ctx, logger, encryptor, d.ID)
+		return d.Mongodb.IsUserReadOnly(ctx, logger, encryptor, d.ID, sshConfig)
 	default:
 		return false, nil, errors.New("read-only check not supported for this database type")
 	}
@@ -106,9 +124,18 @@ func (d *Database) IsUserReadOnly(
 
 func (d *Database) HideSensitiveData() {
 	d.getSpecificDatabase().HideSensitiveData()
+	if d.SSHTunnel != nil {
+		d.SSHTunnel.HideSensitiveData()
+	}
 }
 
 func (d *Database) EncryptSensitiveFields(encryptor encryption.FieldEncryptor) error {
+	if d.SSHTunnel != nil {
+		if err := d.SSHTunnel.EncryptSensitiveFields(d.ID, encryptor); err != nil {
+			return err
+		}
+	}
+
 	if d.Postgresql != nil {
 		return d.Postgresql.EncryptSensitiveFields(d.ID, encryptor)
 	}
@@ -128,17 +155,22 @@ func (d *Database) PopulateDbData(
 	logger *slog.Logger,
 	encryptor encryption.FieldEncryptor,
 ) error {
+	var sshConfig *ssh.Config
+	if d.SSHTunnel != nil && d.SSHTunnel.Enabled {
+		sshConfig = d.SSHTunnel.ToSSHConfig()
+	}
+
 	if d.Postgresql != nil {
-		return d.Postgresql.PopulateDbData(logger, encryptor, d.ID)
+		return d.Postgresql.PopulateDbData(logger, encryptor, d.ID, sshConfig)
 	}
 	if d.Mysql != nil {
-		return d.Mysql.PopulateDbData(logger, encryptor, d.ID)
+		return d.Mysql.PopulateDbData(logger, encryptor, d.ID, sshConfig)
 	}
 	if d.Mariadb != nil {
-		return d.Mariadb.PopulateDbData(logger, encryptor, d.ID)
+		return d.Mariadb.PopulateDbData(logger, encryptor, d.ID, sshConfig)
 	}
 	if d.Mongodb != nil {
-		return d.Mongodb.PopulateDbData(logger, encryptor, d.ID)
+		return d.Mongodb.PopulateDbData(logger, encryptor, d.ID, sshConfig)
 	}
 	return nil
 }
@@ -147,6 +179,14 @@ func (d *Database) Update(incoming *Database) {
 	d.Name = incoming.Name
 	d.Type = incoming.Type
 	d.Notifiers = incoming.Notifiers
+
+	if d.SSHTunnel != nil && incoming.SSHTunnel != nil {
+		d.SSHTunnel.Update(incoming.SSHTunnel)
+	} else if incoming.SSHTunnel != nil {
+		d.SSHTunnel = incoming.SSHTunnel
+	} else {
+		d.SSHTunnel = nil
+	}
 
 	switch d.Type {
 	case DatabaseTypePostgres:

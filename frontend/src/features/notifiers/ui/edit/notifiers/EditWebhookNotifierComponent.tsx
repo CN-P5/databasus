@@ -1,6 +1,7 @@
 import { DeleteOutlined, InfoCircleOutlined, PlusOutlined } from '@ant-design/icons';
 import { Button, Input, Select, Tooltip } from 'antd';
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import type { Notifier, WebhookHeader } from '../../../../../entity/notifiers';
 import { WebhookMethod } from '../../../../../entity/notifiers/models/webhook/WebhookMethod';
@@ -36,6 +37,7 @@ function validateJsonTemplate(template: string): string | null {
 }
 
 export function EditWebhookNotifierComponent({ notifier, setNotifier, setUnsaved }: Props) {
+  const { t } = useTranslation('notifiers');
   const headers = notifier?.webhookNotifier?.headers || [];
   const bodyTemplate = notifier?.webhookNotifier?.bodyTemplate || '';
 
@@ -72,7 +74,7 @@ export function EditWebhookNotifierComponent({ notifier, setNotifier, setUnsaved
   return (
     <>
       <div className="mb-1 flex w-full flex-col items-start sm:flex-row sm:items-center">
-        <div className="mb-1 min-w-[150px] sm:mb-0">Webhook URL</div>
+        <div className="mb-1 min-w-[150px] sm:mb-0">{t('webhookUrl')}</div>
         <Input
           value={notifier?.webhookNotifier?.webhookUrl || ''}
           onChange={(e) => {
@@ -85,7 +87,7 @@ export function EditWebhookNotifierComponent({ notifier, setNotifier, setUnsaved
       </div>
 
       <div className="mt-1 mb-1 flex w-full flex-col items-start sm:flex-row sm:items-center">
-        <div className="mb-1 min-w-[150px] sm:mb-0">Method</div>
+        <div className="mb-1 min-w-[150px] sm:mb-0">{t('method')}</div>
         <div className="flex items-center">
           <Select
             value={notifier?.webhookNotifier?.webhookMethod || WebhookMethod.POST}
@@ -105,8 +107,8 @@ export function EditWebhookNotifierComponent({ notifier, setNotifier, setUnsaved
       <div className="mt-3 mb-1 flex w-full flex-col items-start">
         <div className="mb-1 flex items-center">
           <span className="min-w-[150px]">
-            Custom headers{' '}
-            <Tooltip title="Add custom HTTP headers to the webhook request (e.g., Authorization, X-API-Key)">
+            {t('customHeaders')}{' '}
+            <Tooltip title={t('addCustomHttpHeadersToWebhookRequest')}>
               <InfoCircleOutlined className="ml-1" style={{ color: 'gray' }} />
             </Tooltip>
           </span>
@@ -114,7 +116,7 @@ export function EditWebhookNotifierComponent({ notifier, setNotifier, setUnsaved
 
         {notifier.id && (
           <div className="mb-1 text-xs text-orange-700">
-            *Saved headers hidden for security reasons
+            {t('savedHeadersHiddenForSecurityReasons')}
           </div>
         )}
 
@@ -126,14 +128,14 @@ export function EditWebhookNotifierComponent({ notifier, setNotifier, setUnsaved
                 onChange={(e) => updateHeader(index, 'key', e.target.value)}
                 size="small"
                 style={{ width: 150, flexShrink: 0 }}
-                placeholder="Header name"
+                placeholder={t('headerName')}
               />
               <Input
                 value={header.value}
                 onChange={(e) => updateHeader(index, 'value', e.target.value)}
                 size="small"
                 style={{ flex: 1, minWidth: 0 }}
-                placeholder="Header value"
+                placeholder={t('headerValue')}
               />
               <Button
                 type="text"
@@ -152,7 +154,7 @@ export function EditWebhookNotifierComponent({ notifier, setNotifier, setUnsaved
             onClick={addHeader}
             className="mt-1"
           >
-            Add header
+            {t('addHeader')}
           </Button>
         </div>
       </div>
@@ -160,7 +162,7 @@ export function EditWebhookNotifierComponent({ notifier, setNotifier, setUnsaved
       {notifier?.webhookNotifier?.webhookMethod === WebhookMethod.POST && (
         <div className="mt-3 mb-1 flex w-full flex-col items-start">
           <div className="mb-1 flex items-center">
-            <span className="min-w-[150px]">Body template </span>
+            <span className="min-w-[150px]">{t('bodyTemplate')} </span>
           </div>
 
           <div className="mb-2 text-xs text-gray-500 dark:text-gray-400">
@@ -168,13 +170,13 @@ export function EditWebhookNotifierComponent({ notifier, setNotifier, setUnsaved
               <code className="rounded bg-gray-100 px-1.5 py-0.5 dark:bg-gray-700">
                 {'{{heading}}'}
               </code>{' '}
-              — notification title
+              — {t('headingPlaceholder')}
             </span>
             <span>
               <code className="rounded bg-gray-100 px-1.5 py-0.5 dark:bg-gray-700">
                 {'{{message}}'}
               </code>{' '}
-              — notification message
+              — {t('messagePlaceholder')}
             </span>
           </div>
 
@@ -194,7 +196,7 @@ export function EditWebhookNotifierComponent({ notifier, setNotifier, setUnsaved
 
       {notifier?.webhookNotifier?.webhookUrl && (
         <div className="mt-4">
-          <div className="mb-1 font-medium">Example request</div>
+          <div className="mb-1 font-medium">{t('exampleRequest')}</div>
 
           {notifier?.webhookNotifier?.webhookMethod === WebhookMethod.GET && (
             <div className="rounded bg-gray-100 p-2 px-3 text-sm break-all dark:bg-gray-800">
@@ -208,14 +210,14 @@ export function EditWebhookNotifierComponent({ notifier, setNotifier, setUnsaved
               {headers.length > 0 && (
                 <div className="mt-2 border-t border-gray-200 pt-2 dark:border-gray-600">
                   <div className="text-xs font-semibold text-gray-500 dark:text-gray-400">
-                    Headers:
+                    {t('headers')}
                   </div>
 
                   {headers
                     .filter((h) => h.key)
                     .map((h, i) => (
                       <div key={i} className="text-xs">
-                        {h.key}: {h.value || '(hidden)'}
+                        {h.key}: {h.value || t('hidden')}
                       </div>
                     ))}
                 </div>

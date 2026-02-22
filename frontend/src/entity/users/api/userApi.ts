@@ -31,18 +31,10 @@ const notifyAuthListeners = () => {
 };
 
 export const userApi = {
-  async signUp(signUpRequest: SignUpRequest): Promise<SignInResponse> {
+  async signUp(signUpRequest: SignUpRequest) {
     const requestOptions: RequestOptions = new RequestOptions();
     requestOptions.setBody(JSON.stringify(signUpRequest));
-
-    return apiHelper
-      .fetchPostJson(`${getApplicationServer()}/api/v1/users/signup`, requestOptions)
-      .then((response: unknown): SignInResponse => {
-        const typedResponse = response as SignInResponse;
-        saveAuthorizedData(typedResponse.token, typedResponse.userId);
-        notifyAuthListeners();
-        return typedResponse;
-      });
+    return apiHelper.fetchPostRaw(`${getApplicationServer()}/api/v1/users/signup`, requestOptions);
   },
 
   async signIn(signInRequest: SignInRequest): Promise<SignInResponse> {

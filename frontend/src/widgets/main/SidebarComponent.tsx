@@ -1,6 +1,7 @@
 import { CloseOutlined } from '@ant-design/icons';
 import { Drawer, Tooltip } from 'antd';
 import { useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { type DiskUsage } from '../../entity/disk';
 import { type UserProfile, UserRole } from '../../entity/users';
@@ -58,6 +59,8 @@ export const SidebarComponent = ({
       };
     }
   }, [isMobile, isOpen]);
+
+  const { t } = useTranslation('settings');
 
   const isUsedMoreThan95Percent =
     diskUsage && diskUsage.usedSpaceBytes / diskUsage.totalSpaceBytes > 0.95;
@@ -173,7 +176,7 @@ export const SidebarComponent = ({
                 <div
                   className={`cursor-pointer text-xs ${isUsedMoreThan95Percent ? 'text-red-500' : 'text-gray-600 dark:text-gray-400'}`}
                 >
-                  <div className="font-medium">Disk Usage</div>
+                  <div className="font-medium">{t('diskUsage')}</div>
                   <div className="mt-1">
                     {(diskUsage.usedSpaceBytes / 1024 ** 3).toFixed(1)} of{' '}
                     {(diskUsage.totalSpaceBytes / 1024 ** 3).toFixed(1)} GB used (

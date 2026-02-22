@@ -2,6 +2,7 @@ import { LoadingOutlined } from '@ant-design/icons';
 import { App, Button, Input, Modal } from 'antd';
 import { Spin } from 'antd';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { type UserProfile, UserRole, type UsersSettings } from '../../../entity/users';
 import type { WorkspaceResponse } from '../../../entity/workspaces';
@@ -24,6 +25,7 @@ export const CreateWorkspaceDialogComponent = ({
   onWorkspaceCreated,
   workspacesCount,
 }: Props) => {
+  const { t } = useTranslation('workspaces');
   const { message } = App.useApp();
   const [isCreating, setIsCreating] = useState(false);
   const [workspaceName, setWorkspaceName] = useState(workspacesCount === 0 ? 'My workspace' : '');
@@ -33,7 +35,7 @@ export const CreateWorkspaceDialogComponent = ({
 
   const handleCreateWorkspace = async () => {
     if (!workspaceName.trim()) {
-      message.error('Please enter a workspace name');
+      message.error(t('pleaseEnterAWorkspaceName'));
       return;
     }
 
@@ -44,11 +46,11 @@ export const CreateWorkspaceDialogComponent = ({
         name: workspaceName.trim(),
       });
 
-      message.success('Workspace created successfully');
+      message.success(t('workspaceCreatedSuccessfully'));
       onWorkspaceCreated(newWorkspace);
       onClose();
     } catch (error) {
-      message.error((error as Error).message || 'Failed to create workspace');
+      message.error((error as Error).message || t('failedToCreateWorkspace'));
     } finally {
       setIsCreating(false);
     }
@@ -57,31 +59,28 @@ export const CreateWorkspaceDialogComponent = ({
   if (!isAllowedToCreateWorkspaces) {
     return (
       <Modal
-        title="Permission denied"
+        title={t('permissionDenied')}
         open
         onCancel={onClose}
         footer={[
           <Button key="ok" type="primary" onClick={onClose}>
-            OK
+            {t('ok')}
           </Button>,
         ]}
       >
-        <p>
-          You don&apos;t have permission to create workspaces. Please ask the administrator to
-          create the workspace for you.
-        </p>
+        <p dangerouslySetInnerHTML={{ __html: t('youDontHavePermissionToCreateWorkspaces') }} />
       </Modal>
     );
   }
 
   return (
     <Modal
-      title="Create workspace"
+      title={t('createWorkspace')}
       open
       onCancel={onClose}
       footer={[
         <Button key="cancel" onClick={onClose} disabled={isCreating}>
-          Cancel
+          {t('cancel')}
         </Button>,
 
         <Button
@@ -94,30 +93,21 @@ export const CreateWorkspaceDialogComponent = ({
           {isCreating ? (
             <Spin indicator={<LoadingOutlined spin />} size="small" />
           ) : (
-            'Create workspace'
+            t('createWorkspace')
           )}
         </Button>,
       ]}
     >
       <div className="mb-4">
-        <div className="dark:text-gray-300">
-          Workspace is a place where you group:
-          <br />
-          - your databases;
-          <br />
-          - storages (like local drive, S3, Google Drive, etc.)
-          <br />
-          - notifiers (like email, Slack, Telegram, etc.);
-          <br />- access control (if you have team);
-        </div>
+        <div className="dark:text-gray-300" dangerouslySetInnerHTML={{ __html: t('workspaceDescription') }} />
 
         <label className="mt-5 mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-          Workspace name
+          {t('workspaceNameLabel')}
         </label>
         <Input
           value={workspaceName}
           onChange={(e) => setWorkspaceName(e.target.value)}
-          placeholder="Enter workspace name"
+          placeholder={t('enterWorkspaceNamePlaceholder')}
           disabled={isCreating}
           onPressEnter={handleCreateWorkspace}
           autoFocus

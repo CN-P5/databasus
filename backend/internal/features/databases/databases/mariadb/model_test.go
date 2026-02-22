@@ -91,7 +91,7 @@ func Test_TestConnection_InsufficientPermissions_ReturnsError(t *testing.T) {
 
 			logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 
-			err = mariadbModel.TestConnection(logger, nil, uuid.New())
+			err = mariadbModel.TestConnection(logger, nil, uuid.New(), nil)
 			assert.Error(t, err)
 			assert.Contains(t, err.Error(), "insufficient permissions")
 		})
@@ -177,7 +177,7 @@ func Test_TestConnection_SufficientPermissions_Success(t *testing.T) {
 
 			logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 
-			err = mariadbModel.TestConnection(logger, nil, uuid.New())
+			err = mariadbModel.TestConnection(logger, nil, uuid.New(), nil)
 			assert.NoError(t, err)
 		})
 	}
@@ -214,7 +214,7 @@ func Test_IsUserReadOnly_AdminUser_ReturnsFalse(t *testing.T) {
 			logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 			ctx := context.Background()
 
-			isReadOnly, privileges, err := mariadbModel.IsUserReadOnly(ctx, logger, nil, uuid.New())
+			isReadOnly, privileges, err := mariadbModel.IsUserReadOnly(ctx, logger, nil, uuid.New(), nil)
 			assert.NoError(t, err)
 			assert.False(t, isReadOnly, "Root user should not be read-only")
 			assert.NotEmpty(t, privileges, "Root user should have privileges")
@@ -243,7 +243,7 @@ func Test_IsUserReadOnly_ReadOnlyUser_ReturnsTrue(t *testing.T) {
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 	ctx := context.Background()
 
-	username, password, err := mariadbModel.CreateReadOnlyUser(ctx, logger, nil, uuid.New())
+	username, password, err := mariadbModel.CreateReadOnlyUser(ctx, logger, nil, uuid.New(), nil)
 	assert.NoError(t, err)
 
 	readOnlyModel := &MariadbDatabase{
@@ -256,7 +256,7 @@ func Test_IsUserReadOnly_ReadOnlyUser_ReturnsTrue(t *testing.T) {
 		IsHttps:  false,
 	}
 
-	isReadOnly, privileges, err := readOnlyModel.IsUserReadOnly(ctx, logger, nil, uuid.New())
+	isReadOnly, privileges, err := readOnlyModel.IsUserReadOnly(ctx, logger, nil, uuid.New(), nil)
 	assert.NoError(t, err)
 	assert.True(t, isReadOnly, "Read-only user should be read-only")
 	assert.Empty(t, privileges, "Read-only user should have no write privileges")
@@ -315,7 +315,7 @@ func Test_CreateReadOnlyUser_UserCanReadButNotWrite(t *testing.T) {
 			logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 			ctx := context.Background()
 
-			username, password, err := mariadbModel.CreateReadOnlyUser(ctx, logger, nil, uuid.New())
+			username, password, err := mariadbModel.CreateReadOnlyUser(ctx, logger, nil, uuid.New(), nil)
 			assert.NoError(t, err)
 			assert.NotEmpty(t, username)
 			assert.NotEmpty(t, password)
@@ -340,6 +340,7 @@ func Test_CreateReadOnlyUser_UserCanReadButNotWrite(t *testing.T) {
 				logger,
 				nil,
 				uuid.New(),
+				nil,
 			)
 			assert.NoError(t, err)
 			assert.True(t, isReadOnly, "Created user should be read-only")
@@ -392,7 +393,7 @@ func Test_ReadOnlyUser_FutureTables_NoSelectPermission(t *testing.T) {
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 	ctx := context.Background()
 
-	username, password, err := mariadbModel.CreateReadOnlyUser(ctx, logger, nil, uuid.New())
+	username, password, err := mariadbModel.CreateReadOnlyUser(ctx, logger, nil, uuid.New(), nil)
 	assert.NoError(t, err)
 
 	_, err = container.DB.Exec(`DROP TABLE IF EXISTS future_table`)
@@ -468,7 +469,7 @@ func Test_CreateReadOnlyUser_DatabaseNameWithDash_Success(t *testing.T) {
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 	ctx := context.Background()
 
-	username, password, err := mariadbModel.CreateReadOnlyUser(ctx, logger, nil, uuid.New())
+	username, password, err := mariadbModel.CreateReadOnlyUser(ctx, logger, nil, uuid.New(), nil)
 	assert.NoError(t, err)
 	assert.NotEmpty(t, username)
 	assert.NotEmpty(t, password)
@@ -513,7 +514,7 @@ func Test_ReadOnlyUser_CannotDropOrAlterTables(t *testing.T) {
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 	ctx := context.Background()
 
-	username, password, err := mariadbModel.CreateReadOnlyUser(ctx, logger, nil, uuid.New())
+	username, password, err := mariadbModel.CreateReadOnlyUser(ctx, logger, nil, uuid.New(), nil)
 	assert.NoError(t, err)
 
 	readOnlyDSN := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?parseTime=true",
@@ -616,7 +617,7 @@ func Test_TestConnection_DatabaseSpecificPrivilegesWithGlobalProcess_Success(t *
 
 			logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 
-			err = mariadbModel.TestConnection(logger, nil, uuid.New())
+			err = mariadbModel.TestConnection(logger, nil, uuid.New(), nil)
 			assert.NoError(t, err)
 		})
 	}
@@ -690,7 +691,7 @@ func Test_TestConnection_DatabaseWithUnderscores_Success(t *testing.T) {
 
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 
-	err = mariadbModel.TestConnection(logger, nil, uuid.New())
+	err = mariadbModel.TestConnection(logger, nil, uuid.New(), nil)
 	assert.NoError(t, err)
 }
 
@@ -794,7 +795,7 @@ func Test_TestConnection_DatabaseWithUnderscoresAndAllPrivileges_Success(t *test
 
 			logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 
-			err = mariadbModel.TestConnection(logger, nil, uuid.New())
+			err = mariadbModel.TestConnection(logger, nil, uuid.New(), nil)
 			assert.NoError(t, err)
 			assert.NotEmpty(t, mariadbModel.Privileges)
 			assert.Contains(t, mariadbModel.Privileges, "SELECT")

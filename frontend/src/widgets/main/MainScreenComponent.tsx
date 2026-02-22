@@ -26,11 +26,14 @@ import {
 import { useIsMobile, useScreenHeight } from '../../shared/hooks';
 import { StarButtonComponent } from '../../shared/ui/StarButtonComponent';
 import { ThemeToggleComponent } from '../../shared/ui/ThemeToggleComponent';
+import { LanguageSwitcher } from '../../shared/ui/LanguageSwitcherComponent';
+import { useTranslation } from 'react-i18next';
 import { SidebarComponent } from './SidebarComponent';
 import { WorkspaceSelectionComponent } from './WorkspaceSelectionComponent';
 
 export const MainScreenComponent = () => {
   const { message } = App.useApp();
+  const { t } = useTranslation(['common', 'sidebar']);
   const screenHeight = useScreenHeight();
   const isMobile = useIsMobile();
   const contentHeight = screenHeight - (isMobile ? 70 : 95);
@@ -121,7 +124,7 @@ export const MainScreenComponent = () => {
 
   const tabs = [
     {
-      text: 'Databases',
+      text: t('databases', { ns: 'sidebar' }),
       name: 'databases',
       icon: '/icons/menu/database-gray.svg',
       selectedIcon: '/icons/menu/database-white.svg',
@@ -131,7 +134,7 @@ export const MainScreenComponent = () => {
       isVisible: true,
     },
     {
-      text: 'Storages',
+      text: t('storages', { ns: 'sidebar' }),
       name: 'storages',
       icon: '/icons/menu/storage-gray.svg',
       selectedIcon: '/icons/menu/storage-white.svg',
@@ -141,7 +144,7 @@ export const MainScreenComponent = () => {
       isVisible: !!selectedWorkspace,
     },
     {
-      text: 'Notifiers',
+      text: t('notifiers', { ns: 'sidebar' }),
       name: 'notifiers',
       icon: '/icons/menu/notifier-gray.svg',
       selectedIcon: '/icons/menu/notifier-white.svg',
@@ -151,7 +154,7 @@ export const MainScreenComponent = () => {
       isVisible: !!selectedWorkspace,
     },
     {
-      text: 'Settings',
+      text: t('settings', { ns: 'sidebar' }),
       name: 'settings',
       icon: '/icons/menu/workspace-settings-gray.svg',
       selectedIcon: '/icons/menu/workspace-settings-white.svg',
@@ -161,7 +164,7 @@ export const MainScreenComponent = () => {
       isVisible: !!selectedWorkspace,
     },
     {
-      text: 'Profile',
+      text: t('profile', { ns: 'sidebar' }),
       name: 'profile',
       icon: '/icons/menu/profile-gray.svg',
       selectedIcon: '/icons/menu/profile-white.svg',
@@ -171,7 +174,7 @@ export const MainScreenComponent = () => {
       isVisible: true,
     },
     {
-      text: 'Databasus settings',
+      text: t('settings', { ns: 'common' }),
       name: 'databasus-settings',
       icon: '/icons/menu/global-settings-gray.svg',
       selectedIcon: '/icons/menu/global-settings-white.svg',
@@ -181,7 +184,7 @@ export const MainScreenComponent = () => {
       isVisible: true,
     },
     {
-      text: 'Users',
+      text: t('users', { ns: 'sidebar' }),
       name: 'users',
       icon: '/icons/menu/user-card-gray.svg',
       selectedIcon: '/icons/menu/user-card-white.svg',
@@ -247,6 +250,8 @@ export const MainScreenComponent = () => {
 
           <div className="flex items-center gap-2">
             <StarButtonComponent />
+
+            <LanguageSwitcher />
 
             <ThemeToggleComponent />
           </div>

@@ -11,6 +11,7 @@ import {
   databaseApi,
   getDatabaseLogoFromType,
 } from '../../../../entity/databases';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
   database: Database;
@@ -25,13 +26,6 @@ interface Props {
   onSaved: (db: Database) => void;
 }
 
-const databaseTypeOptions = [
-  { value: DatabaseType.POSTGRES, label: 'PostgreSQL' },
-  { value: DatabaseType.MYSQL, label: 'MySQL' },
-  { value: DatabaseType.MARIADB, label: 'MariaDB' },
-  { value: DatabaseType.MONGODB, label: 'MongoDB' },
-];
-
 export const EditDatabaseBaseInfoComponent = ({
   database,
   isShowName,
@@ -42,6 +36,7 @@ export const EditDatabaseBaseInfoComponent = ({
   isSaveToApi,
   onSaved,
 }: Props) => {
+  const { t } = useTranslation(['common', 'databases']);
   const [editingDatabase, setEditingDatabase] = useState<Database>();
   const [isUnsaved, setIsUnsaved] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -115,12 +110,12 @@ export const EditDatabaseBaseInfoComponent = ({
     <div>
       {isShowName && (
         <div className="mb-1 flex w-full items-center">
-          <div className="min-w-[100px] md:min-w-[150px]">Name</div>
+          <div className="min-w-[100px] md:min-w-[150px]">{t('common:name')}</div>
           <Input
             value={editingDatabase.name || ''}
             onChange={(e) => updateDatabase({ name: e.target.value })}
             size="small"
-            placeholder="My favourite DB"
+            placeholder={t('databases:myFavouriteDB')}
             className="max-w-[150px] grow md:max-w-[200px]"
           />
         </div>
@@ -128,13 +123,18 @@ export const EditDatabaseBaseInfoComponent = ({
 
       {isShowType && (
         <div className="mb-1 flex w-full items-center">
-          <div className="min-w-[100px] md:min-w-[150px]">Database type</div>
+          <div className="min-w-[100px] md:min-w-[150px]">{t('databases:databaseType')}</div>
 
           <div className="flex items-center">
             <Select
               value={editingDatabase.type}
               onChange={handleTypeChange}
-              options={databaseTypeOptions}
+              options={[
+                { value: DatabaseType.POSTGRES, label: t('databases:typePostgres') },
+                { value: DatabaseType.MYSQL, label: t('databases:typeMysql') },
+                { value: DatabaseType.MARIADB, label: t('databases:typeMariadb') },
+                { value: DatabaseType.MONGODB, label: t('databases:typeMongodb') },
+              ]}
               size="small"
               className="w-[150px] grow md:w-[200px]"
             />
@@ -151,7 +151,7 @@ export const EditDatabaseBaseInfoComponent = ({
       <div className="mt-5 flex">
         {isShowCancelButton && (
           <Button danger ghost className="mr-1" onClick={onCancel}>
-            Cancel
+            {t('common:cancel')}
           </Button>
         )}
 
@@ -162,7 +162,7 @@ export const EditDatabaseBaseInfoComponent = ({
           loading={isSaving}
           disabled={(isSaveToApi && !isUnsaved) || !isAllFieldsFilled}
         >
-          {saveButtonText || 'Save'}
+          {saveButtonText || t('common:save')}
         </Button>
       </div>
     </div>

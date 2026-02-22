@@ -1,5 +1,6 @@
 import { InfoCircleOutlined } from '@ant-design/icons';
 import { Input, InputNumber, Switch, Tooltip } from 'antd';
+import { useTranslation } from 'react-i18next';
 
 import type { Storage } from '../../../../../entity/storages';
 
@@ -10,10 +11,12 @@ interface Props {
 }
 
 export function EditNASStorageComponent({ storage, setStorage, setUnsaved }: Props) {
+  const { t } = useTranslation('storages');
+
   return (
     <>
       <div className="mb-1 flex w-full flex-col items-start sm:flex-row sm:items-center">
-        <div className="mb-1 min-w-[110px] sm:mb-0">Host</div>
+        <div className="mb-1 min-w-[110px] sm:mb-0">{t('host')}</div>
         <Input
           value={storage?.nasStorage?.host || ''}
           onChange={(e) => {
@@ -35,7 +38,7 @@ export function EditNASStorageComponent({ storage, setStorage, setUnsaved }: Pro
       </div>
 
       <div className="mb-1 flex w-full flex-col items-start sm:flex-row sm:items-center">
-        <div className="mb-1 min-w-[110px] sm:mb-0">Port</div>
+        <div className="mb-1 min-w-[110px] sm:mb-0">{t('port')}</div>
         <InputNumber
           value={storage?.nasStorage?.port}
           onChange={(value) => {
@@ -59,7 +62,7 @@ export function EditNASStorageComponent({ storage, setStorage, setUnsaved }: Pro
       </div>
 
       <div className="mb-1 flex w-full flex-col items-start sm:flex-row sm:items-center">
-        <div className="mb-1 min-w-[110px] sm:mb-0">Share</div>
+        <div className="mb-1 min-w-[110px] sm:mb-0">{t('share')}</div>
         <Input
           value={storage?.nasStorage?.share || ''}
           onChange={(e) => {
@@ -81,7 +84,7 @@ export function EditNASStorageComponent({ storage, setStorage, setUnsaved }: Pro
       </div>
 
       <div className="mb-1 flex w-full flex-col items-start sm:flex-row sm:items-center">
-        <div className="mb-1 min-w-[110px] sm:mb-0">Username</div>
+        <div className="mb-1 min-w-[110px] sm:mb-0">{t('username')}</div>
         <Input
           value={storage?.nasStorage?.username || ''}
           onChange={(e) => {
@@ -103,7 +106,7 @@ export function EditNASStorageComponent({ storage, setStorage, setUnsaved }: Pro
       </div>
 
       <div className="mb-1 flex w-full flex-col items-start sm:flex-row sm:items-center">
-        <div className="mb-1 min-w-[110px] sm:mb-0">Password</div>
+        <div className="mb-1 min-w-[110px] sm:mb-0">{t('password')}</div>
         <Input.Password
           value={storage?.nasStorage?.password || ''}
           onChange={(e) => {
@@ -129,7 +132,7 @@ export function EditNASStorageComponent({ storage, setStorage, setUnsaved }: Pro
       </div>
 
       <div className="mb-1 flex w-full flex-col items-start sm:flex-row sm:items-center">
-        <div className="mb-1 min-w-[110px] sm:mb-0">Use SSL</div>
+        <div className="mb-1 min-w-[110px] sm:mb-0">{t('useSsl')}</div>
         <div className="flex items-center">
           <Switch
             checked={storage?.nasStorage?.useSsl || false}
@@ -150,7 +153,7 @@ export function EditNASStorageComponent({ storage, setStorage, setUnsaved }: Pro
 
           <Tooltip
             className="cursor-pointer"
-            title="Enable SSL/TLS encryption for secure connection"
+            title={t('enableSslTlsEncryptionForSecureConnection')}
           >
             <InfoCircleOutlined className="ml-2" style={{ color: 'gray' }} />
           </Tooltip>
@@ -158,7 +161,7 @@ export function EditNASStorageComponent({ storage, setStorage, setUnsaved }: Pro
       </div>
 
       <div className="mb-1 flex w-full flex-col items-start sm:flex-row sm:items-center">
-        <div className="mb-1 min-w-[110px] sm:mb-0">Domain</div>
+        <div className="mb-1 min-w-[110px] sm:mb-0">{t('domain')}</div>
         <div className="flex items-center">
           <Input
             value={storage?.nasStorage?.domain || ''}
@@ -181,7 +184,7 @@ export function EditNASStorageComponent({ storage, setStorage, setUnsaved }: Pro
 
           <Tooltip
             className="cursor-pointer"
-            title="Windows domain name (optional, leave empty if not using domain authentication)"
+            title={t('windowsDomainNameOptional')}
           >
             <InfoCircleOutlined className="ml-2" style={{ color: 'gray' }} />
           </Tooltip>
@@ -189,7 +192,7 @@ export function EditNASStorageComponent({ storage, setStorage, setUnsaved }: Pro
       </div>
 
       <div className="mb-1 flex w-full flex-col items-start sm:flex-row sm:items-center">
-        <div className="mb-1 min-w-[110px] sm:mb-0">Path</div>
+        <div className="mb-1 min-w-[110px] sm:mb-0">{t('path')}</div>
         <div className="flex items-center">
           <Input
             value={storage?.nasStorage?.path || ''}
@@ -197,7 +200,6 @@ export function EditNASStorageComponent({ storage, setStorage, setUnsaved }: Pro
               if (!storage?.nasStorage) return;
 
               let pathValue = e.target.value.trim();
-              // Remove leading slash if present
               if (pathValue.startsWith('/')) {
                 pathValue = pathValue.substring(1);
               }
@@ -216,7 +218,7 @@ export function EditNASStorageComponent({ storage, setStorage, setUnsaved }: Pro
             placeholder="backups (optional, no leading slash)"
           />
 
-          <Tooltip className="cursor-pointer" title="Subdirectory path within the share (optional)">
+          <Tooltip className="cursor-pointer" title={t('subdirectoryPathWithinTheShare')}>
             <InfoCircleOutlined className="ml-2" style={{ color: 'gray' }} />
           </Tooltip>
         </div>

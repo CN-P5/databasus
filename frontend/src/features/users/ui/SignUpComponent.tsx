@@ -1,14 +1,12 @@
 import { EyeInvisibleOutlined, EyeTwoTone } from '@ant-design/icons';
 import { App, Button, Input } from 'antd';
 import { type JSX, useState } from 'react';
-
-import { useCloudflareTurnstile } from '../../../shared/hooks/useCloudflareTurnstile';
+import { useTranslation } from 'react-i18next';
 
 import { GITHUB_CLIENT_ID, GOOGLE_CLIENT_ID } from '../../../constants';
 import { userApi } from '../../../entity/users';
 import { StringUtils } from '../../../shared/lib';
 import { FormValidator } from '../../../shared/lib/FormValidator';
-import { CloudflareTurnstileWidget } from '../../../shared/ui/CloudflareTurnstileWidget';
 import { GithubOAuthComponent } from './oauth/GithubOAuthComponent';
 import { GoogleOAuthComponent } from './oauth/GoogleOAuthComponent';
 
@@ -17,6 +15,7 @@ interface SignUpComponentProps {
 }
 
 export function SignUpComponent({ onSwitchToSignIn }: SignUpComponentProps): JSX.Element {
+  const { t } = useTranslation('users');
   const { message } = App.useApp();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -34,12 +33,10 @@ export function SignUpComponent({ onSwitchToSignIn }: SignUpComponentProps): JSX
 
   const [signUpError, setSignUpError] = useState('');
 
-  const { token, containerRef, resetCloudflareTurnstile } = useCloudflareTurnstile();
-
   const validateFieldsForSignUp = (): boolean => {
     if (!name || name.trim() === '') {
       setNameError(true);
-      message.error('Name is required');
+      message.error(t('nameIsRequired'));
       return false;
     }
     setNameError(false);
@@ -61,7 +58,7 @@ export function SignUpComponent({ onSwitchToSignIn }: SignUpComponentProps): JSX
 
     if (password.length < 8) {
       setPasswordError(true);
-      message.error('Password must be at least 8 characters long');
+      message.error(t('passwordMustBeAtLeast8CharactersLong'));
       return false;
     }
     setPasswordError(false);
@@ -90,11 +87,10 @@ export function SignUpComponent({ onSwitchToSignIn }: SignUpComponentProps): JSX
           email,
           password,
           name,
-          cloudflareTurnstileToken: token,
         });
+        await userApi.signIn({ email, password });
       } catch (e) {
         setSignUpError(StringUtils.capitalizeFirstLetter((e as Error).message));
-        resetCloudflareTurnstile();
       }
     }
 
@@ -103,7 +99,7 @@ export function SignUpComponent({ onSwitchToSignIn }: SignUpComponentProps): JSX
 
   return (
     <div className="w-full max-w-[300px]">
-      <div className="mb-5 text-center text-2xl font-bold">Sign up</div>
+      <div className="mb-5 text-center text-2xl font-bold">{t('signUp')}</div>
 
       <div className="mt-4">
         <div className="space-y-2">
@@ -119,13 +115,13 @@ export function SignUpComponent({ onSwitchToSignIn }: SignUpComponentProps): JSX
           </div>
           <div className="relative flex justify-center text-sm">
             <span className="bg-white px-2 text-gray-500 dark:bg-gray-900 dark:text-gray-400">
-              or continue
+              {t('orContinue')}
             </span>
           </div>
         </div>
       )}
 
-      <div className="my-1 text-xs font-semibold">Your name</div>
+      <div className="my-1 text-xs font-semibold">{t('yourName')}</div>
       <Input
         placeholder="John Doe"
         value={name}
@@ -136,7 +132,7 @@ export function SignUpComponent({ onSwitchToSignIn }: SignUpComponentProps): JSX
         status={nameError ? 'error' : undefined}
       />
 
-      <div className="my-1 text-xs font-semibold">Your email</div>
+      <div className="my-1 text-xs font-semibold">{t('yourEmail')}</div>
       <Input
         placeholder="your@email.com"
         value={email}
@@ -148,7 +144,7 @@ export function SignUpComponent({ onSwitchToSignIn }: SignUpComponentProps): JSX
         type="email"
       />
 
-      <div className="my-1 text-xs font-semibold">Password</div>
+      <div className="my-1 text-xs font-semibold">{t('newPassword')}</div>
       <Input.Password
         placeholder="********"
         value={password}
@@ -161,7 +157,7 @@ export function SignUpComponent({ onSwitchToSignIn }: SignUpComponentProps): JSX
         visibilityToggle={{ visible: passwordVisible, onVisibleChange: setPasswordVisible }}
       />
 
-      <div className="my-1 text-xs font-semibold">Confirm password</div>
+      <div className="my-1 text-xs font-semibold">{t('confirmPassword')}</div>
       <Input.Password
         placeholder="********"
         value={confirmPassword}
@@ -179,8 +175,6 @@ export function SignUpComponent({ onSwitchToSignIn }: SignUpComponentProps): JSX
 
       <div className="mt-3" />
 
-      <CloudflareTurnstileWidget containerRef={containerRef} />
-
       <Button
         disabled={isLoading}
         loading={isLoading}
@@ -190,7 +184,7 @@ export function SignUpComponent({ onSwitchToSignIn }: SignUpComponentProps): JSX
         }}
         type="primary"
       >
-        Sign up
+        {t('signUp')}
       </Button>
 
       {signUpError && (
@@ -201,13 +195,13 @@ export function SignUpComponent({ onSwitchToSignIn }: SignUpComponentProps): JSX
 
       {onSwitchToSignIn && (
         <div className="mt-4 text-center text-sm text-gray-600 dark:text-gray-400">
-          Already have an account?{' '}
+          {t('alreadyHaveAnAccount')}{' '}
           <button
             type="button"
             onClick={onSwitchToSignIn}
             className="cursor-pointer font-medium text-blue-600 hover:text-blue-700 dark:!text-blue-500"
           >
-            Sign in
+            {t('signIn')}
           </button>
         </div>
       )}

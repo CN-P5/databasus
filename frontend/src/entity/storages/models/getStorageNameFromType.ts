@@ -1,23 +1,24 @@
+import i18n from '../../../shared/i18n/config';
 import { StorageType } from './StorageType';
 
 export const getStorageNameFromType = (type: StorageType) => {
   switch (type) {
     case StorageType.LOCAL:
-      return 'local storage';
+      return i18n.t('storages:local');
     case StorageType.S3:
-      return 'S3';
+      return i18n.t('storages:s3');
     case StorageType.GOOGLE_DRIVE:
-      return 'Google Drive';
+      return i18n.t('storages:googleDrive');
     case StorageType.NAS:
-      return 'NAS';
+      return i18n.t('storages:nas');
     case StorageType.AZURE_BLOB:
-      return 'Azure Blob Storage';
+      return i18n.t('storages:azureBlob');
     case StorageType.FTP:
-      return 'FTP';
+      return i18n.t('storages:ftp');
     case StorageType.SFTP:
-      return 'SFTP';
+      return i18n.t('storages:sftp');
     case StorageType.RCLONE:
-      return 'Rclone';
+      return i18n.t('storages:rclone');
     default:
       return '';
   }

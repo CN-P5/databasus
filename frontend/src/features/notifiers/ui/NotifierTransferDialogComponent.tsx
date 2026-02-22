@@ -1,5 +1,6 @@
 import { Button, Modal, Select, Spin } from 'antd';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { databaseApi } from '../../../entity/databases';
 import { type Notifier, notifierApi } from '../../../entity/notifiers';
@@ -12,6 +13,9 @@ interface Props {
 }
 
 export const NotifierTransferDialogComponent = ({ notifier, onClose, onTransferred }: Props) => {
+  const { t } = useTranslation('notifiers');
+  const { t: tCommon } = useTranslation('common');
+
   const [isLoading, setIsLoading] = useState(true);
   const [isNotifierInUse, setIsNotifierInUse] = useState(false);
   const [workspaces, setWorkspaces] = useState<WorkspaceResponse[]>([]);
@@ -58,7 +62,7 @@ export const NotifierTransferDialogComponent = ({ notifier, onClose, onTransferr
 
   return (
     <Modal
-      title="Transfer notifier to another workspace"
+      title={t('transferNotifierToAnotherWorkspace')}
       footer={null}
       open={true}
       onCancel={onClose}
@@ -71,37 +75,36 @@ export const NotifierTransferDialogComponent = ({ notifier, onClose, onTransferr
       ) : isNotifierInUse ? (
         <div className="py-3">
           <div className="text-gray-700 dark:text-gray-300">
-            This notifier is used by some databases. Please transfer or remove related databases
-            first.
+            {t('thisNotifierIsUsedBySomeDatabases')}
           </div>
 
           <div className="mt-5">
             <Button type="primary" onClick={onClose}>
-              OK
+              {tCommon('ok')}
             </Button>
           </div>
         </div>
       ) : (
         <div className="py-3">
           <div className="mb-3 text-gray-500 dark:text-gray-400">
-            Select a workspace to transfer this notifier to.
+            {t('selectAWorkspaceToTransferThisNotifierTo')}
           </div>
 
           <div className="mb-5 flex items-center">
-            <div className="min-w-[120px]">Target workspace</div>
+            <div className="min-w-[120px]">{t('targetWorkspace')}</div>
 
             <Select
               value={selectedWorkspaceId}
               onChange={setSelectedWorkspaceId}
               className="min-w-[200px] grow"
-              placeholder="Select workspace"
+              placeholder={t('selectWorkspace')}
               options={workspaces.map((w) => ({ label: w.name, value: w.id }))}
             />
           </div>
 
           <div className="flex gap-2">
             <Button type="default" onClick={onClose}>
-              Cancel
+              {tCommon('cancel')}
             </Button>
 
             <Button
@@ -110,7 +113,7 @@ export const NotifierTransferDialogComponent = ({ notifier, onClose, onTransferr
               loading={isTransferring}
               disabled={!selectedWorkspaceId || isTransferring}
             >
-              Transfer
+              {t('transfer')}
             </Button>
           </div>
         </div>

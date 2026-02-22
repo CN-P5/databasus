@@ -2,6 +2,7 @@ package databases
 
 import (
 	"databasus-backend/internal/util/encryption"
+	"databasus-backend/internal/util/ssh"
 	"log/slog"
 
 	"github.com/google/uuid"
@@ -16,6 +17,7 @@ type DatabaseConnector interface {
 		logger *slog.Logger,
 		encryptor encryption.FieldEncryptor,
 		databaseID uuid.UUID,
+		sshTunnel *ssh.Config,
 	) error
 
 	HideSensitiveData()

@@ -32,7 +32,6 @@ describe('MongodbConnectionStringParser', () => {
       expect(result.database).toBe('mydb');
       expect(result.authDatabase).toBe('admin');
       expect(result.useTls).toBe(false);
-      expect(result.isSrv).toBe(false);
     });
 
     it('should parse connection string without database', () => {
@@ -47,7 +46,6 @@ describe('MongodbConnectionStringParser', () => {
       expect(result.database).toBe('');
       expect(result.authDatabase).toBe('admin');
       expect(result.useTls).toBe(false);
-      expect(result.isSrv).toBe(false);
     });
 
     it('should default port to 27017 when not specified', () => {
@@ -109,7 +107,6 @@ describe('MongodbConnectionStringParser', () => {
       expect(result.password).toBe('atlaspass');
       expect(result.database).toBe('mydb');
       expect(result.useTls).toBe(true); // SRV connections use TLS by default
-      expect(result.isSrv).toBe(true);
     });
 
     it('should parse mongodb+srv:// without database', () => {
@@ -122,7 +119,6 @@ describe('MongodbConnectionStringParser', () => {
       expect(result.host).toBe('cluster0.abc123.mongodb.net');
       expect(result.database).toBe('');
       expect(result.useTls).toBe(true);
-      expect(result.isSrv).toBe(true);
     });
   });
 
@@ -318,15 +314,13 @@ describe('MongodbConnectionStringParser', () => {
       expect(result.format).toBe('key-value');
     });
 
-    it('should allow missing password in key-value format (returns empty password)', () => {
-      const result = expectSuccess(
+    it('should return error for key-value format missing password', () => {
+      const result = expectError(
         MongodbConnectionStringParser.parse('host=localhost database=mydb user=admin'),
       );
 
-      expect(result.host).toBe('localhost');
-      expect(result.username).toBe('admin');
-      expect(result.password).toBe('');
-      expect(result.database).toBe('mydb');
+      expect(result.error).toContain('Password');
+      expect(result.format).toBe('key-value');
     });
   });
 
@@ -357,15 +351,12 @@ describe('MongodbConnectionStringParser', () => {
       expect(result.error).toContain('Username');
     });
 
-    it('should allow missing password in URI (returns empty password)', () => {
-      const result = expectSuccess(
+    it('should return error for missing password in URI', () => {
+      const result = expectError(
         MongodbConnectionStringParser.parse('mongodb://user@host:27017/db'),
       );
 
-      expect(result.username).toBe('user');
-      expect(result.password).toBe('');
-      expect(result.host).toBe('host');
-      expect(result.database).toBe('db');
+      expect(result.error).toContain('Password');
     });
 
     it('should return error for mysql:// format (wrong database type)', () => {
@@ -453,109 +444,6 @@ describe('MongodbConnectionStringParser', () => {
       );
 
       expect(result.database).toBe('');
-    });
-  });
-
-  describe('Direct Connection Handling', () => {
-    it('should parse directConnection=true from URI', () => {
-      const result = expectSuccess(
-        MongodbConnectionStringParser.parse(
-          'mongodb://user:pass@host:27017/db?authSource=admin&directConnection=true',
-        ),
-      );
-
-      expect(result.isDirectConnection).toBe(true);
-    });
-
-    it('should default isDirectConnection to false when not specified in URI', () => {
-      const result = expectSuccess(
-        MongodbConnectionStringParser.parse('mongodb://user:pass@host:27017/db'),
-      );
-
-      expect(result.isDirectConnection).toBe(false);
-    });
-
-    it('should parse isDirectConnection=true from key-value format', () => {
-      const result = expectSuccess(
-        MongodbConnectionStringParser.parse(
-          'host=localhost port=27017 database=mydb user=admin password=secret directConnection=true',
-        ),
-      );
-
-      expect(result.isDirectConnection).toBe(true);
-    });
-
-    it('should default isDirectConnection to false in key-value format when not specified', () => {
-      const result = expectSuccess(
-        MongodbConnectionStringParser.parse(
-          'host=localhost port=27017 database=mydb user=admin password=secret',
-        ),
-      );
-
-      expect(result.isDirectConnection).toBe(false);
-    });
-  });
-
-  describe('Password Placeholder Handling', () => {
-    it('should treat <db_password> placeholder as empty password in URI format', () => {
-      const result = expectSuccess(
-        MongodbConnectionStringParser.parse('mongodb://user:<db_password>@host:27017/db'),
-      );
-
-      expect(result.username).toBe('user');
-      expect(result.password).toBe('');
-      expect(result.host).toBe('host');
-      expect(result.database).toBe('db');
-    });
-
-    it('should treat <password> placeholder as empty password in URI format', () => {
-      const result = expectSuccess(
-        MongodbConnectionStringParser.parse('mongodb://user:<password>@host:27017/db'),
-      );
-
-      expect(result.username).toBe('user');
-      expect(result.password).toBe('');
-      expect(result.host).toBe('host');
-      expect(result.database).toBe('db');
-    });
-
-    it('should treat <db_password> placeholder as empty password in SRV format', () => {
-      const result = expectSuccess(
-        MongodbConnectionStringParser.parse(
-          'mongodb+srv://user:<db_password>@cluster0.mongodb.net/db',
-        ),
-      );
-
-      expect(result.username).toBe('user');
-      expect(result.password).toBe('');
-      expect(result.host).toBe('cluster0.mongodb.net');
-      expect(result.isSrv).toBe(true);
-    });
-
-    it('should treat <db_password> placeholder as empty password in key-value format', () => {
-      const result = expectSuccess(
-        MongodbConnectionStringParser.parse(
-          'host=localhost database=mydb user=admin password=<db_password>',
-        ),
-      );
-
-      expect(result.host).toBe('localhost');
-      expect(result.username).toBe('admin');
-      expect(result.password).toBe('');
-      expect(result.database).toBe('mydb');
-    });
-
-    it('should treat <password> placeholder as empty password in key-value format', () => {
-      const result = expectSuccess(
-        MongodbConnectionStringParser.parse(
-          'host=localhost database=mydb user=admin password=<password>',
-        ),
-      );
-
-      expect(result.host).toBe('localhost');
-      expect(result.username).toBe('admin');
-      expect(result.password).toBe('');
-      expect(result.database).toBe('mydb');
     });
   });
 });

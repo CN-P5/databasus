@@ -1,0 +1,18 @@
+{
+  "welcomeToDatabasusPlayground": "Welcome to Databasus playground",
+  "understood": "Understood",
+  "whatIsPlayground": "What is Playground?",
+  "playgroundDescription": "Playground is a dev environment of Databasus development team. It is used by Databasus dev team to test new features and see issues which hard to detect when using self hosted (without logs or reports). <b>Here you can make backups for small and not critical databases for free</b>",
+  "whatIsLimit": "What is limit?",
+  "singleBackupSize": "Single backup size - 100 MB (~1.5 GB database)",
+  "storePeriod": "Store period - 7 days",
+  "isItSecure": "Is it secure?",
+  "securityDescription": "Yes, it's regular Databasus installation, secured and maintained by Databasus team. More about security <a href=\"https://databasus.com/security\" target=\"_blank\" rel=\"noopener noreferrer\" class=\"text-blue-600 hover:underline dark:text-blue-400\">you can read here</a>",
+  "canMyDataBeCorrupted": "Can my data be corrupted?",
+  "corruptionDescription": "No, because playground use only read-only users and cannot affect your DB. Only issue you can face is instability: playground background workers frequently reloaded so backup can be slower or be restarted due to app restart. Do not rely production DBs on playground, please. At once we may clean backups or something like this. At least, check your backups here once a week",
+  "whatIfISeeAnIssue": "What if I see an issue?",
+  "issueDescription": "Create <a href=\"https://github.com/databasus/databasus/issues\" target=\"_blank\" rel=\"noopener noreferrer\" class=\"text-blue-600 hover:underline dark:text-blue-400\">GitHub issue</a> or write <a href=\"https://t.me/databasus_community\" target=\"_blank\" rel=\"noopener noreferrer\" class=\"text-blue-600 hover:underline dark:text-blue-400\">to community</a>",
+  "continueWithGitHub": "Continue with GitHub",
+  "continueWithGoogle": "Continue with Google",
+  "invalidOAuthConfiguration": "Invalid OAuth configuration"
+}

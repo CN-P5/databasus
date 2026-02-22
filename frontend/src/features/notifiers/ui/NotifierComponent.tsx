@@ -7,6 +7,7 @@ import {
 import { Button, Input, Spin } from 'antd';
 import { useState } from 'react';
 import { useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { databaseApi } from '../../../entity/databases';
 import { notifierApi } from '../../../entity/notifiers';
@@ -32,6 +33,9 @@ export const NotifierComponent = ({
   onNotifierTransferred,
   isCanManageNotifiers,
 }: Props) => {
+  const { t } = useTranslation('notifiers');
+  const { t: tCommon } = useTranslation('common');
+
   const [notifier, setNotifier] = useState<Notifier | undefined>();
 
   const [isEditName, setIsEditName] = useState(false);
@@ -56,8 +60,8 @@ export const NotifierComponent = ({
       .sendTestNotification(notifier.id)
       .then(() => {
         ToastHelper.showToast({
-          title: 'Test notification sent!',
-          description: 'Test notification sent successfully',
+          title: t('testNotificationSent'),
+          description: t('testNotificationSentSuccessfully'),
         });
 
         if (notifier.lastSendError) {
@@ -81,9 +85,7 @@ export const NotifierComponent = ({
     try {
       const isNotifierUsing = await databaseApi.isNotifierUsing(notifier.id);
       if (isNotifierUsing) {
-        alert(
-          'Notifier is used by some databases. Please remove the notifier from databases first.',
-        );
+        alert(t('notifierIsUsedBySomeDatabasesRemoveFirst'));
         setIsShowRemoveConfirm(false);
       } else {
         await notifierApi.deleteNotifier(notifier.id);
@@ -162,7 +164,7 @@ export const NotifierComponent = ({
                       setEditNotifier({ ...editNotifier, name: e.target.value });
                       setIsNameUnsaved(true);
                     }}
-                    placeholder="Enter name..."
+                    placeholder={t('enterName')}
                     size="large"
                   />
 
@@ -189,7 +191,7 @@ export const NotifierComponent = ({
                     loading={isSaving}
                     disabled={!editNotifier?.name}
                   >
-                    Save
+                    {tCommon('save')}
                   </Button>
                 )}
               </div>
@@ -199,29 +201,29 @@ export const NotifierComponent = ({
               <div className="max-w-[400px] rounded border border-red-600 px-3 py-3">
                 <div className="mt-1 flex items-center text-sm font-bold text-red-600">
                   <InfoCircleOutlined className="mr-2" style={{ color: 'red' }} />
-                  Send error
+                  {t('sendError')}
                 </div>
 
                 <div className="mt-3 text-sm">
-                  The error:
+                  {t('theError')}
                   <br />
                   {notifier.lastSendError}
                 </div>
 
                 <div className="mt-3 text-sm break-words whitespace-pre-wrap text-gray-500 dark:text-gray-400">
-                  To clean this error (choose any):
+                  {t('toCleanThisErrorChooseAny')}
                   <ul>
                     <li>
-                      - send test notification via button below (even if you updated settings);
+                      {t('sendTestNotificationViaButtonBelow')}
                     </li>
-                    <li>- wait until the next notification is sent without errors;</li>
+                    <li>{t('waitUntilNextNotificationSentWithoutErrors')}</li>
                   </ul>
                 </div>
               </div>
             )}
 
             <div className="mt-5 flex items-center font-bold">
-              <div>Notifier settings</div>
+              <div>{t('notifierSettings')}</div>
 
               {!isEditSettings && isCanManageNotifiers ? (
                 <div className="ml-2 h-4 w-4 cursor-pointer" onClick={() => startEdit('settings')}>
@@ -260,7 +262,7 @@ export const NotifierComponent = ({
                   loading={isSendingTestNotification}
                   disabled={isSendingTestNotification}
                 >
-                  Send test notification
+                  {t('sendTestNotification')}
                 </Button>
 
                 {isCanManageNotifiers && (
@@ -293,8 +295,8 @@ export const NotifierComponent = ({
           <ConfirmationComponent
             onConfirm={remove}
             onDecline={() => setIsShowRemoveConfirm(false)}
-            description="Are you sure you want to remove this notifier? This action cannot be undone."
-            actionText="Remove"
+            description={t('areYouSureToRemoveThisNotifier')}
+            actionText={t('remove')}
             actionButtonColor="red"
           />
         )}

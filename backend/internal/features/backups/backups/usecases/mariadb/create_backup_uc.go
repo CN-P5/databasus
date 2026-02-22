@@ -19,7 +19,6 @@ import (
 
 	"databasus-backend/internal/config"
 	common "databasus-backend/internal/features/backups/backups/common"
-	backups_core "databasus-backend/internal/features/backups/backups/core"
 	backup_encryption "databasus-backend/internal/features/backups/backups/encryption"
 	backups_config "databasus-backend/internal/features/backups/config"
 	"databasus-backend/internal/features/databases"
@@ -27,6 +26,7 @@ import (
 	encryption_secrets "databasus-backend/internal/features/encryption/secrets"
 	"databasus-backend/internal/features/storages"
 	"databasus-backend/internal/util/encryption"
+	"databasus-backend/internal/util/ssh"
 	"databasus-backend/internal/util/tools"
 )
 
@@ -53,7 +53,7 @@ type writeResult struct {
 
 func (uc *CreateMariadbBackupUsecase) Execute(
 	ctx context.Context,
-	backup *backups_core.Backup,
+	backupID uuid.UUID,
 	backupConfig *backups_config.BackupConfig,
 	db *databases.Database,
 	storage *storages.Storage,
@@ -79,11 +79,36 @@ func (uc *CreateMariadbBackupUsecase) Execute(
 		return nil, fmt.Errorf("failed to decrypt database password: %w", err)
 	}
 
-	args := uc.buildMariadbDumpArgs(mdb)
+	host := mdb.Host
+	port := mdb.Port
+	var tunnel *ssh.Tunnel
+
+	if db.SSHTunnel != nil && db.SSHTunnel.Enabled {
+		sshConfig, err := db.SSHTunnel.ToSSHConfigWithDecrypt(uc.fieldEncryptor, db.ID)
+		if err != nil {
+			return nil, fmt.Errorf("failed to prepare SSH tunnel config: %w", err)
+		}
+
+		tunnel = ssh.NewTunnel(sshConfig)
+		if err := tunnel.Start(ctx, mdb.Host, mdb.Port); err != nil {
+			return nil, fmt.Errorf("failed to start SSH tunnel: %w", err)
+		}
+		defer tunnel.Stop()
+
+		host = "127.0.0.1"
+		port = tunnel.GetLocalPort()
+
+		uc.logger.Info("SSH tunnel established for MariaDB backup",
+			"originalHost", mdb.Host,
+			"localPort", port,
+		)
+	}
+
+	args := uc.buildMariadbDumpArgsWithHostPort(mdb, host, port)
 
 	return uc.streamToStorage(
 		ctx,
-		backup,
+		backupID,
 		backupConfig,
 		tools.GetMariadbExecutable(
 			tools.MariadbExecutableMariadbDump,
@@ -96,28 +121,30 @@ func (uc *CreateMariadbBackupUsecase) Execute(
 		storage,
 		backupProgressListener,
 		mdb,
+		host,
+		port,
 	)
 }
 
-func (uc *CreateMariadbBackupUsecase) buildMariadbDumpArgs(
+func (uc *CreateMariadbBackupUsecase) buildMariadbDumpArgsWithHostPort(
 	mdb *mariadbtypes.MariadbDatabase,
+	host string,
+	port int,
 ) []string {
 	args := []string{
-		"--host=" + mdb.Host,
-		"--port=" + strconv.Itoa(mdb.Port),
+		"--host=" + host,
+		"--port=" + strconv.Itoa(port),
 		"--user=" + mdb.Username,
 		"--single-transaction",
 		"--routines",
 		"--quick",
-		"--skip-extended-insert",
 		"--verbose",
 	}
 
 	if mdb.HasPrivilege("TRIGGER") {
 		args = append(args, "--triggers")
 	}
-
-	if mdb.HasPrivilege("EVENT") && !mdb.IsExcludeEvents {
+	if mdb.HasPrivilege("EVENT") {
 		args = append(args, "--events")
 	}
 
@@ -137,7 +164,7 @@ func (uc *CreateMariadbBackupUsecase) buildMariadbDumpArgs(
 
 func (uc *CreateMariadbBackupUsecase) streamToStorage(
 	parentCtx context.Context,
-	backup *backups_core.Backup,
+	backupID uuid.UUID,
 	backupConfig *backups_config.BackupConfig,
 	mariadbBin string,
 	args []string,
@@ -145,13 +172,15 @@ func (uc *CreateMariadbBackupUsecase) streamToStorage(
 	storage *storages.Storage,
 	backupProgressListener func(completedMBs float64),
 	mdbConfig *mariadbtypes.MariadbDatabase,
+	host string,
+	port int,
 ) (*common.BackupMetadata, error) {
 	uc.logger.Info("Streaming MariaDB backup to storage", "mariadbBin", mariadbBin)
 
 	ctx, cancel := uc.createBackupContext(parentCtx)
 	defer cancel()
 
-	myCnfFile, err := uc.createTempMyCnfFile(mdbConfig, password)
+	myCnfFile, err := uc.createTempMyCnfFile(mdbConfig, password, host, port)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create .my.cnf: %w", err)
 	}
@@ -188,7 +217,7 @@ func (uc *CreateMariadbBackupUsecase) streamToStorage(
 	storageReader, storageWriter := io.Pipe()
 
 	finalWriter, encryptionWriter, backupMetadata, err := uc.setupBackupEncryption(
-		backup.ID,
+		backupID,
 		backupConfig,
 		storageWriter,
 	)
@@ -205,13 +234,7 @@ func (uc *CreateMariadbBackupUsecase) streamToStorage(
 
 	saveErrCh := make(chan error, 1)
 	go func() {
-		saveErr := storage.SaveFile(
-			ctx,
-			uc.fieldEncryptor,
-			uc.logger,
-			backup.FileName,
-			storageReader,
-		)
+		saveErr := storage.SaveFile(ctx, uc.fieldEncryptor, uc.logger, backupID, storageReader)
 		saveErrCh <- saveErr
 	}()
 
@@ -274,6 +297,8 @@ func (uc *CreateMariadbBackupUsecase) streamToStorage(
 func (uc *CreateMariadbBackupUsecase) createTempMyCnfFile(
 	mdbConfig *mariadbtypes.MariadbDatabase,
 	password string,
+	host string,
+	port int,
 ) (string, error) {
 	tempFolder := config.GetEnv().TempFolder
 	if err := os.MkdirAll(tempFolder, 0700); err != nil {
@@ -300,7 +325,7 @@ user=%s
 password="%s"
 host=%s
 port=%d
-`, mdbConfig.Username, tools.EscapeMariadbPassword(password), mdbConfig.Host, mdbConfig.Port)
+`, mdbConfig.Username, tools.EscapeMariadbPassword(password), host, port)
 
 	if mdbConfig.IsHttps {
 		content += "ssl=true\n"
@@ -427,9 +452,7 @@ func (uc *CreateMariadbBackupUsecase) setupBackupEncryption(
 	backupConfig *backups_config.BackupConfig,
 	storageWriter io.WriteCloser,
 ) (io.Writer, *backup_encryption.EncryptionWriter, common.BackupMetadata, error) {
-	metadata := common.BackupMetadata{
-		BackupID: backupID,
-	}
+	metadata := common.BackupMetadata{}
 
 	if backupConfig.Encryption != backups_config.BackupEncryptionEncrypted {
 		metadata.Encryption = backups_config.BackupEncryptionNone

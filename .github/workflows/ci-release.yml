@@ -9,7 +9,7 @@ on:
 
 jobs:
   lint-backend:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     container:
       image: golang:1.24.9
       volumes:
@@ -109,7 +109,7 @@ jobs:
           npm run test
 
   test-backend:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     needs: [lint-backend]
     container:
       image: golang:1.24.9
@@ -200,11 +200,11 @@ jobs:
           TEST_TELEGRAM_BOT_TOKEN=${{ secrets.TEST_TELEGRAM_BOT_TOKEN }}
           TEST_TELEGRAM_CHAT_ID=${{ secrets.TEST_TELEGRAM_CHAT_ID }}
           # supabase
-          TEST_SUPABASE_HOST=${{ secrets.TEST_SUPABASE_HOST }}
-          TEST_SUPABASE_PORT=${{ secrets.TEST_SUPABASE_PORT }}
-          TEST_SUPABASE_USERNAME=${{ secrets.TEST_SUPABASE_USERNAME }}
-          TEST_SUPABASE_PASSWORD=${{ secrets.TEST_SUPABASE_PASSWORD }}
-          TEST_SUPABASE_DATABASE=${{ secrets.TEST_SUPABASE_DATABASE }}
+          # TEST_SUPABASE_HOST=${{ secrets.TEST_SUPABASE_HOST }}
+          # TEST_SUPABASE_PORT=${{ secrets.TEST_SUPABASE_PORT }}
+          # TEST_SUPABASE_USERNAME=${{ secrets.TEST_SUPABASE_USERNAME }}
+          # TEST_SUPABASE_PASSWORD=${{ secrets.TEST_SUPABASE_PASSWORD }}
+          # TEST_SUPABASE_DATABASE=${{ secrets.TEST_SUPABASE_DATABASE }}
           # testing MongoDB
           TEST_MONGODB_40_PORT=27040
           TEST_MONGODB_42_PORT=27042
@@ -438,7 +438,7 @@ jobs:
           echo "Cleanup complete"
 
   determine-version:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     container:
       image: node:20
     needs: [test-backend, test-frontend]
@@ -533,7 +533,7 @@ jobs:
           fi
 
   build-only:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     needs: [test-backend, test-frontend]
     if: ${{ github.ref == 'refs/heads/main' && contains(github.event.head_commit.message, '[skip-release]') }}
     steps:
@@ -566,11 +566,11 @@ jobs:
           build-args: |
             APP_VERSION=dev-${{ github.sha }}
           tags: |
-            databasus/databasus:latest
-            databasus/databasus:${{ github.sha }}
+            heibai2006/databasus:latest
+            heibai2006/databasus:${{ github.sha }}
 
   build-and-push:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     needs: [determine-version]
     if: ${{ needs.determine-version.outputs.should_release == 'true' }}
     permissions:
@@ -605,12 +605,12 @@ jobs:
           build-args: |
             APP_VERSION=${{ needs.determine-version.outputs.new_version }}
           tags: |
-            databasus/databasus:latest
-            databasus/databasus:v${{ needs.determine-version.outputs.new_version }}
-            databasus/databasus:${{ github.sha }}
+            heibai2006/databasus:latest
+            heibai2006/databasus:v${{ needs.determine-version.outputs.new_version }}
+            heibai2006/databasus:${{ github.sha }}
 
   release:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     container:
       image: node:20
     needs: [determine-version, build-and-push]
@@ -707,7 +707,7 @@ jobs:
 
           # Add Docker image info
           CHANGELOG="${CHANGELOG}### 🐳 Docker\n"
-          CHANGELOG="${CHANGELOG}- **Image**: \`databasus/databasus:v${NEW_VERSION}\`\n"
+          CHANGELOG="${CHANGELOG}- **Image**: \`heibai2006/databasus:v${NEW_VERSION}\`\n"
           CHANGELOG="${CHANGELOG}- **Platforms**: linux/amd64, linux/arm64\n\n"
 
           # Set output for GitHub release
@@ -729,7 +729,7 @@ jobs:
           prerelease: false
 
   publish-helm-chart:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     container:
       image: alpine:3.19
       volumes:
@@ -777,4 +777,4 @@ jobs:
       - name: Push Helm chart to GHCR
         run: |
           VERSION="${{ needs.determine-version.outputs.new_version }}"
-          helm push databasus-${VERSION}.tgz oci://ghcr.io/databasus/charts
+          helm push databasus-${VERSION}.tgz oci://ghcr.io/cn-p5/charts

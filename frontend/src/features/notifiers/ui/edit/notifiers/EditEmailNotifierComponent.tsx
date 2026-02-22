@@ -1,5 +1,6 @@
 import { InfoCircleOutlined } from '@ant-design/icons';
 import { Input, Tooltip } from 'antd';
+import { useTranslation } from 'react-i18next';
 
 import type { Notifier } from '../../../../../entity/notifiers';
 
@@ -10,10 +11,12 @@ interface Props {
 }
 
 export function EditEmailNotifierComponent({ notifier, setNotifier, setUnsaved }: Props) {
+  const { t } = useTranslation('notifiers');
+
   return (
     <>
       <div className="mb-1 flex w-full flex-col items-start sm:flex-row sm:items-center">
-        <div className="mb-1 min-w-[150px] sm:mb-0">Target email</div>
+        <div className="mb-1 min-w-[150px] sm:mb-0">{t('targetEmail')}</div>
         <div className="flex items-center">
           <Input
             value={notifier?.emailNotifier?.targetEmail || ''}
@@ -36,7 +39,7 @@ export function EditEmailNotifierComponent({ notifier, setNotifier, setUnsaved }
 
           <Tooltip
             className="cursor-pointer"
-            title="The email where you want to receive the message"
+            title={t('theEmailWhereYouWantToReceiveMessage')}
           >
             <InfoCircleOutlined className="ml-2" style={{ color: 'gray' }} />
           </Tooltip>
@@ -44,7 +47,7 @@ export function EditEmailNotifierComponent({ notifier, setNotifier, setUnsaved }
       </div>
 
       <div className="mb-1 flex w-full flex-col items-start sm:flex-row sm:items-center">
-        <div className="mb-1 min-w-[150px] sm:mb-0">SMTP host</div>
+        <div className="mb-1 min-w-[150px] sm:mb-0">{t('smtpHost')}</div>
         <Input
           value={notifier?.emailNotifier?.smtpHost || ''}
           onChange={(e) => {
@@ -66,7 +69,7 @@ export function EditEmailNotifierComponent({ notifier, setNotifier, setUnsaved }
       </div>
 
       <div className="mb-1 flex w-full flex-col items-start sm:flex-row sm:items-center">
-        <div className="mb-1 min-w-[150px] sm:mb-0">SMTP port</div>
+        <div className="mb-1 min-w-[150px] sm:mb-0">{t('smtpPort')}</div>
         <Input
           type="number"
           value={notifier?.emailNotifier?.smtpPort || ''}
@@ -89,7 +92,7 @@ export function EditEmailNotifierComponent({ notifier, setNotifier, setUnsaved }
       </div>
 
       <div className="mb-1 flex w-full flex-col items-start sm:flex-row sm:items-center">
-        <div className="mb-1 min-w-[150px] sm:mb-0">SMTP user</div>
+        <div className="mb-1 min-w-[150px] sm:mb-0">{t('smtpUser')}</div>
         <Input
           value={notifier?.emailNotifier?.smtpUser || ''}
           onChange={(e) => {
@@ -111,7 +114,7 @@ export function EditEmailNotifierComponent({ notifier, setNotifier, setUnsaved }
       </div>
 
       <div className="mb-1 flex w-full flex-col items-start sm:flex-row sm:items-center">
-        <div className="mb-1 min-w-[150px] sm:mb-0">SMTP password</div>
+        <div className="mb-1 min-w-[150px] sm:mb-0">{t('smtpPassword')}</div>
         <Input
           type="password"
           value={notifier?.emailNotifier?.smtpPassword || ''}
@@ -134,7 +137,7 @@ export function EditEmailNotifierComponent({ notifier, setNotifier, setUnsaved }
       </div>
 
       <div className="mb-1 flex w-full flex-col items-start sm:flex-row sm:items-center">
-        <div className="mb-1 min-w-[150px] sm:mb-0">From</div>
+        <div className="mb-1 min-w-[150px] sm:mb-0">{t('from')}</div>
         <div className="flex items-center">
           <Input
             value={notifier?.emailNotifier?.from || ''}
@@ -157,7 +160,7 @@ export function EditEmailNotifierComponent({ notifier, setNotifier, setUnsaved }
 
           <Tooltip
             className="cursor-pointer"
-            title="Optional. Email address to use as sender. If empty, will use SMTP user or auto-generate from host"
+            title={t('optionalEmailAddressToUseAsSender')}
           >
             <InfoCircleOutlined className="ml-2" style={{ color: 'gray' }} />
           </Tooltip>

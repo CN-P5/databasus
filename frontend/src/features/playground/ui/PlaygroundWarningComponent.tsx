@@ -1,6 +1,7 @@
 import { Modal } from 'antd';
 import type { JSX } from 'react';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { IS_CLOUD } from '../../../constants';
 
@@ -9,6 +10,7 @@ const STORAGE_KEY = 'databasus_playground_info_dismissed';
 const TIMEOUT_SECONDS = 30;
 
 export const PlaygroundWarningComponent = (): JSX.Element => {
+  const { t } = useTranslation('playground');
   const [isVisible, setIsVisible] = useState(false);
   const [remainingSeconds, setRemainingSeconds] = useState(TIMEOUT_SECONDS);
   const [isButtonEnabled, setIsButtonEnabled] = useState(false);
@@ -59,12 +61,12 @@ export const PlaygroundWarningComponent = (): JSX.Element => {
 
   return (
     <Modal
-      title="Welcome to Databasus playground"
+      title={t('welcomeToDatabasusPlayground')}
       open={isVisible}
       onOk={handleClose}
       okText={
         <div className="min-w-[100px]">
-          {isButtonEnabled ? 'Understood' : `${remainingSeconds}`}
+          {isButtonEnabled ? t('understood') : `${remainingSeconds}`}
         </div>
       }
       okButtonProps={{ disabled: !isButtonEnabled }}
@@ -76,72 +78,33 @@ export const PlaygroundWarningComponent = (): JSX.Element => {
     >
       <div className="space-y-6 py-4">
         <div>
-          <h3 className="mb-2 text-lg font-semibold">What is Playground?</h3>
-          <p className="text-gray-700 dark:text-gray-300">
-            Playground is a dev environment of Databasus development team. It is used by Databasus
-            dev team to test new features and see issues which hard to detect when using self hosted
-            (without logs or reports).{' '}
-            <b>Here you can make backups for small and not critical databases for free</b>
-          </p>
+          <h3 className="mb-2 text-lg font-semibold">{t('whatIsPlayground')}</h3>
+          <p className="text-gray-700 dark:text-gray-300" dangerouslySetInnerHTML={{ __html: t('playgroundDescription') }} />
         </div>
 
         <div>
-          <h3 className="mb-2 text-lg font-semibold">What is limit?</h3>
+          <h3 className="mb-2 text-lg font-semibold">{t('whatIsLimit')}</h3>
           <ul className="list-disc space-y-1 pl-5 text-gray-700 dark:text-gray-300">
-            <li>Single backup size - 100 MB (~1.5 GB database)</li>
-            <li>Store period - 7 days</li>
+            <li>{t('singleBackupSize')}</li>
+            <li>{t('storePeriod')}</li>
           </ul>
         </div>
 
         <div>
-          <h3 className="mb-2 text-lg font-semibold">Is it secure?</h3>
+          <h3 className="mb-2 text-lg font-semibold">{t('isItSecure')}</h3>
+          <p className="text-gray-700 dark:text-gray-300" dangerouslySetInnerHTML={{ __html: t('securityDescription') }} />
+        </div>
+
+        <div>
+          <h3 className="mb-2 text-lg font-semibold">{t('canMyDataBeCorrupted')}</h3>
           <p className="text-gray-700 dark:text-gray-300">
-            Yes, it&apos;s regular Databasus installation, secured and maintained by Databasus team.
-            More about security{' '}
-            <a
-              href="https://databasus.com/security"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-blue-600 hover:underline dark:text-blue-400"
-            >
-              you can read here
-            </a>
+            {t('corruptionDescription')}
           </p>
         </div>
 
         <div>
-          <h3 className="mb-2 text-lg font-semibold">Can my data be currepted?</h3>
-          <p className="text-gray-700 dark:text-gray-300">
-            No, because playground use only read-only users and cannot affect your DB. Only issue
-            you can face is instability: playground background workers frequently reloaded so backup
-            can be slower or be restarted due to app restart. Do not rely production DBs on
-            playground, please. At once we may clean backups or something like this. At least, check
-            your backups here once a week
-          </p>
-        </div>
-
-        <div>
-          <h3 className="mb-2 text-lg font-semibold">What if I see an issue?</h3>
-          <p className="text-gray-700 dark:text-gray-300">
-            Create{' '}
-            <a
-              href="https://github.com/databasus/databasus/issues"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-blue-600 hover:underline dark:text-blue-400"
-            >
-              GitHub issue
-            </a>{' '}
-            or write{' '}
-            <a
-              href="https://t.me/databasus_community"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-blue-600 hover:underline dark:text-blue-400"
-            >
-              to the community
-            </a>
-          </p>
+          <h3 className="mb-2 text-lg font-semibold">{t('whatIfISeeAnIssue')}</h3>
+          <p className="text-gray-700 dark:text-gray-300" dangerouslySetInnerHTML={{ __html: t('issueDescription') }} />
         </div>
       </div>
     </Modal>

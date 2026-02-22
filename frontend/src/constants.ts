@@ -3,7 +3,6 @@ interface RuntimeConfig {
   GITHUB_CLIENT_ID?: string;
   GOOGLE_CLIENT_ID?: string;
   IS_EMAIL_CONFIGURED?: string;
-  CLOUDFLARE_TURNSTILE_SITE_KEY?: string;
 }
 
 declare global {
@@ -15,7 +14,7 @@ declare global {
 export function getApplicationServer() {
   const origin = window.location.origin;
   const url = new URL(origin);
-
+  
   const isDevelopment = import.meta.env.MODE === 'development';
 
   if (isDevelopment) {
@@ -39,11 +38,6 @@ export const GOOGLE_CLIENT_ID =
 export const IS_EMAIL_CONFIGURED =
   window.__RUNTIME_CONFIG__?.IS_EMAIL_CONFIGURED === 'true' ||
   import.meta.env.VITE_IS_EMAIL_CONFIGURED === 'true';
-
-export const CLOUDFLARE_TURNSTILE_SITE_KEY =
-  window.__RUNTIME_CONFIG__?.CLOUDFLARE_TURNSTILE_SITE_KEY ||
-  import.meta.env.VITE_CLOUDFLARE_TURNSTILE_SITE_KEY ||
-  '';
 
 export function getOAuthRedirectUri(): string {
   return `${window.location.origin}/auth/callback`;

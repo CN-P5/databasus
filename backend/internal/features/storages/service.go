@@ -92,8 +92,6 @@ func (s *StorageService) SaveStorage(
 
 		existingStorage.Update(storage)
 
-		oldName := existingStorage.Name
-
 		if err := existingStorage.EncryptSensitiveData(s.fieldEncryptor); err != nil {
 			return err
 		}
@@ -107,19 +105,11 @@ func (s *StorageService) SaveStorage(
 			return err
 		}
 
-		if oldName != existingStorage.Name {
-			s.auditLogService.WriteAuditLog(
-				fmt.Sprintf("Storage renamed from '%s' to '%s'", oldName, existingStorage.Name),
-				&user.ID,
-				&workspaceID,
-			)
-		} else {
-			s.auditLogService.WriteAuditLog(
-				fmt.Sprintf("Storage updated: %s", existingStorage.Name),
-				&user.ID,
-				&workspaceID,
-			)
-		}
+		s.auditLogService.WriteAuditLog(
+			fmt.Sprintf("Storage updated: %s", existingStorage.Name),
+			&user.ID,
+			&workspaceID,
+		)
 	} else {
 		storage.WorkspaceID = workspaceID
 
@@ -378,26 +368,9 @@ func (s *StorageService) TransferStorageToWorkspace(
 		return err
 	}
 
-	sourceWorkspace, err := s.workspaceService.GetWorkspaceByID(sourceWorkspaceID)
-	if err != nil {
-		return fmt.Errorf("failed to get source workspace: %w", err)
-	}
-
-	targetWorkspace, err := s.workspaceService.GetWorkspaceByID(targetWorkspaceID)
-	if err != nil {
-		return fmt.Errorf("failed to get target workspace: %w", err)
-	}
-
 	s.auditLogService.WriteAuditLog(
-		fmt.Sprintf("Storage transferred out: %s to workspace '%s'",
-			existingStorage.Name, targetWorkspace.Name),
-		&user.ID,
-		&sourceWorkspaceID,
-	)
-
-	s.auditLogService.WriteAuditLog(
-		fmt.Sprintf("Storage transferred in: %s from workspace '%s'",
-			existingStorage.Name, sourceWorkspace.Name),
+		fmt.Sprintf("Storage transferred: %s from workspace %s to workspace %s",
+			existingStorage.Name, sourceWorkspaceID, targetWorkspaceID),
 		&user.ID,
 		&targetWorkspaceID,
 	)

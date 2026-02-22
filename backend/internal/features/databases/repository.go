@@ -48,13 +48,13 @@ func (r *DatabaseRepository) Save(database *Database) (*Database, error) {
 
 		if isNew {
 			if err := tx.Create(database).
-				Omit("Postgresql", "Mysql", "Mariadb", "Mongodb", "Notifiers").
+				Omit("Postgresql", "Mysql", "Mariadb", "Mongodb", "Notifiers", "SSHTunnel").
 				Error; err != nil {
 				return err
 			}
 		} else {
 			if err := tx.Save(database).
-				Omit("Postgresql", "Mysql", "Mariadb", "Mongodb", "Notifiers").
+				Omit("Postgresql", "Mysql", "Mariadb", "Mongodb", "Notifiers", "SSHTunnel").
 				Error; err != nil {
 				return err
 			}
@@ -111,6 +111,24 @@ func (r *DatabaseRepository) Save(database *Database) (*Database, error) {
 			}
 		}
 
+		if database.SSHTunnel != nil {
+			database.SSHTunnel.DatabaseID = database.ID
+			if database.SSHTunnel.ID == uuid.Nil {
+				database.SSHTunnel.ID = uuid.New()
+				if err := tx.Create(database.SSHTunnel).Error; err != nil {
+					return err
+				}
+			} else {
+				if err := tx.Save(database.SSHTunnel).Error; err != nil {
+					return err
+				}
+			}
+		} else {
+			if err := tx.Where("database_id = ?", database.ID).Delete(&SSHTunnelConfig{}).Error; err != nil {
+				return err
+			}
+		}
+
 		if err := tx.
 			Model(database).
 			Association("Notifiers").
@@ -137,6 +155,7 @@ func (r *DatabaseRepository) FindByID(id uuid.UUID) (*Database, error) {
 		Preload("Mysql").
 		Preload("Mariadb").
 		Preload("Mongodb").
+		Preload("SSHTunnel").
 		Preload("Notifiers").
 		Where("id = ?", id).
 		First(&database).Error; err != nil {
@@ -155,6 +174,7 @@ func (r *DatabaseRepository) FindByWorkspaceID(workspaceID uuid.UUID) ([]*Databa
 		Preload("Mysql").
 		Preload("Mariadb").
 		Preload("Mongodb").
+		Preload("SSHTunnel").
 		Preload("Notifiers").
 		Where("workspace_id = ?", workspaceID).
 		Order("CASE WHEN health_status = 'UNAVAILABLE' THEN 1 WHEN health_status = 'AVAILABLE' THEN 2 WHEN health_status IS NULL THEN 3 ELSE 4 END, name ASC").
@@ -205,6 +225,10 @@ func (r *DatabaseRepository) Delete(id uuid.UUID) error {
 			}
 		}
 
+		if err := tx.Where("database_id = ?", id).Delete(&SSHTunnelConfig{}).Error; err != nil {
+			return err
+		}
+
 		if err := tx.Delete(&Database{}, id).Error; err != nil {
 			return err
 		}
@@ -236,6 +260,7 @@ func (r *DatabaseRepository) GetAllDatabases() ([]*Database, error) {
 		Preload("Mysql").
 		Preload("Mariadb").
 		Preload("Mongodb").
+		Preload("SSHTunnel").
 		Preload("Notifiers").
 		Find(&databases).Error; err != nil {
 		return nil, err

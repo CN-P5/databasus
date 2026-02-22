@@ -1,7 +1,11 @@
 import { StarButtonComponent } from '../../../shared/ui/StarButtonComponent';
+import { LanguageSwitcher } from '../../../shared/ui/LanguageSwitcherComponent';
 import { ThemeToggleComponent } from '../../../shared/ui/ThemeToggleComponent';
+import { useTranslation } from 'react-i18next';
 
 export function AuthNavbarComponent() {
+  const { t } = useTranslation('users');
+
   return (
     <div className="flex h-[65px] items-center justify-center px-5 pt-5 sm:justify-start">
       <div className="flex items-center gap-3 hover:opacity-80">
@@ -28,12 +32,12 @@ export function AuthNavbarComponent() {
           target="_blank"
           rel="noreferrer"
         >
-          Community
+          {t('community')}
         </a>
 
         <div className="flex items-center gap-2">
           <StarButtonComponent />
-
+          <LanguageSwitcher />
           <ThemeToggleComponent />
         </div>
       </div>

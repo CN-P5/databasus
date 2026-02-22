@@ -1,4 +1,5 @@
 import { type Database, getDatabaseLogoFromType } from '../../../../entity/databases';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
   database: Database;
@@ -7,18 +8,20 @@ interface Props {
 }
 
 export const ShowDatabaseBaseInfoComponent = ({ database, isShowName, isShowType }: Props) => {
+  const { t } = useTranslation(['common', 'databases']);
+
   return (
     <div>
       {isShowName && (
         <div className="mb-1 flex w-full items-center">
-          <div className="min-w-[150px]">Name</div>
+          <div className="min-w-[150px]">{t('common:name')}</div>
           <div>{database.name || ''}</div>
         </div>
       )}
 
       {isShowType && (
         <div className="mb-1 flex w-full items-center">
-          <div className="min-w-[150px]">Database type</div>
+          <div className="min-w-[150px]">{t('databases:databaseType')}</div>
           <div className="flex items-center">
             <span>{database.type === 'POSTGRES' ? 'PostgreSQL' : 'MySQL'}</span>
             <img

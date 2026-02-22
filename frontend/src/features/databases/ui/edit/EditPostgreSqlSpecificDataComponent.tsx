@@ -6,6 +6,8 @@ import { IS_CLOUD } from '../../../../constants';
 import { type Database, databaseApi } from '../../../../entity/databases';
 import { ConnectionStringParser } from '../../../../entity/databases/model/postgresql/ConnectionStringParser';
 import { ToastHelper } from '../../../../shared/toast';
+import { useTranslation } from 'react-i18next';
+import { SshTunnelConfigComponent } from '../components/SshTunnelConfigComponent';
 
 interface Props {
   database: Database;
@@ -39,6 +41,7 @@ export const EditPostgreSqlSpecificDataComponent = ({
   isShowDbName = true,
   isRestoreMode = false,
 }: Props) => {
+  const { t } = useTranslation(['common', 'databases']);
   const { message } = App.useApp();
 
   const [editingDatabase, setEditingDatabase] = useState<Database>();
@@ -60,7 +63,7 @@ export const EditPostgreSqlSpecificDataComponent = ({
       const trimmedText = text.trim();
 
       if (!trimmedText) {
-        message.error('Clipboard is empty');
+        message.error(t('databases:clipboardIsEmpty'));
         return;
       }
 
@@ -89,9 +92,9 @@ export const EditPostgreSqlSpecificDataComponent = ({
 
       setEditingDatabase(autoAddPublicSchemaForSupabase(updatedDatabase));
       setIsConnectionTested(false);
-      message.success('Connection string parsed successfully');
+      message.success(t('databases:connectionStringParsedSuccessfully'));
     } catch {
-      message.error('Failed to read clipboard. Please check browser permissions.');
+      message.error(t('databases:failedToReadClipboard'));
     }
   };
 
@@ -137,8 +140,8 @@ export const EditPostgreSqlSpecificDataComponent = ({
       await databaseApi.testDatabaseConnectionDirect(trimmedDatabase);
       setIsConnectionTested(true);
       ToastHelper.showToast({
-        title: 'Connection test passed',
-        description: 'You can continue with the next step',
+        title: t('databases:connectionTestPassed'),
+        description: t('databases:youCanContinueWithNextStep'),
       });
     } catch (e) {
       setIsConnectionFailed(true);
@@ -209,12 +212,12 @@ export const EditPostgreSqlSpecificDataComponent = ({
           onClick={parseFromClipboard}
         >
           <CopyOutlined className="mr-1" />
-          Parse from clipboard
+          {t('databases:parseFromClipboard')}
         </div>
       </div>
 
       <div className="mb-1 flex w-full items-center">
-        <div className="min-w-[150px]">Host</div>
+        <div className="min-w-[150px]">{t('databases:host')}</div>
         <Input
           value={editingDatabase.postgresql?.host}
           onChange={(e) => {
@@ -232,7 +235,7 @@ export const EditPostgreSqlSpecificDataComponent = ({
           }}
           size="small"
           className="max-w-[200px] grow"
-          placeholder="Enter PG host"
+          placeholder={t('databases:hostPlaceholder')}
         />
       </div>
 
@@ -240,16 +243,16 @@ export const EditPostgreSqlSpecificDataComponent = ({
         <div className="mb-1 flex">
           <div className="min-w-[150px]" />
           <div className="max-w-[200px] text-xs text-gray-500 dark:text-gray-400">
-            Please{' '}
+            {t('databases:please')}{' '}
             <a
               href="https://databasus.com/faq/localhost"
               target="_blank"
               rel="noreferrer"
               className="!text-blue-600 dark:!text-blue-400"
             >
-              read this document
+              {t('databases:readThisDocument')}
             </a>{' '}
-            to study how to backup local database
+            {t('databases:toStudyHowToBackupLocalDatabase')}
           </div>
         </div>
       )}
@@ -258,22 +261,22 @@ export const EditPostgreSqlSpecificDataComponent = ({
         <div className="mb-1 flex">
           <div className="min-w-[150px]" />
           <div className="max-w-[200px] text-xs text-gray-500 dark:text-gray-400">
-            Please{' '}
+            {t('databases:please')}{' '}
             <a
               href="https://databasus.com/faq/supabase"
               target="_blank"
               rel="noreferrer"
               className="!text-blue-600 dark:!text-blue-400"
             >
-              read this document
+              {t('databases:readThisDocument')}
             </a>{' '}
-            to study how to backup Supabase database
+            {t('databases:toStudyHowToBackupSupabaseDatabase')}
           </div>
         </div>
       )}
 
       <div className="mb-1 flex w-full items-center">
-        <div className="min-w-[150px]">Port</div>
+        <div className="min-w-[150px]">{t('databases:port')}</div>
         <InputNumber
           type="number"
           value={editingDatabase.postgresql?.port}
@@ -288,12 +291,12 @@ export const EditPostgreSqlSpecificDataComponent = ({
           }}
           size="small"
           className="max-w-[200px] grow"
-          placeholder="Enter PG port"
+          placeholder={t('databases:portPlaceholder')}
         />
       </div>
 
       <div className="mb-1 flex w-full items-center">
-        <div className="min-w-[150px]">Username</div>
+        <div className="min-w-[150px]">{t('databases:username')}</div>
         <Input
           value={editingDatabase.postgresql?.username}
           onChange={(e) => {
@@ -308,12 +311,12 @@ export const EditPostgreSqlSpecificDataComponent = ({
           }}
           size="small"
           className="max-w-[200px] grow"
-          placeholder="Enter PG username"
+          placeholder={t('databases:usernamePlaceholder')}
         />
       </div>
 
       <div className="mb-1 flex w-full items-center">
-        <div className="min-w-[150px]">Password</div>
+        <div className="min-w-[150px]">{t('databases:databasePassword')}</div>
         <Input.Password
           value={editingDatabase.postgresql?.password}
           onChange={(e) => {
@@ -327,7 +330,7 @@ export const EditPostgreSqlSpecificDataComponent = ({
           }}
           size="small"
           className="max-w-[200px] grow"
-          placeholder="Enter PG password"
+          placeholder={t('databases:databasePasswordPlaceholder')}
           autoComplete="off"
           data-1p-ignore
           data-lpignore="true"
@@ -337,7 +340,7 @@ export const EditPostgreSqlSpecificDataComponent = ({
 
       {isShowDbName && (
         <div className="mb-1 flex w-full items-center">
-          <div className="min-w-[150px]">DB name</div>
+          <div className="min-w-[150px]">{t('databases:databaseName')}</div>
           <Input
             value={editingDatabase.postgresql?.database}
             onChange={(e) => {
@@ -351,13 +354,13 @@ export const EditPostgreSqlSpecificDataComponent = ({
             }}
             size="small"
             className="max-w-[200px] grow"
-            placeholder="Enter PG database name"
+            placeholder={t('databases:databaseNamePlaceholder')}
           />
         </div>
       )}
 
       <div className="mb-1 flex w-full items-center">
-        <div className="min-w-[150px]">Use HTTPS</div>
+        <div className="min-w-[150px]">{t('databases:useHttps')}</div>
         <Switch
           checked={editingDatabase.postgresql?.isHttps}
           onChange={(checked) => {
@@ -375,7 +378,7 @@ export const EditPostgreSqlSpecificDataComponent = ({
 
       {isRestoreMode && !IS_CLOUD && (
         <div className="mb-5 flex w-full items-center">
-          <div className="min-w-[150px]">CPU count</div>
+          <div className="min-w-[150px]">{t('databases:cpuCount')}</div>
           <div className="flex items-center">
             <InputNumber
               min={1}
@@ -396,7 +399,7 @@ export const EditPostgreSqlSpecificDataComponent = ({
 
             <Tooltip
               className="cursor-pointer"
-              title="Number of CPU cores to use for backup and restore operations. Higher values may speed up operations but use more resources."
+              title={t('databases:cpuCountDescription')}
             >
               <InfoCircleOutlined className="ml-2" style={{ color: 'gray' }} />
             </Tooltip>
@@ -409,7 +412,7 @@ export const EditPostgreSqlSpecificDataComponent = ({
           className="flex cursor-pointer items-center text-sm text-blue-600 hover:text-blue-800"
           onClick={() => setShowAdvanced(!isShowAdvanced)}
         >
-          <span className="mr-2">Advanced settings</span>
+          <span className="mr-2">{t('databases:advancedSettings')}</span>
 
           {isShowAdvanced ? (
             <UpOutlined style={{ fontSize: '12px' }} />
@@ -423,7 +426,7 @@ export const EditPostgreSqlSpecificDataComponent = ({
         <>
           {!isRestoreMode && (
             <div className="mb-1 flex w-full items-center">
-              <div className="min-w-[150px]">Include schemas</div>
+              <div className="min-w-[150px]">{t('databases:includeSchemas')}</div>
               <Select
                 mode="tags"
                 value={editingDatabase.postgresql?.includeSchemas || []}
@@ -437,7 +440,7 @@ export const EditPostgreSqlSpecificDataComponent = ({
                 }}
                 size="small"
                 className="max-w-[200px] grow"
-                placeholder="All schemas (default)"
+                placeholder={t('databases:allSchemasDefault')}
                 tokenSeparators={[',']}
               />
             </div>
@@ -445,7 +448,7 @@ export const EditPostgreSqlSpecificDataComponent = ({
 
           {isRestoreMode && (
             <div className="mb-1 flex w-full items-center">
-              <div className="min-w-[150px]">Exclude extensions</div>
+              <div className="min-w-[150px]">{t('databases:excludeExtensions')}</div>
               <div className="flex items-center">
                 <Checkbox
                   checked={editingDatabase.postgresql?.isExcludeExtensions || false}
@@ -461,12 +464,12 @@ export const EditPostgreSqlSpecificDataComponent = ({
                     });
                   }}
                 >
-                  Skip extensions
+                  {t('databases:skipExtensions')}
                 </Checkbox>
 
                 <Tooltip
                   className="cursor-pointer"
-                  title="Skip restoring extension definitions (CREATE EXTENSION statements). Enable this if you're restoring to a managed PostgreSQL service where extensions are managed by the provider."
+                  title={t('databases:skipExtensionsDescription')}
                 >
                   <InfoCircleOutlined className="ml-2" style={{ color: 'gray' }} />
                 </Tooltip>
@@ -476,16 +479,27 @@ export const EditPostgreSqlSpecificDataComponent = ({
         </>
       )}
 
+      <SshTunnelConfigComponent
+        sshTunnel={editingDatabase.sshTunnel}
+        onChange={(sshTunnel) => {
+          setEditingDatabase({
+            ...editingDatabase,
+            sshTunnel,
+          });
+          setIsConnectionTested(false);
+        }}
+      />
+
       <div className="mt-5 flex">
         {isShowCancelButton && (
           <Button className="mr-1" danger ghost onClick={() => onCancel()}>
-            Cancel
+            {t('common:cancel')}
           </Button>
         )}
 
         {isShowBackButton && (
           <Button className="mr-auto" type="primary" ghost onClick={() => onBack()}>
-            Back
+            {t('common:back')}
           </Button>
         )}
 
@@ -497,7 +511,7 @@ export const EditPostgreSqlSpecificDataComponent = ({
             disabled={!isAllFieldsFilled}
             className="mr-5"
           >
-            Test connection
+            {t('databases:testConnection')}
           </Button>
         )}
 
@@ -509,15 +523,14 @@ export const EditPostgreSqlSpecificDataComponent = ({
             disabled={!isAllFieldsFilled}
             className="mr-5"
           >
-            {saveButtonText || 'Save'}
+            {saveButtonText || t('common:save')}
           </Button>
         )}
       </div>
 
       {isConnectionFailed && !IS_CLOUD && (
         <div className="mt-3 text-sm text-gray-500 dark:text-gray-400">
-          If your database uses IP whitelist, make sure Databasus server IP is added to the allowed
-          list.
+          {t('databases:ifYourDatabaseUsesIpWhitelist')}
         </div>
       )}
     </div>
