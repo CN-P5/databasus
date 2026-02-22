@@ -3,6 +3,7 @@ package postgresql
 import (
 	"context"
 	"databasus-backend/internal/util/encryption"
+	"databasus-backend/internal/util/ssh"
 	"databasus-backend/internal/util/tools"
 	"errors"
 	"fmt"
@@ -129,11 +130,12 @@ func (p *PostgresqlDatabase) TestConnection(
 	logger *slog.Logger,
 	encryptor encryption.FieldEncryptor,
 	databaseID uuid.UUID,
+	sshConfig *ssh.Config,
 ) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
 
-	return testSingleDatabaseConnection(logger, ctx, p, encryptor, databaseID)
+	return testSingleDatabaseConnection(logger, ctx, p, encryptor, databaseID, sshConfig)
 }
 
 func (p *PostgresqlDatabase) HideSensitiveData() {
@@ -854,6 +856,7 @@ func testSingleDatabaseConnection(
 	postgresDb *PostgresqlDatabase,
 	encryptor encryption.FieldEncryptor,
 	databaseID uuid.UUID,
+	sshConfig *ssh.Config,
 ) error {
 	// For single database backup, we need to connect to the specific database
 	if postgresDb.Database == nil || *postgresDb.Database == "" {
@@ -866,8 +869,20 @@ func testSingleDatabaseConnection(
 		return fmt.Errorf("failed to decrypt password: %w", err)
 	}
 
+	// Start SSH tunnel if configured
+	var tunnel *ssh.Tunnel
+	var localPort int
+	if sshConfig != nil {
+		tunnel = ssh.NewTunnel(sshConfig)
+		if err := tunnel.Start(ctx, postgresDb.Host, postgresDb.Port); err != nil {
+			return fmt.Errorf("failed to start SSH tunnel: %w", err)
+		}
+		defer tunnel.Stop()
+		localPort = tunnel.GetLocalPort()
+	}
+
 	// Build connection string for the specific database
-	connStr := buildConnectionStringForDB(postgresDb, *postgresDb.Database, password)
+	connStr := buildConnectionStringForDBWithPort(postgresDb, *postgresDb.Database, password, localPort)
 
 	// Test connection
 	conn, err := pgx.Connect(ctx, connStr)
@@ -1063,15 +1078,27 @@ func checkBackupPermissions(
 
 // buildConnectionStringForDB builds connection string for specific database
 func buildConnectionStringForDB(p *PostgresqlDatabase, dbName string, password string) string {
+	return buildConnectionStringForDBWithPort(p, dbName, password, 0)
+}
+
+// buildConnectionStringForDBWithPort builds connection string for specific database with optional local port (for SSH tunnel)
+func buildConnectionStringForDBWithPort(p *PostgresqlDatabase, dbName string, password string, localPort int) string {
 	sslMode := "disable"
 	if p.IsHttps {
 		sslMode = "require"
 	}
 
+	host := p.Host
+	port := p.Port
+	if localPort > 0 {
+		host = "localhost"
+		port = localPort
+	}
+
 	return fmt.Sprintf(
 		"host=%s port=%d user=%s password='%s' dbname=%s sslmode=%s default_query_exec_mode=simple_protocol standard_conforming_strings=on client_encoding=UTF8",
-		p.Host,
-		p.Port,
+		host,
+		port,
 		p.Username,
 		escapeConnectionStringValue(password),
 		dbName,
