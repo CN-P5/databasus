@@ -18,6 +18,13 @@ const (
 	PeriodForever Period = "FOREVER"
 )
 
+type RetentionPolicyType string
+
+const (
+	RetentionPolicyTypeTimePeriod RetentionPolicyType = "TIME_PERIOD"
+	RetentionPolicyTypeGFS       RetentionPolicyType = "GFS"
+)
+
 // ToDuration converts Period to time.Duration
 func (p Period) ToDuration() time.Duration {
 	switch p {

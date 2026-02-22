@@ -102,43 +102,45 @@ func (c *BackupCleaner) cleanOldBackups() error {
 	}
 
 	for _, backupConfig := range enabledBackupConfigs {
-		backupStorePeriod := backupConfig.StorePeriod
+		if backupConfig.RetentionPolicyType == period.RetentionPolicyTypeTimePeriod {
+			backupStorePeriod := backupConfig.RetentionTimePeriod
 
-		if backupStorePeriod == period.PeriodForever {
-			continue
-		}
-
-		storeDuration := backupStorePeriod.ToDuration()
-		dateBeforeBackupsShouldBeDeleted := time.Now().UTC().Add(-storeDuration)
-
-		oldBackups, err := c.backupRepository.FindBackupsBeforeDate(
-			backupConfig.DatabaseID,
-			dateBeforeBackupsShouldBeDeleted,
-		)
-		if err != nil {
-			c.logger.Error(
-				"Failed to find old backups for database",
-				"databaseId",
-				backupConfig.DatabaseID,
-				"error",
-				err,
-			)
-			continue
-		}
-
-		for _, backup := range oldBackups {
-			if err := c.DeleteBackup(backup); err != nil {
-				c.logger.Error("Failed to delete old backup", "backupId", backup.ID, "error", err)
+			if backupStorePeriod == period.PeriodForever {
 				continue
 			}
 
-			c.logger.Info(
-				"Deleted old backup",
-				"backupId",
-				backup.ID,
-				"databaseId",
+			storeDuration := backupStorePeriod.ToDuration()
+			dateBeforeBackupsShouldBeDeleted := time.Now().UTC().Add(-storeDuration)
+
+			oldBackups, err := c.backupRepository.FindBackupsBeforeDate(
 				backupConfig.DatabaseID,
+				dateBeforeBackupsShouldBeDeleted,
 			)
+			if err != nil {
+				c.logger.Error(
+					"Failed to find old backups for database",
+					"databaseId",
+					backupConfig.DatabaseID,
+					"error",
+					err,
+				)
+				continue
+			}
+
+			for _, backup := range oldBackups {
+				if err := c.DeleteBackup(backup); err != nil {
+					c.logger.Error("Failed to delete old backup", "backupId", backup.ID, "error", err)
+					continue
+				}
+
+				c.logger.Info(
+					"Deleted old backup",
+					"backupId",
+					backup.ID,
+					"databaseId",
+					backupConfig.DatabaseID,
+				)
+			}
 		}
 	}
 

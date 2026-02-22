@@ -10,6 +10,7 @@ import (
 	"databasus-backend/internal/features/storages"
 	users_models "databasus-backend/internal/features/users/models"
 	workspaces_services "databasus-backend/internal/features/workspaces/services"
+	"databasus-backend/internal/util/period"
 
 	"github.com/google/uuid"
 )
@@ -227,7 +228,8 @@ func (s *BackupConfigService) initializeDefaultConfig(
 	_, err = s.backupConfigRepository.Save(&BackupConfig{
 		DatabaseID:            databaseID,
 		IsBackupsEnabled:      false,
-		StorePeriod:           plan.MaxStoragePeriod,
+		RetentionPolicyType:   period.RetentionPolicyTypeTimePeriod,
+		RetentionTimePeriod:   plan.MaxStoragePeriod,
 		MaxBackupSizeMB:       plan.MaxBackupSizeMB,
 		MaxBackupsTotalSizeMB: plan.MaxBackupsTotalSizeMB,
 		BackupInterval: &intervals.Interval{

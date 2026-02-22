@@ -18,7 +18,14 @@ type BackupConfig struct {
 
 	IsBackupsEnabled bool `json:"isBackupsEnabled" gorm:"column:is_backups_enabled;type:boolean;not null"`
 
-	StorePeriod period.Period `json:"storePeriod" gorm:"column:store_period;type:text;not null"`
+	RetentionPolicyType period.RetentionPolicyType `json:"retentionPolicyType" gorm:"column:retention_policy_type;type:text;not null"`
+	RetentionTimePeriod period.Period              `json:"retentionTimePeriod" gorm:"column:retention_time_period;type:text;not null"`
+	RetentionCount      int                        `json:"retentionCount"      gorm:"column:retention_count;type:int;not null"`
+	RetentionGfsHours   int                        `json:"retentionGfsHours"  gorm:"column:retention_gfs_hours;type:int;not null"`
+	RetentionGfsDays    int                        `json:"retentionGfsDays"   gorm:"column:retention_gfs_days;type:int;not null"`
+	RetentionGfsWeeks   int                        `json:"retentionGfsWeeks"  gorm:"column:retention_gfs_weeks;type:int;not null"`
+	RetentionGfsMonths  int                        `json:"retentionGfsMonths" gorm:"column:retention_gfs_months;type:int;not null"`
+	RetentionGfsYears   int                        `json:"retentionGfsYears"  gorm:"column:retention_gfs_years;type:int;not null"`
 
 	BackupIntervalID uuid.UUID           `json:"backupIntervalId"         gorm:"column:backup_interval_id;type:uuid;not null"`
 	BackupInterval   *intervals.Interval `json:"backupInterval,omitempty" gorm:"foreignKey:BackupIntervalID"`
@@ -78,13 +85,12 @@ func (b *BackupConfig) AfterFind(tx *gorm.DB) error {
 }
 
 func (b *BackupConfig) Validate(plan *plans.DatabasePlan) error {
-	// Backup interval is required either as ID or as object
 	if b.BackupIntervalID == uuid.Nil && b.BackupInterval == nil {
 		return errors.New("backup interval is required")
 	}
 
-	if b.StorePeriod == "" {
-		return errors.New("store period is required")
+	if b.RetentionPolicyType == "" {
+		return errors.New("retention policy type is required")
 	}
 
 	if b.IsRetryIfFailed && b.MaxFailedTriesCount <= 0 {
@@ -111,10 +117,9 @@ func (b *BackupConfig) Validate(plan *plans.DatabasePlan) error {
 	}
 
 	// Validate against plan limits
-	// Check storage period limit
-	if plan.MaxStoragePeriod != period.PeriodForever {
-		if b.StorePeriod.CompareTo(plan.MaxStoragePeriod) > 0 {
-			return errors.New("storage period exceeds plan limit")
+	if b.RetentionPolicyType == period.RetentionPolicyTypeTimePeriod {
+		if b.RetentionTimePeriod.CompareTo(plan.MaxStoragePeriod) > 0 {
+			return errors.New("retention time period exceeds plan limit")
 		}
 	}
 
@@ -140,7 +145,14 @@ func (b *BackupConfig) Copy(newDatabaseID uuid.UUID) *BackupConfig {
 	return &BackupConfig{
 		DatabaseID:            newDatabaseID,
 		IsBackupsEnabled:      b.IsBackupsEnabled,
-		StorePeriod:           b.StorePeriod,
+		RetentionPolicyType:   b.RetentionPolicyType,
+		RetentionTimePeriod:   b.RetentionTimePeriod,
+		RetentionCount:        b.RetentionCount,
+		RetentionGfsHours:     b.RetentionGfsHours,
+		RetentionGfsDays:      b.RetentionGfsDays,
+		RetentionGfsWeeks:     b.RetentionGfsWeeks,
+		RetentionGfsMonths:    b.RetentionGfsMonths,
+		RetentionGfsYears:     b.RetentionGfsYears,
 		BackupIntervalID:      uuid.Nil,
 		BackupInterval:        b.BackupInterval.Copy(),
 		StorageID:             b.StorageID,

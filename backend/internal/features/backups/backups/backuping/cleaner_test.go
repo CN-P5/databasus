@@ -45,12 +45,13 @@ func Test_CleanOldBackups_DeletesBackupsOlderThanStorePeriod(t *testing.T) {
 	interval := createTestInterval()
 
 	backupConfig := &backups_config.BackupConfig{
-		DatabaseID:       database.ID,
-		IsBackupsEnabled: true,
-		StorePeriod:      period.PeriodWeek,
-		StorageID:        &storage.ID,
-		BackupIntervalID: interval.ID,
-		BackupInterval:   interval,
+		DatabaseID:          database.ID,
+		IsBackupsEnabled:    true,
+		RetentionPolicyType: period.RetentionPolicyTypeTimePeriod,
+		RetentionTimePeriod: period.PeriodWeek,
+		StorageID:           &storage.ID,
+		BackupIntervalID:    interval.ID,
+		BackupInterval:      interval,
 	}
 	_, err := backups_config.GetBackupConfigService().SaveBackupConfig(backupConfig)
 	assert.NoError(t, err)
@@ -126,12 +127,13 @@ func Test_CleanOldBackups_SkipsDatabaseWithForeverStorePeriod(t *testing.T) {
 	interval := createTestInterval()
 
 	backupConfig := &backups_config.BackupConfig{
-		DatabaseID:       database.ID,
-		IsBackupsEnabled: true,
-		StorePeriod:      period.PeriodForever,
-		StorageID:        &storage.ID,
-		BackupIntervalID: interval.ID,
-		BackupInterval:   interval,
+		DatabaseID:          database.ID,
+		IsBackupsEnabled:    true,
+		RetentionPolicyType: period.RetentionPolicyTypeTimePeriod,
+		RetentionTimePeriod: period.PeriodForever,
+		StorageID:           &storage.ID,
+		BackupIntervalID:    interval.ID,
+		BackupInterval:      interval,
 	}
 	_, err := backups_config.GetBackupConfigService().SaveBackupConfig(backupConfig)
 	assert.NoError(t, err)
@@ -187,7 +189,8 @@ func Test_CleanExceededBackups_WhenUnderLimit_NoBackupsDeleted(t *testing.T) {
 	backupConfig := &backups_config.BackupConfig{
 		DatabaseID:            database.ID,
 		IsBackupsEnabled:      true,
-		StorePeriod:           period.PeriodForever,
+		RetentionPolicyType:   period.RetentionPolicyTypeTimePeriod,
+		RetentionTimePeriod:   period.PeriodForever,
 		StorageID:             &storage.ID,
 		MaxBackupsTotalSizeMB: 100, // 100 MB limit
 		BackupIntervalID:      interval.ID,
@@ -248,7 +251,8 @@ func Test_CleanExceededBackups_WhenOverLimit_DeletesOldestBackups(t *testing.T) 
 	backupConfig := &backups_config.BackupConfig{
 		DatabaseID:            database.ID,
 		IsBackupsEnabled:      true,
-		StorePeriod:           period.PeriodForever,
+		RetentionPolicyType:   period.RetentionPolicyTypeTimePeriod,
+		RetentionTimePeriod:   period.PeriodForever,
 		StorageID:             &storage.ID,
 		MaxBackupsTotalSizeMB: 30, // 30 MB limit
 		BackupIntervalID:      interval.ID,
@@ -323,7 +327,8 @@ func Test_CleanExceededBackups_SkipsInProgressBackups(t *testing.T) {
 	backupConfig := &backups_config.BackupConfig{
 		DatabaseID:            database.ID,
 		IsBackupsEnabled:      true,
-		StorePeriod:           period.PeriodForever,
+		RetentionPolicyType:   period.RetentionPolicyTypeTimePeriod,
+		RetentionTimePeriod:   period.PeriodForever,
 		StorageID:             &storage.ID,
 		MaxBackupsTotalSizeMB: 50, // 50 MB limit
 		BackupIntervalID:      interval.ID,
@@ -412,7 +417,8 @@ func Test_CleanExceededBackups_WithZeroLimit_SkipsDatabase(t *testing.T) {
 	backupConfig := &backups_config.BackupConfig{
 		DatabaseID:            database.ID,
 		IsBackupsEnabled:      true,
-		StorePeriod:           period.PeriodForever,
+		RetentionPolicyType:   period.RetentionPolicyTypeTimePeriod,
+		RetentionTimePeriod:   period.PeriodForever,
 		StorageID:             &storage.ID,
 		MaxBackupsTotalSizeMB: 0, // No size limit
 		BackupIntervalID:      interval.ID,
