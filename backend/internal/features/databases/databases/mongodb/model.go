@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"databasus-backend/internal/util/encryption"
+	"databasus-backend/internal/util/ssh"
 	"databasus-backend/internal/util/tools"
 
 	"github.com/google/uuid"
@@ -72,6 +73,7 @@ func (m *MongodbDatabase) TestConnection(
 	logger *slog.Logger,
 	encryptor encryption.FieldEncryptor,
 	databaseID uuid.UUID,
+	sshConfig *ssh.Config,
 ) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
@@ -81,7 +83,19 @@ func (m *MongodbDatabase) TestConnection(
 		return fmt.Errorf("failed to decrypt password: %w", err)
 	}
 
-	uri := m.buildConnectionURI(password)
+	// Start SSH tunnel if configured
+	var tunnel *ssh.Tunnel
+	var localPort int
+	if sshConfig != nil {
+		tunnel = ssh.NewTunnel(sshConfig)
+		if err := tunnel.Start(ctx, m.Host, m.Port); err != nil {
+			return fmt.Errorf("failed to start SSH tunnel: %w", err)
+		}
+		defer tunnel.Stop()
+		localPort = tunnel.GetLocalPort()
+	}
+
+	uri := m.buildConnectionURIWithPort(password, localPort)
 
 	clientOptions := options.Client().ApplyURI(uri)
 	client, err := mongo.Connect(ctx, clientOptions)
@@ -454,6 +468,11 @@ func (m *MongodbDatabase) CreateReadOnlyUser(
 
 // buildConnectionURI builds a MongoDB connection URI
 func (m *MongodbDatabase) buildConnectionURI(password string) string {
+	return m.buildConnectionURIWithPort(password, 0)
+}
+
+// buildConnectionURIWithPort builds a MongoDB connection URI with optional local port (for SSH tunnel)
+func (m *MongodbDatabase) buildConnectionURIWithPort(password string, localPort int) string {
 	authDB := m.AuthDatabase
 	if authDB == "" {
 		authDB = "admin"
@@ -467,28 +486,35 @@ func (m *MongodbDatabase) buildConnectionURI(password string) string {
 		extraParams += "&directConnection=true"
 	}
 
-	if m.IsSrv {
+	host := m.Host
+	port := 27017
+	if m.Port != nil {
+		port = *m.Port
+	}
+
+	// Use localhost and local port if SSH tunnel is active
+	if localPort > 0 {
+		host = "localhost"
+		port = localPort
+	}
+
+	if m.IsSrv && localPort == 0 {
 		return fmt.Sprintf(
 			"mongodb+srv://%s:%s@%s/%s?authSource=%s&connectTimeoutMS=15000%s",
 			url.QueryEscape(m.Username),
 			url.QueryEscape(password),
-			m.Host,
+			host,
 			m.Database,
 			authDB,
 			extraParams,
 		)
 	}
 
-	port := 27017
-	if m.Port != nil {
-		port = *m.Port
-	}
-
 	return fmt.Sprintf(
 		"mongodb://%s:%s@%s:%d/%s?authSource=%s&connectTimeoutMS=15000%s",
 		url.QueryEscape(m.Username),
 		url.QueryEscape(password),
-		m.Host,
+		host,
 		port,
 		m.Database,
 		authDB,
