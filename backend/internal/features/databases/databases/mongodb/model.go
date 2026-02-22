@@ -88,7 +88,11 @@ func (m *MongodbDatabase) TestConnection(
 	var localPort int
 	if sshConfig != nil {
 		tunnel = ssh.NewTunnel(sshConfig)
-		if err := tunnel.Start(ctx, m.Host, m.Port); err != nil {
+		port := 27017
+		if m.Port != nil {
+			port = *m.Port
+		}
+		if err := tunnel.Start(ctx, m.Host, port); err != nil {
 			return fmt.Errorf("failed to start SSH tunnel: %w", err)
 		}
 		defer tunnel.Stop()
