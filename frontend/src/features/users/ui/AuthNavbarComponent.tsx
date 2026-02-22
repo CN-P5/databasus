@@ -1,3 +1,4 @@
+import { LanguageSwitcher } from '../../../shared/i18n';
 import { StarButtonComponent } from '../../../shared/ui/StarButtonComponent';
 import { ThemeToggleComponent } from '../../../shared/ui/ThemeToggleComponent';
 
@@ -32,6 +33,8 @@ export function AuthNavbarComponent() {
         </a>
 
         <div className="flex items-center gap-2">
+          <LanguageSwitcher />
+
           <StarButtonComponent />
 
           <ThemeToggleComponent />

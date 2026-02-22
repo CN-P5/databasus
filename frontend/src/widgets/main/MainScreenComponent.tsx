@@ -24,6 +24,7 @@ import {
   WorkspaceSettingsComponent,
 } from '../../features/workspaces';
 import { useIsMobile, useScreenHeight } from '../../shared/hooks';
+import { LanguageSwitcher } from '../../shared/i18n';
 import { StarButtonComponent } from '../../shared/ui/StarButtonComponent';
 import { ThemeToggleComponent } from '../../shared/ui/ThemeToggleComponent';
 import { SidebarComponent } from './SidebarComponent';
@@ -246,6 +247,8 @@ export const MainScreenComponent = () => {
           )}
 
           <div className="flex items-center gap-2">
+            <LanguageSwitcher />
+
             <StarButtonComponent />
 
             <ThemeToggleComponent />
