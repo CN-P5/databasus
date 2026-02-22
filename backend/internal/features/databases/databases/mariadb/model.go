@@ -212,7 +212,14 @@ func (m *MariadbDatabase) PopulateVersion(
 		return fmt.Errorf("failed to decrypt password: %w", err)
 	}
 
-	db, cleanup, err := connectWithSSHTunnelMariaDB(ctx, m, password, sshTunnel, encryptor, databaseID)
+	db, cleanup, err := connectWithSSHTunnelMariaDB(
+		ctx,
+		m,
+		password,
+		sshTunnel,
+		encryptor,
+		databaseID,
+	)
 	if err != nil {
 		return fmt.Errorf("failed to connect to database: %w", err)
 	}
@@ -239,7 +246,14 @@ func (m *MariadbDatabase) IsUserReadOnly(
 		return false, nil, fmt.Errorf("failed to decrypt password: %w", err)
 	}
 
-	db, cleanup, err := connectWithSSHTunnelMariaDB(ctx, m, password, sshTunnel, encryptor, databaseID)
+	db, cleanup, err := connectWithSSHTunnelMariaDB(
+		ctx,
+		m,
+		password,
+		sshTunnel,
+		encryptor,
+		databaseID,
+	)
 	if err != nil {
 		return false, nil, fmt.Errorf("failed to connect to database: %w", err)
 	}
@@ -299,7 +313,14 @@ func (m *MariadbDatabase) CreateReadOnlyUser(
 		return "", "", fmt.Errorf("failed to decrypt password: %w", err)
 	}
 
-	db, cleanup, err := connectWithSSHTunnelMariaDB(ctx, m, password, sshTunnel, encryptor, databaseID)
+	db, cleanup, err := connectWithSSHTunnelMariaDB(
+		ctx,
+		m,
+		password,
+		sshTunnel,
+		encryptor,
+		databaseID,
+	)
 	if err != nil {
 		return "", "", fmt.Errorf("failed to connect to database: %w", err)
 	}

@@ -212,7 +212,14 @@ func (m *MysqlDatabase) PopulateVersion(
 		return fmt.Errorf("failed to decrypt password: %w", err)
 	}
 
-	db, cleanup, err := connectWithSSHTunnelMySQL(ctx, m, password, sshTunnel, encryptor, databaseID)
+	db, cleanup, err := connectWithSSHTunnelMySQL(
+		ctx,
+		m,
+		password,
+		sshTunnel,
+		encryptor,
+		databaseID,
+	)
 	if err != nil {
 		return fmt.Errorf("failed to connect to database: %w", err)
 	}
@@ -239,7 +246,14 @@ func (m *MysqlDatabase) IsUserReadOnly(
 		return false, nil, fmt.Errorf("failed to decrypt password: %w", err)
 	}
 
-	db, cleanup, err := connectWithSSHTunnelMySQL(ctx, m, password, sshTunnel, encryptor, databaseID)
+	db, cleanup, err := connectWithSSHTunnelMySQL(
+		ctx,
+		m,
+		password,
+		sshTunnel,
+		encryptor,
+		databaseID,
+	)
 	if err != nil {
 		return false, nil, fmt.Errorf("failed to connect to database: %w", err)
 	}
@@ -300,7 +314,14 @@ func (m *MysqlDatabase) CreateReadOnlyUser(
 		return "", "", fmt.Errorf("failed to decrypt password: %w", err)
 	}
 
-	db, cleanup, err := connectWithSSHTunnelMySQL(ctx, m, password, sshTunnel, encryptor, databaseID)
+	db, cleanup, err := connectWithSSHTunnelMySQL(
+		ctx,
+		m,
+		password,
+		sshTunnel,
+		encryptor,
+		databaseID,
+	)
 	if err != nil {
 		return "", "", fmt.Errorf("failed to connect to database: %w", err)
 	}

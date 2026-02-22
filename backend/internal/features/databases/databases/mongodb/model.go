@@ -205,7 +205,14 @@ func (m *MongodbDatabase) IsUserReadOnly(
 		return false, nil, fmt.Errorf("failed to decrypt password: %w", err)
 	}
 
-	client, cleanup, err := connectWithSSHTunnelMongoDB(ctx, m, password, sshTunnel, encryptor, databaseID)
+	client, cleanup, err := connectWithSSHTunnelMongoDB(
+		ctx,
+		m,
+		password,
+		sshTunnel,
+		encryptor,
+		databaseID,
+	)
 	if err != nil {
 		return false, nil, fmt.Errorf("failed to connect to database: %w", err)
 	}
@@ -379,7 +386,14 @@ func (m *MongodbDatabase) CreateReadOnlyUser(
 		return "", "", fmt.Errorf("failed to decrypt password: %w", err)
 	}
 
-	client, cleanup, err := connectWithSSHTunnelMongoDB(ctx, m, password, sshTunnel, encryptor, databaseID)
+	client, cleanup, err := connectWithSSHTunnelMongoDB(
+		ctx,
+		m,
+		password,
+		sshTunnel,
+		encryptor,
+		databaseID,
+	)
 	if err != nil {
 		return "", "", fmt.Errorf("failed to connect to database: %w", err)
 	}
@@ -712,7 +726,7 @@ func connectWithSSHTunnelMongoDB(
 		port = tunnel.GetLocalPort()
 
 		cleanup = func() {
-			tunnel.Stop()
+			_ = tunnel.Stop()
 		}
 	}
 
@@ -722,7 +736,7 @@ func connectWithSSHTunnelMongoDB(
 	client, err := mongo.Connect(ctx, clientOptions)
 	if err != nil {
 		if tunnel != nil {
-			tunnel.Stop()
+			_ = tunnel.Stop()
 		}
 		return nil, func() {}, err
 	}
