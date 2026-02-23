@@ -80,7 +80,7 @@ func Test_TestConnection_InsufficientPermissions_ReturnsError(t *testing.T) {
 
 			logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 
-			err = mongodbModel.TestConnection(logger, nil, uuid.New())
+			err = mongodbModel.TestConnection(logger, nil, uuid.New(), nil)
 			assert.Error(t, err)
 			assert.Contains(t, err.Error(), "insufficient permissions")
 		})
@@ -151,7 +151,7 @@ func Test_TestConnection_SufficientPermissions_Success(t *testing.T) {
 
 			logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 
-			err = mongodbModel.TestConnection(logger, nil, uuid.New())
+			err = mongodbModel.TestConnection(logger, nil, uuid.New(), nil)
 			assert.NoError(t, err)
 		})
 	}

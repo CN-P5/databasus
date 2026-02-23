@@ -91,7 +91,7 @@ func Test_TestConnection_InsufficientPermissions_ReturnsError(t *testing.T) {
 
 			logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 
-			err = mariadbModel.TestConnection(logger, nil, uuid.New())
+			err = mariadbModel.TestConnection(logger, nil, uuid.New(), nil)
 			assert.Error(t, err)
 			assert.Contains(t, err.Error(), "insufficient permissions")
 		})
@@ -177,7 +177,7 @@ func Test_TestConnection_SufficientPermissions_Success(t *testing.T) {
 
 			logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 
-			err = mariadbModel.TestConnection(logger, nil, uuid.New())
+			err = mariadbModel.TestConnection(logger, nil, uuid.New(), nil)
 			assert.NoError(t, err)
 		})
 	}
@@ -616,7 +616,7 @@ func Test_TestConnection_DatabaseSpecificPrivilegesWithGlobalProcess_Success(t *
 
 			logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 
-			err = mariadbModel.TestConnection(logger, nil, uuid.New())
+			err = mariadbModel.TestConnection(logger, nil, uuid.New(), nil)
 			assert.NoError(t, err)
 		})
 	}
@@ -690,7 +690,7 @@ func Test_TestConnection_DatabaseWithUnderscores_Success(t *testing.T) {
 
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 
-	err = mariadbModel.TestConnection(logger, nil, uuid.New())
+	err = mariadbModel.TestConnection(logger, nil, uuid.New(), nil)
 	assert.NoError(t, err)
 }
 
@@ -794,7 +794,7 @@ func Test_TestConnection_DatabaseWithUnderscoresAndAllPrivileges_Success(t *test
 
 			logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 
-			err = mariadbModel.TestConnection(logger, nil, uuid.New())
+			err = mariadbModel.TestConnection(logger, nil, uuid.New(), nil)
 			assert.NoError(t, err)
 			assert.NotEmpty(t, mariadbModel.Privileges)
 			assert.Contains(t, mariadbModel.Privileges, "SELECT")

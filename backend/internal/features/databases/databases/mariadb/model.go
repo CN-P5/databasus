@@ -82,7 +82,11 @@ func (m *MariadbDatabase) TestConnection(
 		if err := tunnel.Start(ctx, m.Host, m.Port); err != nil {
 			return fmt.Errorf("failed to start SSH tunnel: %w", err)
 		}
-		defer tunnel.Stop()
+		defer func() {
+			if stopErr := tunnel.Stop(); stopErr != nil {
+				logger.Warn("failed to stop SSH tunnel", "error", stopErr)
+			}
+		}()
 		localPort = tunnel.GetLocalPort()
 	}
 

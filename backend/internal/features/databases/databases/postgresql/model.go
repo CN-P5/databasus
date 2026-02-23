@@ -877,12 +877,20 @@ func testSingleDatabaseConnection(
 		if err := tunnel.Start(ctx, postgresDb.Host, postgresDb.Port); err != nil {
 			return fmt.Errorf("failed to start SSH tunnel: %w", err)
 		}
-		defer tunnel.Stop()
+		defer func() {
+			if stopErr := tunnel.Stop(); stopErr != nil {
+				logger.Warn("failed to stop SSH tunnel", "error", stopErr)
+			}
+		}()
 		localPort = tunnel.GetLocalPort()
 	}
 
-	// Build connection string for the specific database
-	connStr := buildConnectionStringForDBWithPort(postgresDb, *postgresDb.Database, password, localPort)
+	connStr := buildConnectionStringForDBWithPort(
+		postgresDb,
+		*postgresDb.Database,
+		password,
+		localPort,
+	)
 
 	// Test connection
 	conn, err := pgx.Connect(ctx, connStr)
@@ -1082,7 +1090,12 @@ func buildConnectionStringForDB(p *PostgresqlDatabase, dbName string, password s
 }
 
 // buildConnectionStringForDBWithPort builds connection string for specific database with optional local port (for SSH tunnel)
-func buildConnectionStringForDBWithPort(p *PostgresqlDatabase, dbName string, password string, localPort int) string {
+func buildConnectionStringForDBWithPort(
+	p *PostgresqlDatabase,
+	dbName string,
+	password string,
+	localPort int,
+) string {
 	sslMode := "disable"
 	if p.IsHttps {
 		sslMode = "require"

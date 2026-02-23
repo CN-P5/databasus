@@ -80,7 +80,7 @@ func Test_TestConnection_PasswordContainingSpaces_TestedSuccessfully(t *testing.
 
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 
-	err = pgModel.TestConnection(logger, nil, uuid.New())
+	err = pgModel.TestConnection(logger, nil, uuid.New(), nil)
 	assert.NoError(t, err)
 }
 
@@ -150,7 +150,7 @@ func Test_TestConnection_InsufficientPermissions_ReturnsError(t *testing.T) {
 
 			logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 
-			err = pgModel.TestConnection(logger, nil, uuid.New())
+			err = pgModel.TestConnection(logger, nil, uuid.New(), nil)
 			assert.Error(t, err)
 			if err != nil {
 				assert.Contains(t, err.Error(), "insufficient permissions")
@@ -237,7 +237,7 @@ func Test_TestConnection_SufficientPermissions_Success(t *testing.T) {
 
 			logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 
-			err = pgModel.TestConnection(logger, nil, uuid.New())
+			err = pgModel.TestConnection(logger, nil, uuid.New(), nil)
 			assert.NoError(t, err)
 		})
 	}
