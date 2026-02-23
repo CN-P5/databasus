@@ -1,7 +1,6 @@
 import { DownOutlined, InfoCircleOutlined, UpOutlined } from '@ant-design/icons';
 import { Checkbox, Input, Tooltip } from 'antd';
 import { useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
 
 import type { Storage } from '../../../../../entity/storages';
 
@@ -18,7 +17,6 @@ export function EditS3StorageComponent({
   setUnsaved,
   connectionError,
 }: Props) {
-  const { t } = useTranslation('storages');
   const hasAdvancedValues =
     !!storage?.s3Storage?.s3Prefix ||
     !!storage?.s3Storage?.s3UseVirtualHostedStyle ||
@@ -38,13 +36,13 @@ export function EditS3StorageComponent({
 
         <div className="text-xs text-blue-600">
           <a href="https://databasus.com/storages/cloudflare-r2" target="_blank" rel="noreferrer">
-            {t('howToUseWithCloudflareR2')}
+            How to use with Cloudflare R2?
           </a>
         </div>
       </div>
 
       <div className="mb-1 flex w-full flex-col items-start sm:flex-row sm:items-center">
-        <div className="mb-1 min-w-[110px] sm:mb-0">{t('s3Bucket')}</div>
+        <div className="mb-1 min-w-[110px] sm:mb-0">S3 Bucket</div>
         <Input
           value={storage?.s3Storage?.s3Bucket || ''}
           onChange={(e) => {
@@ -66,7 +64,7 @@ export function EditS3StorageComponent({
       </div>
 
       <div className="mb-1 flex w-full flex-col items-start sm:flex-row sm:items-center">
-        <div className="mb-1 min-w-[110px] sm:mb-0">{t('s3Region')}</div>
+        <div className="mb-1 min-w-[110px] sm:mb-0">Region</div>
         <Input
           value={storage?.s3Storage?.s3Region || ''}
           onChange={(e) => {
@@ -88,7 +86,7 @@ export function EditS3StorageComponent({
       </div>
 
       <div className="mb-1 flex w-full flex-col items-start sm:flex-row sm:items-center">
-        <div className="mb-1 min-w-[110px] sm:mb-0">{t('s3AccessKey')}</div>
+        <div className="mb-1 min-w-[110px] sm:mb-0">Access key</div>
         <Input.Password
           value={storage?.s3Storage?.s3AccessKey || ''}
           onChange={(e) => {
@@ -114,7 +112,7 @@ export function EditS3StorageComponent({
       </div>
 
       <div className="mb-1 flex w-full flex-col items-start sm:flex-row sm:items-center">
-        <div className="mb-1 min-w-[110px] sm:mb-0">{t('s3SecretKey')}</div>
+        <div className="mb-1 min-w-[110px] sm:mb-0">Secret key</div>
         <Input.Password
           value={storage?.s3Storage?.s3SecretKey || ''}
           onChange={(e) => {
@@ -140,7 +138,7 @@ export function EditS3StorageComponent({
       </div>
 
       <div className="mb-1 flex w-full flex-col items-start sm:flex-row sm:items-center">
-        <div className="mb-1 min-w-[110px] sm:mb-0">{t('s3Endpoint')}</div>
+        <div className="mb-1 min-w-[110px] sm:mb-0">Endpoint</div>
         <div className="flex items-center">
           <Input
             value={storage?.s3Storage?.s3Endpoint || ''}
@@ -163,7 +161,7 @@ export function EditS3StorageComponent({
 
           <Tooltip
             className="cursor-pointer"
-            title={t('customS3CompatibleEndpointUrlOptionalLeaveEmptyForAWSS3')}
+            title="Custom S3-compatible endpoint URL (optional, leave empty for AWS S3)"
           >
             <InfoCircleOutlined className="ml-2" style={{ color: 'gray' }} />
           </Tooltip>
@@ -175,7 +173,7 @@ export function EditS3StorageComponent({
           className="flex cursor-pointer items-center text-sm text-blue-600 hover:text-blue-800"
           onClick={() => setShowAdvanced(!showAdvanced)}
         >
-          <span className="mr-2">{t('advancedSettings')}</span>
+          <span className="mr-2">Advanced settings</span>
 
           {showAdvanced ? (
             <UpOutlined style={{ fontSize: '12px' }} />
@@ -188,7 +186,7 @@ export function EditS3StorageComponent({
       {showAdvanced && (
         <>
           <div className="mb-1 flex w-full flex-col items-start sm:flex-row sm:items-center">
-            <div className="mb-1 min-w-[110px] sm:mb-0">{t('folderPrefix')}</div>
+            <div className="mb-1 min-w-[110px] sm:mb-0">Folder prefix</div>
             <div className="flex items-center">
               <Input
                 value={storage?.s3Storage?.s3Prefix || ''}
@@ -212,14 +210,17 @@ export function EditS3StorageComponent({
                 disabled={!!storage.id}
               />
 
-              <Tooltip className="cursor-pointer" title={t('optionalPrefixForAllObjectKeys')}>
+              <Tooltip
+                className="cursor-pointer"
+                title="Optional prefix for all object keys (e.g., 'backups/' or 'my_team/'). May not work with some S3-compatible storages. Cannot be changed after creation (otherwise backups will be lost)."
+              >
                 <InfoCircleOutlined className="ml-4" style={{ color: 'gray' }} />
               </Tooltip>
             </div>
           </div>
 
           <div className="mb-1 flex w-full flex-col items-start sm:flex-row sm:items-center">
-            <div className="mb-1 min-w-[110px] sm:mb-0">{t('s3VirtualHost')}</div>
+            <div className="mb-1 min-w-[110px] sm:mb-0">Virtual host</div>
             <div className="flex items-center">
               <Checkbox
                 checked={storage?.s3Storage?.s3UseVirtualHostedStyle || false}
@@ -236,17 +237,20 @@ export function EditS3StorageComponent({
                   setUnsaved();
                 }}
               >
-                {t('useVirtualStyledDomains')}
+                Use virtual-styled domains
               </Checkbox>
 
-              <Tooltip className="cursor-pointer" title={t('useVirtualHostedStyleUrls')}>
+              <Tooltip
+                className="cursor-pointer"
+                title="Use virtual-hosted-style URLs (bucket.s3.region.amazonaws.com) instead of path-style (s3.region.amazonaws.com/bucket). May be required if you see COS errors."
+              >
                 <InfoCircleOutlined className="ml-2" style={{ color: 'gray' }} />
               </Tooltip>
             </div>
           </div>
 
           <div className="mb-1 flex w-full flex-col items-start sm:flex-row sm:items-center">
-            <div className="mb-1 min-w-[110px] sm:mb-0">{t('s3SkipTlsVerify')}</div>
+            <div className="mb-1 min-w-[110px] sm:mb-0">Skip TLS verify</div>
             <div className="flex items-center">
               <Checkbox
                 checked={storage?.s3Storage?.skipTLSVerify || false}
@@ -263,10 +267,13 @@ export function EditS3StorageComponent({
                   setUnsaved();
                 }}
               >
-                {t('skipTLS')}
+                Skip TLS
               </Checkbox>
 
-              <Tooltip className="cursor-pointer" title={t('skipTLSCertificateVerification')}>
+              <Tooltip
+                className="cursor-pointer"
+                title="Skip TLS certificate verification. Enable this if your S3-compatible storage uses a self-signed certificate. Warning: this reduces security."
+              >
                 <InfoCircleOutlined className="ml-2" style={{ color: 'gray' }} />
               </Tooltip>
             </div>

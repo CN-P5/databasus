@@ -61,7 +61,7 @@ export const PlaygroundWarningComponent = (): JSX.Element => {
 
   return (
     <Modal
-      title={t('welcomeToDatabasusPlayground')}
+      title={t('welcomeToPlayground')}
       open={isVisible}
       onOk={handleClose}
       okText={
@@ -79,39 +79,59 @@ export const PlaygroundWarningComponent = (): JSX.Element => {
       <div className="space-y-6 py-4">
         <div>
           <h3 className="mb-2 text-lg font-semibold">{t('whatIsPlayground')}</h3>
-          <p
-            className="text-gray-700 dark:text-gray-300"
-            dangerouslySetInnerHTML={{ __html: t('playgroundDescription') }}
-          />
+          <p className="text-gray-700 dark:text-gray-300">{t('playgroundDescription')}</p>
         </div>
 
         <div>
           <h3 className="mb-2 text-lg font-semibold">{t('whatIsLimit')}</h3>
           <ul className="list-disc space-y-1 pl-5 text-gray-700 dark:text-gray-300">
-            <li>{t('singleBackupSize')}</li>
-            <li>{t('storePeriod')}</li>
+            <li>{t('singleBackupSizeLimit')}</li>
+            <li>{t('storePeriodLimit')}</li>
           </ul>
         </div>
 
         <div>
           <h3 className="mb-2 text-lg font-semibold">{t('isItSecure')}</h3>
-          <p
-            className="text-gray-700 dark:text-gray-300"
-            dangerouslySetInnerHTML={{ __html: t('securityDescription') }}
-          />
+          <p className="text-gray-700 dark:text-gray-300">
+            {t('securityDescription')}{' '}
+            <a
+              href="https://databasus.com/security"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-600 hover:underline dark:text-blue-400"
+            >
+              {t('youCanReadHere')}
+            </a>
+          </p>
         </div>
 
         <div>
           <h3 className="mb-2 text-lg font-semibold">{t('canMyDataBeCorrupted')}</h3>
-          <p className="text-gray-700 dark:text-gray-300">{t('corruptionDescription')}</p>
+          <p className="text-gray-700 dark:text-gray-300">{t('dataCorruptionDescription')}</p>
         </div>
 
         <div>
-          <h3 className="mb-2 text-lg font-semibold">{t('whatIfISeeAnIssue')}</h3>
-          <p
-            className="text-gray-700 dark:text-gray-300"
-            dangerouslySetInnerHTML={{ __html: t('issueDescription') }}
-          />
+          <h3 className="mb-2 text-lg font-semibold">{t('whatIfISeeIssue')}</h3>
+          <p className="text-gray-700 dark:text-gray-300">
+            {t('create')}{' '}
+            <a
+              href="https://github.com/databasus/databasus/issues"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-600 hover:underline dark:text-blue-400"
+            >
+              GitHub issue
+            </a>{' '}
+            {t('orWrite')}{' '}
+            <a
+              href="https://t.me/databasus_community"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-600 hover:underline dark:text-blue-400"
+            >
+              {t('toTheCommunity')}
+            </a>
+          </p>
         </div>
       </div>
     </Modal>

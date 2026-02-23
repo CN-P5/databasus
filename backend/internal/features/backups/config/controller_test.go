@@ -120,7 +120,7 @@ func Test_SaveBackupConfig_PermissionsEnforced(t *testing.T) {
 			request := BackupConfig{
 				DatabaseID:          database.ID,
 				IsBackupsEnabled:    true,
-				RetentionPolicyType: period.RetentionPolicyTypeTimePeriod,
+				RetentionPolicyType: RetentionPolicyTypeTimePeriod,
 				RetentionTimePeriod: period.PeriodWeek,
 				BackupInterval: &intervals.Interval{
 					Interval:  intervals.IntervalDaily,
@@ -173,7 +173,7 @@ func Test_SaveBackupConfig_WhenUserIsNotWorkspaceMember_ReturnsForbidden(t *test
 	request := BackupConfig{
 		DatabaseID:          database.ID,
 		IsBackupsEnabled:    true,
-		RetentionPolicyType: period.RetentionPolicyTypeTimePeriod,
+		RetentionPolicyType: RetentionPolicyTypeTimePeriod,
 		RetentionTimePeriod: period.PeriodWeek,
 		BackupInterval: &intervals.Interval{
 			Interval:  intervals.IntervalDaily,
@@ -415,7 +415,7 @@ func Test_SaveBackupConfig_WhenPlanLimitsAreAdjusted_ValidationEnforced(t *testi
 	backupConfigExceededSize := BackupConfig{
 		DatabaseID:          database.ID,
 		IsBackupsEnabled:    true,
-		RetentionPolicyType: period.RetentionPolicyTypeTimePeriod,
+		RetentionPolicyType: RetentionPolicyTypeTimePeriod,
 		RetentionTimePeriod: period.PeriodWeek,
 		BackupInterval: &intervals.Interval{
 			Interval:  intervals.IntervalDaily,
@@ -445,7 +445,7 @@ func Test_SaveBackupConfig_WhenPlanLimitsAreAdjusted_ValidationEnforced(t *testi
 	backupConfigExceededTotal := BackupConfig{
 		DatabaseID:          database.ID,
 		IsBackupsEnabled:    true,
-		RetentionPolicyType: period.RetentionPolicyTypeTimePeriod,
+		RetentionPolicyType: RetentionPolicyTypeTimePeriod,
 		RetentionTimePeriod: period.PeriodWeek,
 		BackupInterval: &intervals.Interval{
 			Interval:  intervals.IntervalDaily,
@@ -475,7 +475,7 @@ func Test_SaveBackupConfig_WhenPlanLimitsAreAdjusted_ValidationEnforced(t *testi
 	backupConfigExceededPeriod := BackupConfig{
 		DatabaseID:          database.ID,
 		IsBackupsEnabled:    true,
-		RetentionPolicyType: period.RetentionPolicyTypeTimePeriod,
+		RetentionPolicyType: RetentionPolicyTypeTimePeriod,
 		RetentionTimePeriod: period.PeriodYear, // Exceeds limit of Month
 		BackupInterval: &intervals.Interval{
 			Interval:  intervals.IntervalDaily,
@@ -505,7 +505,7 @@ func Test_SaveBackupConfig_WhenPlanLimitsAreAdjusted_ValidationEnforced(t *testi
 	backupConfigValid := BackupConfig{
 		DatabaseID:          database.ID,
 		IsBackupsEnabled:    true,
-		RetentionPolicyType: period.RetentionPolicyTypeTimePeriod,
+		RetentionPolicyType: RetentionPolicyTypeTimePeriod,
 		RetentionTimePeriod: period.PeriodWeek, // Within Month limit
 		BackupInterval: &intervals.Interval{
 			Interval:  intervals.IntervalDaily,
@@ -626,7 +626,7 @@ func Test_SaveBackupConfig_WithEncryptionNone_ConfigSaved(t *testing.T) {
 	request := BackupConfig{
 		DatabaseID:          database.ID,
 		IsBackupsEnabled:    true,
-		RetentionPolicyType: period.RetentionPolicyTypeTimePeriod,
+		RetentionPolicyType: RetentionPolicyTypeTimePeriod,
 		RetentionTimePeriod: period.PeriodWeek,
 		BackupInterval: &intervals.Interval{
 			Interval:  intervals.IntervalDaily,
@@ -671,7 +671,7 @@ func Test_SaveBackupConfig_WithEncryptionEncrypted_ConfigSaved(t *testing.T) {
 	request := BackupConfig{
 		DatabaseID:          database.ID,
 		IsBackupsEnabled:    true,
-		RetentionPolicyType: period.RetentionPolicyTypeTimePeriod,
+		RetentionPolicyType: RetentionPolicyTypeTimePeriod,
 		RetentionTimePeriod: period.PeriodWeek,
 		BackupInterval: &intervals.Interval{
 			Interval:  intervals.IntervalDaily,
@@ -969,7 +969,7 @@ func Test_TransferDatabase_ToNewStorage_DatabaseTransferd(t *testing.T) {
 	backupConfigRequest := BackupConfig{
 		DatabaseID:          database.ID,
 		IsBackupsEnabled:    true,
-		RetentionPolicyType: period.RetentionPolicyTypeTimePeriod,
+		RetentionPolicyType: RetentionPolicyTypeTimePeriod,
 		RetentionTimePeriod: period.PeriodWeek,
 		BackupInterval: &intervals.Interval{
 			Interval:  intervals.IntervalDaily,
@@ -1056,7 +1056,7 @@ func Test_TransferDatabase_WithExistingStorage_DatabaseAndStorageTransferd(t *te
 	backupConfigRequest := BackupConfig{
 		DatabaseID:          database.ID,
 		IsBackupsEnabled:    true,
-		RetentionPolicyType: period.RetentionPolicyTypeTimePeriod,
+		RetentionPolicyType: RetentionPolicyTypeTimePeriod,
 		RetentionTimePeriod: period.PeriodWeek,
 		BackupInterval: &intervals.Interval{
 			Interval:  intervals.IntervalDaily,
@@ -1154,7 +1154,7 @@ func Test_TransferDatabase_StorageHasOtherDBs_CannotTransfer(t *testing.T) {
 	backupConfigRequest1 := BackupConfig{
 		DatabaseID:          database1.ID,
 		IsBackupsEnabled:    true,
-		RetentionPolicyType: period.RetentionPolicyTypeTimePeriod,
+		RetentionPolicyType: RetentionPolicyTypeTimePeriod,
 		RetentionTimePeriod: period.PeriodWeek,
 		BackupInterval: &intervals.Interval{
 			Interval:  intervals.IntervalDaily,
@@ -1181,7 +1181,7 @@ func Test_TransferDatabase_StorageHasOtherDBs_CannotTransfer(t *testing.T) {
 	backupConfigRequest2 := BackupConfig{
 		DatabaseID:          database2.ID,
 		IsBackupsEnabled:    true,
-		RetentionPolicyType: period.RetentionPolicyTypeTimePeriod,
+		RetentionPolicyType: RetentionPolicyTypeTimePeriod,
 		RetentionTimePeriod: period.PeriodWeek,
 		BackupInterval: &intervals.Interval{
 			Interval:  intervals.IntervalDaily,
@@ -1258,7 +1258,7 @@ func Test_TransferDatabase_WithNotifiers_NotifiersTransferred(t *testing.T) {
 	backupConfigRequest := BackupConfig{
 		DatabaseID:          database.ID,
 		IsBackupsEnabled:    true,
-		RetentionPolicyType: period.RetentionPolicyTypeTimePeriod,
+		RetentionPolicyType: RetentionPolicyTypeTimePeriod,
 		RetentionTimePeriod: period.PeriodWeek,
 		BackupInterval: &intervals.Interval{
 			Interval:  intervals.IntervalDaily,
@@ -1379,7 +1379,7 @@ func Test_TransferDatabase_NotifierHasOtherDBs_NotifierSkipped(t *testing.T) {
 	backupConfigRequest := BackupConfig{
 		DatabaseID:          database1.ID,
 		IsBackupsEnabled:    true,
-		RetentionPolicyType: period.RetentionPolicyTypeTimePeriod,
+		RetentionPolicyType: RetentionPolicyTypeTimePeriod,
 		RetentionTimePeriod: period.PeriodWeek,
 		BackupInterval: &intervals.Interval{
 			Interval:  intervals.IntervalDaily,
@@ -1502,7 +1502,7 @@ func Test_TransferDatabase_WithMultipleNotifiers_OnlyExclusiveOnesTransferred(t 
 	backupConfigRequest := BackupConfig{
 		DatabaseID:          database1.ID,
 		IsBackupsEnabled:    true,
-		RetentionPolicyType: period.RetentionPolicyTypeTimePeriod,
+		RetentionPolicyType: RetentionPolicyTypeTimePeriod,
 		RetentionTimePeriod: period.PeriodWeek,
 		BackupInterval: &intervals.Interval{
 			Interval:  intervals.IntervalDaily,
@@ -1602,7 +1602,7 @@ func Test_TransferDatabase_WithTargetNotifiers_NotifiersAssigned(t *testing.T) {
 	backupConfigRequest := BackupConfig{
 		DatabaseID:          database.ID,
 		IsBackupsEnabled:    true,
-		RetentionPolicyType: period.RetentionPolicyTypeTimePeriod,
+		RetentionPolicyType: RetentionPolicyTypeTimePeriod,
 		RetentionTimePeriod: period.PeriodWeek,
 		BackupInterval: &intervals.Interval{
 			Interval:  intervals.IntervalDaily,
@@ -1683,7 +1683,7 @@ func Test_TransferDatabase_TargetNotifierFromDifferentWorkspace_ReturnsBadReques
 	backupConfigRequest := BackupConfig{
 		DatabaseID:          database.ID,
 		IsBackupsEnabled:    true,
-		RetentionPolicyType: period.RetentionPolicyTypeTimePeriod,
+		RetentionPolicyType: RetentionPolicyTypeTimePeriod,
 		RetentionTimePeriod: period.PeriodWeek,
 		BackupInterval: &intervals.Interval{
 			Interval:  intervals.IntervalDaily,
@@ -1749,7 +1749,7 @@ func Test_TransferDatabase_TargetStorageFromDifferentWorkspace_ReturnsBadRequest
 	backupConfigRequest := BackupConfig{
 		DatabaseID:          database.ID,
 		IsBackupsEnabled:    true,
-		RetentionPolicyType: period.RetentionPolicyTypeTimePeriod,
+		RetentionPolicyType: RetentionPolicyTypeTimePeriod,
 		RetentionTimePeriod: period.PeriodWeek,
 		BackupInterval: &intervals.Interval{
 			Interval:  intervals.IntervalDaily,
@@ -1809,7 +1809,7 @@ func Test_SaveBackupConfig_WithSystemStorage_CanBeUsedByAnyDatabase(t *testing.T
 	backupConfigWithRegularStorage := BackupConfig{
 		DatabaseID:          databaseA.ID,
 		IsBackupsEnabled:    true,
-		RetentionPolicyType: period.RetentionPolicyTypeTimePeriod,
+		RetentionPolicyType: RetentionPolicyTypeTimePeriod,
 		RetentionTimePeriod: period.PeriodWeek,
 		BackupInterval: &intervals.Interval{
 			Interval:  intervals.IntervalDaily,
@@ -1861,7 +1861,7 @@ func Test_SaveBackupConfig_WithSystemStorage_CanBeUsedByAnyDatabase(t *testing.T
 	backupConfigWithSystemStorage := BackupConfig{
 		DatabaseID:          databaseA.ID,
 		IsBackupsEnabled:    true,
-		RetentionPolicyType: period.RetentionPolicyTypeTimePeriod,
+		RetentionPolicyType: RetentionPolicyTypeTimePeriod,
 		RetentionTimePeriod: period.PeriodWeek,
 		BackupInterval: &intervals.Interval{
 			Interval:  intervals.IntervalDaily,

@@ -15,9 +15,9 @@ func EnableBackupsForTestDatabase(
 	timeOfDay := "16:00"
 
 	backupConfig := &BackupConfig{
-		DatabaseID:       databaseID,
-		IsBackupsEnabled: true,
-		RetentionPolicyType:  period.RetentionPolicyTypeTimePeriod,
+		DatabaseID:          databaseID,
+		IsBackupsEnabled:    true,
+		RetentionPolicyType: RetentionPolicyTypeTimePeriod,
 		RetentionTimePeriod: period.PeriodDay,
 		BackupInterval: &intervals.Interval{
 			Interval:  intervals.IntervalDaily,

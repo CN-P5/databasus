@@ -37,7 +37,7 @@ func Test_AttachStorageFromSameWorkspace_SuccessfullyAttached(t *testing.T) {
 	request := BackupConfig{
 		DatabaseID:          database.ID,
 		IsBackupsEnabled:    true,
-		RetentionPolicyType: period.RetentionPolicyTypeTimePeriod,
+		RetentionPolicyType: RetentionPolicyTypeTimePeriod,
 		RetentionTimePeriod: period.PeriodWeek,
 		BackupInterval: &intervals.Interval{
 			Interval:  intervals.IntervalDaily,
@@ -90,7 +90,7 @@ func Test_AttachStorageFromDifferentWorkspace_ReturnsForbidden(t *testing.T) {
 	request := BackupConfig{
 		DatabaseID:          database.ID,
 		IsBackupsEnabled:    true,
-		RetentionPolicyType: period.RetentionPolicyTypeTimePeriod,
+		RetentionPolicyType: RetentionPolicyTypeTimePeriod,
 		RetentionTimePeriod: period.PeriodWeek,
 		BackupInterval: &intervals.Interval{
 			Interval:  intervals.IntervalDaily,
@@ -135,7 +135,7 @@ func Test_DeleteStorageWithAttachedDatabases_CannotDelete(t *testing.T) {
 	request := BackupConfig{
 		DatabaseID:          database.ID,
 		IsBackupsEnabled:    true,
-		RetentionPolicyType: period.RetentionPolicyTypeTimePeriod,
+		RetentionPolicyType: RetentionPolicyTypeTimePeriod,
 		RetentionTimePeriod: period.PeriodWeek,
 		BackupInterval: &intervals.Interval{
 			Interval:  intervals.IntervalDaily,
@@ -196,7 +196,7 @@ func Test_TransferStorageWithAttachedDatabase_CannotTransfer(t *testing.T) {
 	request := BackupConfig{
 		DatabaseID:          database.ID,
 		IsBackupsEnabled:    true,
-		RetentionPolicyType: period.RetentionPolicyTypeTimePeriod,
+		RetentionPolicyType: RetentionPolicyTypeTimePeriod,
 		RetentionTimePeriod: period.PeriodWeek,
 		BackupInterval: &intervals.Interval{
 			Interval:  intervals.IntervalDaily,

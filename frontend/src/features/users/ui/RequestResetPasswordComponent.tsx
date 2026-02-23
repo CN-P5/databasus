@@ -2,9 +2,12 @@ import { Button, Input } from 'antd';
 import { type JSX, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { useCloudflareTurnstile } from '../../../shared/hooks/useCloudflareTurnstile';
+
 import { userApi } from '../../../entity/users';
 import { StringUtils } from '../../../shared/lib';
 import { FormValidator } from '../../../shared/lib/FormValidator';
+import { CloudflareTurnstileWidget } from '../../../shared/ui/CloudflareTurnstileWidget';
 
 interface RequestResetPasswordComponentProps {
   onSwitchToSignIn?: () => void;
@@ -15,12 +18,14 @@ export function RequestResetPasswordComponent({
   onSwitchToSignIn,
   onSwitchToResetPassword,
 }: RequestResetPasswordComponentProps): JSX.Element {
-  const { t } = useTranslation('users');
+  const { t } = useTranslation('auth');
   const [email, setEmail] = useState('');
   const [isLoading, setLoading] = useState(false);
   const [isEmailError, setEmailError] = useState(false);
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
+
+  const { token, containerRef, resetCloudflareTurnstile } = useCloudflareTurnstile();
 
   const validateEmail = (): boolean => {
     if (!email) {
@@ -44,7 +49,10 @@ export function RequestResetPasswordComponent({
       setLoading(true);
 
       try {
-        const response = await userApi.sendResetPasswordCode({ email });
+        const response = await userApi.sendResetPasswordCode({
+          email,
+          cloudflareTurnstileToken: token,
+        });
         setSuccessMessage(response.message);
 
         // After successful code send, switch to reset password form
@@ -55,6 +63,7 @@ export function RequestResetPasswordComponent({
         }, 2000);
       } catch (e) {
         setError(StringUtils.capitalizeFirstLetter((e as Error).message));
+        resetCloudflareTurnstile();
       }
 
       setLoading(false);
@@ -66,7 +75,7 @@ export function RequestResetPasswordComponent({
       <div className="mb-5 text-center text-2xl font-bold">{t('resetPassword')}</div>
 
       <div className="mb-4 text-center text-sm text-gray-600 dark:text-gray-400">
-        {t('enterYourEmailAddressAndWeWillSendYouAResetCode')}
+        {t('resetPasswordDescription')}
       </div>
 
       <div className="my-1 text-xs font-semibold">{t('yourEmail')}</div>
@@ -85,6 +94,8 @@ export function RequestResetPasswordComponent({
       />
 
       <div className="mt-3" />
+
+      <CloudflareTurnstileWidget containerRef={containerRef} />
 
       <Button
         disabled={isLoading}

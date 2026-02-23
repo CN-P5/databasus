@@ -21,7 +21,7 @@ interface Props {
 }
 
 export function WorkspaceSettingsComponent({ workspaceResponse, user, contentHeight }: Props) {
-  const { t } = useTranslation('workspaces');
+  const { t } = useTranslation(['common', 'workspaces']);
   const { message, modal } = App.useApp();
   const isMobile = useIsMobile();
   const [workspace, setWorkspace] = useState<Workspace | undefined>(undefined);
@@ -63,7 +63,8 @@ export function WorkspaceSettingsComponent({ workspaceResponse, user, contentHei
 
       setBasicInfoChanges(false);
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : t('failedToLoadWorkspace');
+      const errorMessage =
+        error instanceof Error ? error.message : t('workspaces:failedToLoadWorkspace');
       message.error(errorMessage);
     } finally {
       setIsLoading(false);
@@ -84,7 +85,7 @@ export function WorkspaceSettingsComponent({ workspaceResponse, user, contentHei
 
     if (!formWorkspace.name?.trim()) {
       setNameError(true);
-      message.error(t('workspaceNameIsRequired'));
+      message.error(t('workspaces:workspaceNameIsRequired'));
       return;
     }
     setNameError(false);
@@ -102,10 +103,10 @@ export function WorkspaceSettingsComponent({ workspaceResponse, user, contentHei
       setBasicInfoChanges(false);
 
       setNameError(false);
-      message.success(t('basicInformationUpdatedSuccessfully'));
+      message.success(t('workspaces:basicInformationUpdatedSuccessfully'));
     } catch (error: unknown) {
       const errorMessage =
-        error instanceof Error ? error.message : t('failedToUpdateBasicInformation');
+        error instanceof Error ? error.message : t('workspaces:failedToUpdateBasicInformation');
       message.error(errorMessage);
     } finally {
       setIsSaving(false);
@@ -114,33 +115,26 @@ export function WorkspaceSettingsComponent({ workspaceResponse, user, contentHei
 
   const handleDeleteWorkspace = async () => {
     if (!workspace) {
-      message.error(t('workspaceNotFound'));
+      message.error(t('workspaces:workspaceNotFound'));
       return;
     }
 
     if (!canEdit) {
-      message.error(t('youDoNotHavePermissionToDeleteThisWorkspace'));
+      message.error(t('workspaces:youDoNotHavePermissionToDeleteThisWorkspace'));
       return;
     }
 
     modal.confirm({
-      title: t('deleteWorkspaceTitle'),
+      title: t('workspaces:deleteWorkspaceTitle'),
       content: (
         <div>
-          <p>
-            {t('deleteWorkspaceConfirmation').replace(
-              '{name}',
-              `<strong>${workspace.name}</strong>`,
-            )}
-          </p>
-          <p className="mt-2 text-red-600">
-            <strong>{t('thisActionCannotBeUndone')}</strong> {t('deleteWorkspaceWarning')}
-          </p>
+          <p>{t('workspaces:deleteWorkspaceConfirmation', { name: workspace.name })}</p>
+          <p className="mt-2 text-red-600">{t('workspaces:thisActionCannotBeUndone')}</p>
         </div>
       ),
-      okText: t('deleteWorkspace'),
+      okText: t('workspaces:deleteWorkspace'),
       okType: 'danger',
-      cancelText: t('cancel'),
+      cancelText: t('common:cancel'),
       onOk: async () => {
         setIsDeleting(true);
         try {
@@ -149,20 +143,19 @@ export function WorkspaceSettingsComponent({ workspaceResponse, user, contentHei
 
           if (databases && databases.length > 0) {
             message.error(
-              t('cannotDeleteWorkspacePleaseRemoveAllDatabasesFirst').replace(
-                '{count}',
-                String(databases.length),
-              ),
+              t('workspaces:cannotDeleteWorkspacePleaseRemoveAllDatabasesFirst', {
+                count: databases.length,
+              }),
             );
             return;
           }
 
           await workspaceApi.deleteWorkspace(workspace.id);
-          message.success(t('workspaceDeletedSuccessfully'));
+          message.success(t('workspaces:workspaceDeletedSuccessfully'));
           window.location.href = '/';
         } catch (error: unknown) {
           const errorMessage =
-            error instanceof Error ? error.message : t('failedToDeleteWorkspace');
+            error instanceof Error ? error.message : t('workspaces:failedToDeleteWorkspace');
           message.error(errorMessage);
         } finally {
           setIsDeleting(false);
@@ -179,7 +172,9 @@ export function WorkspaceSettingsComponent({ workspaceResponse, user, contentHei
           className={`grow overflow-y-auto rounded bg-white shadow dark:bg-gray-800 ${isMobile ? 'p-3' : 'p-5'}`}
           style={{ height: contentHeight }}
         >
-          <h1 className="mb-6 text-2xl font-bold dark:text-white">{t('workspaceSettings')}</h1>
+          <h1 className="mb-6 text-2xl font-bold dark:text-white">
+            {t('workspaces:workspaceSettings')}
+          </h1>
 
           {isLoading || !workspace ? (
             <Spin indicator={<LoadingOutlined spin />} size="large" />
@@ -188,7 +183,7 @@ export function WorkspaceSettingsComponent({ workspaceResponse, user, contentHei
               {!canEdit && (
                 <div className="my-4 max-w-[500px] rounded-md bg-yellow-50 p-3 dark:bg-yellow-900/30">
                   <div className="text-sm text-yellow-800 dark:text-yellow-200">
-                    {t('youDontHavePermissionToModifyTheseSettings')}
+                    {t('workspaces:youDontHavePermissionToModifyTheseSettings')}
                   </div>
                 </div>
               )}
@@ -197,7 +192,7 @@ export function WorkspaceSettingsComponent({ workspaceResponse, user, contentHei
                 <div className="max-w-2xl border-b border-gray-200 pb-6 dark:border-gray-700">
                   <div className="max-w-md">
                     <div className="mb-1 font-medium text-gray-900 dark:text-white">
-                      {t('workspaceName')}
+                      {t('workspaces:workspaceName')}
                     </div>
                     <Input
                       value={formWorkspace.name || ''}
@@ -206,7 +201,7 @@ export function WorkspaceSettingsComponent({ workspaceResponse, user, contentHei
                         handleFieldChange('name', e.target.value);
                       }}
                       disabled={!canEdit}
-                      placeholder={t('enterWorkspaceName')}
+                      placeholder={t('workspaces:enterWorkspaceName')}
                       maxLength={100}
                       status={nameError ? 'error' : undefined}
                     />
@@ -221,7 +216,7 @@ export function WorkspaceSettingsComponent({ workspaceResponse, user, contentHei
                         disabled={isSaving}
                         className="border-blue-600 bg-blue-600 hover:border-blue-700 hover:bg-blue-700"
                       >
-                        {isSaving ? t('saving') : t('saveChanges')}
+                        {isSaving ? t('common:saving') : t('common:saveChanges')}
                       </Button>
 
                       <Button
@@ -236,7 +231,7 @@ export function WorkspaceSettingsComponent({ workspaceResponse, user, contentHei
                         }}
                         disabled={isSaving}
                       >
-                        {t('reset')}
+                        {t('common:reset')}
                       </Button>
                     </div>
                   )}
@@ -249,7 +244,7 @@ export function WorkspaceSettingsComponent({ workspaceResponse, user, contentHei
                 {canEdit && (
                   <div className="max-w-2xl border-b border-gray-200 pb-6 dark:border-gray-700">
                     <h2 className="mb-4 text-xl font-bold text-gray-900 dark:text-white">
-                      {t('dangerZone')}
+                      {t('workspaces:dangerZone')}
                     </h2>
 
                     <div className="rounded-lg border border-red-200 bg-red-50 p-4 dark:border-red-800 dark:bg-red-900/30">
@@ -258,10 +253,10 @@ export function WorkspaceSettingsComponent({ workspaceResponse, user, contentHei
                       >
                         <div className="flex-1">
                           <div className="font-medium text-red-900 dark:text-red-200">
-                            {t('deleteThisWorkspace')}
+                            {t('workspaces:deleteThisWorkspace')}
                           </div>
                           <div className="mt-1 text-sm text-red-700 dark:text-red-300">
-                            {t('deleteWorkspaceWarning')}
+                            {t('workspaces:deleteWorkspaceWarning')}
                           </div>
                         </div>
 
@@ -274,7 +269,7 @@ export function WorkspaceSettingsComponent({ workspaceResponse, user, contentHei
                             loading={isDeleting}
                             className={`bg-red-600 hover:bg-red-700 ${isMobile ? 'w-full' : ''}`}
                           >
-                            {isDeleting ? t('deleting') : t('deleteWorkspace')}
+                            {isDeleting ? t('common:deleting') : t('workspaces:deleteWorkspace')}
                           </Button>
                         </div>
                       </div>

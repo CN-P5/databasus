@@ -71,12 +71,13 @@ func GetTestMongodbConfig() *mongodb.MongodbDatabase {
 	return &mongodb.MongodbDatabase{
 		Version:      tools.MongodbVersion7,
 		Host:         config.GetEnv().TestLocalhost,
-		Port:         port,
+		Port:         &port,
 		Username:     "root",
 		Password:     "rootpassword",
 		Database:     "testdb",
 		AuthDatabase: "admin",
 		IsHttps:      false,
+		IsSrv:        false,
 		CpuCount:     1,
 	}
 }

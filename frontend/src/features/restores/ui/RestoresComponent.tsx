@@ -64,9 +64,8 @@ const getRestorePayload = (database: Database, editingDatabase: Database) => {
 };
 
 export const RestoresComponent = ({ database, backup }: Props) => {
-  const { message } = App.useApp();
   const { t } = useTranslation('restores');
-  const { t: tDatabases } = useTranslation('databases');
+  const { message } = App.useApp();
 
   const [editingDatabase, setEditingDatabase] = useState<Database>(
     createInitialEditingDatabase(database),
@@ -147,12 +146,11 @@ export const RestoresComponent = ({ database, backup }: Props) => {
     return (
       <>
         <div className="my-5 text-sm">
-          {t('enterInfoOfDatabaseWeWillRestoreBackupTo')}{' '}
-          <u>{t('theEmptyDatabaseForRestoreShouldBeCreatedBeforeRestore')}</u>.{' '}
-          {t('duringTheRestoreAllCurrentDataWillBeCleared')}
+          {t('enterRestoreDbInfo')} <u>{t('emptyDbShouldBeCreated')}</u>.{' '}
+          {t('duringRestoreDataCleared')}
           <br />
           <br />
-          {t('makeSureDatabaseIsNotUsedRightNow')}
+          {t('makeSureDbNotUsed')}
         </div>
 
         <EditDatabaseSpecificDataComponent
@@ -191,7 +189,7 @@ export const RestoresComponent = ({ database, backup }: Props) => {
           </Button>
 
           {restores.length === 0 && (
-            <div className="my-5 text-center text-gray-400">{t('noRestores')}</div>
+            <div className="my-5 text-center text-gray-400">{t('noRestoresYet')}</div>
           )}
 
           <div className="mt-5">
@@ -303,11 +301,10 @@ export const RestoresComponent = ({ database, backup }: Props) => {
                       <div>
                         <div>{duration}</div>
                         <div className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                          {t('expectedRestorationTime')}
+                          {t('expectedRestoreTimeHint')}
                           <br />
                           <br />
-                          {t('soItIsExpectedToTakeUpTo')} {expectedRestoreDuration}{' '}
-                          {t('usuallySignificantlyFaster')}
+                          {t('expectedToTake', { time: expectedRestoreDuration })}
                         </div>
                       </div>
                     </div>
@@ -330,18 +327,16 @@ export const RestoresComponent = ({ database, backup }: Props) => {
               icon={<CopyOutlined />}
               onClick={() => {
                 navigator.clipboard.writeText(showingRestoreError.failMessage || '');
-                message.success(t('errorMessageCopiedToClipboard'));
+                message.success(t('errorMessageCopied'));
               }}
             >
-              {t('copy')}
+              {t('common:copy')}
             </Button>
           }
         >
           {showingRestoreError.failMessage?.includes('must be owner of extension') && (
             <div className="mb-4 rounded border border-yellow-300 bg-yellow-50 p-3 text-sm dark:border-yellow-600 dark:bg-yellow-900/30">
-              <strong>💡 {t('tip')}</strong> {t('thisErrorTypicallyOccurs')}{' '}
-              <strong>&quot;{tDatabases('excludeExtensions')}&quot;</strong>{' '}
-              {t('inAdvancedSettingsBeforeRestoring')}
+              <strong>💡 {t('tip')}:</strong> {t('extensionOwnerErrorHint')}
             </div>
           )}
           <div className="overflow-y-auto text-sm whitespace-pre-wrap" style={{ height: '400px' }}>

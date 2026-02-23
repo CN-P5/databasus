@@ -21,7 +21,7 @@ export function EditSlackNotifierComponent({ notifier, setNotifier, setUnsaved }
           target="_blank"
           rel="noreferrer"
         >
-          How to connect Slack (how to get bot token and chat ID)?
+          {t('howToConnectSlack')}
         </a>
       </div>
 

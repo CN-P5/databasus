@@ -18,14 +18,15 @@ type BackupConfig struct {
 
 	IsBackupsEnabled bool `json:"isBackupsEnabled" gorm:"column:is_backups_enabled;type:boolean;not null"`
 
-	RetentionPolicyType period.RetentionPolicyType `json:"retentionPolicyType" gorm:"column:retention_policy_type;type:text;not null"`
-	RetentionTimePeriod period.Period              `json:"retentionTimePeriod" gorm:"column:retention_time_period;type:text;not null"`
-	RetentionCount      int                        `json:"retentionCount"      gorm:"column:retention_count;type:int;not null"`
-	RetentionGfsHours   int                        `json:"retentionGfsHours"  gorm:"column:retention_gfs_hours;type:int;not null"`
-	RetentionGfsDays    int                        `json:"retentionGfsDays"   gorm:"column:retention_gfs_days;type:int;not null"`
-	RetentionGfsWeeks   int                        `json:"retentionGfsWeeks"  gorm:"column:retention_gfs_weeks;type:int;not null"`
-	RetentionGfsMonths  int                        `json:"retentionGfsMonths" gorm:"column:retention_gfs_months;type:int;not null"`
-	RetentionGfsYears   int                        `json:"retentionGfsYears"  gorm:"column:retention_gfs_years;type:int;not null"`
+	RetentionPolicyType RetentionPolicyType `json:"retentionPolicyType" gorm:"column:retention_policy_type;type:text;not null;default:'TIME_PERIOD'"`
+	RetentionTimePeriod period.TimePeriod   `json:"retentionTimePeriod" gorm:"column:retention_time_period;type:text;not null;default:''"`
+
+	RetentionCount     int `json:"retentionCount"     gorm:"column:retention_count;type:int;not null;default:0"`
+	RetentionGfsHours  int `json:"retentionGfsHours"  gorm:"column:retention_gfs_hours;type:int;not null;default:0"`
+	RetentionGfsDays   int `json:"retentionGfsDays"   gorm:"column:retention_gfs_days;type:int;not null;default:0"`
+	RetentionGfsWeeks  int `json:"retentionGfsWeeks"  gorm:"column:retention_gfs_weeks;type:int;not null;default:0"`
+	RetentionGfsMonths int `json:"retentionGfsMonths" gorm:"column:retention_gfs_months;type:int;not null;default:0"`
+	RetentionGfsYears  int `json:"retentionGfsYears"  gorm:"column:retention_gfs_years;type:int;not null;default:0"`
 
 	BackupIntervalID uuid.UUID           `json:"backupIntervalId"         gorm:"column:backup_interval_id;type:uuid;not null"`
 	BackupInterval   *intervals.Interval `json:"backupInterval,omitempty" gorm:"foreignKey:BackupIntervalID"`
@@ -89,8 +90,8 @@ func (b *BackupConfig) Validate(plan *plans.DatabasePlan) error {
 		return errors.New("backup interval is required")
 	}
 
-	if b.RetentionPolicyType == "" {
-		return errors.New("retention policy type is required")
+	if err := b.validateRetentionPolicy(plan); err != nil {
+		return err
 	}
 
 	if b.IsRetryIfFailed && b.MaxFailedTriesCount <= 0 {
@@ -116,21 +117,12 @@ func (b *BackupConfig) Validate(plan *plans.DatabasePlan) error {
 		return errors.New("max backups total size must be non-negative")
 	}
 
-	// Validate against plan limits
-	if b.RetentionPolicyType == period.RetentionPolicyTypeTimePeriod {
-		if b.RetentionTimePeriod.CompareTo(plan.MaxStoragePeriod) > 0 {
-			return errors.New("retention time period exceeds plan limit")
-		}
-	}
-
-	// Check max backup size limit (0 in plan means unlimited)
 	if plan.MaxBackupSizeMB > 0 {
 		if b.MaxBackupSizeMB == 0 || b.MaxBackupSizeMB > plan.MaxBackupSizeMB {
 			return errors.New("max backup size exceeds plan limit")
 		}
 	}
 
-	// Check max total backups size limit (0 in plan means unlimited)
 	if plan.MaxBackupsTotalSizeMB > 0 {
 		if b.MaxBackupsTotalSizeMB == 0 ||
 			b.MaxBackupsTotalSizeMB > plan.MaxBackupsTotalSizeMB {
@@ -163,4 +155,35 @@ func (b *BackupConfig) Copy(newDatabaseID uuid.UUID) *BackupConfig {
 		MaxBackupSizeMB:       b.MaxBackupSizeMB,
 		MaxBackupsTotalSizeMB: b.MaxBackupsTotalSizeMB,
 	}
+}
+
+func (b *BackupConfig) validateRetentionPolicy(plan *plans.DatabasePlan) error {
+	switch b.RetentionPolicyType {
+	case RetentionPolicyTypeTimePeriod, "":
+		if b.RetentionTimePeriod == "" {
+			return errors.New("retention time period is required")
+		}
+
+		if plan.MaxStoragePeriod != period.PeriodForever {
+			if b.RetentionTimePeriod.CompareTo(plan.MaxStoragePeriod) > 0 {
+				return errors.New("storage period exceeds plan limit")
+			}
+		}
+
+	case RetentionPolicyTypeCount:
+		if b.RetentionCount <= 0 {
+			return errors.New("retention count must be greater than 0")
+		}
+
+	case RetentionPolicyTypeGFS:
+		if b.RetentionGfsHours <= 0 && b.RetentionGfsDays <= 0 && b.RetentionGfsWeeks <= 0 &&
+			b.RetentionGfsMonths <= 0 && b.RetentionGfsYears <= 0 {
+			return errors.New("at least one GFS retention field must be greater than 0")
+		}
+
+	default:
+		return errors.New("invalid retention policy type")
+	}
+
+	return nil
 }

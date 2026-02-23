@@ -9,22 +9,37 @@ interface Props {
 }
 
 export const ShowDatabaseBaseInfoComponent = ({ database, isShowName, isShowType }: Props) => {
-  const { t } = useTranslation(['common', 'databases']);
+  const { t } = useTranslation('databases');
+
+  const getDatabaseTypeName = () => {
+    switch (database.type) {
+      case 'POSTGRES':
+        return 'PostgreSQL';
+      case 'MYSQL':
+        return 'MySQL';
+      case 'MARIADB':
+        return 'MariaDB';
+      case 'MONGODB':
+        return 'MongoDB';
+      default:
+        return t('database');
+    }
+  };
 
   return (
     <div>
       {isShowName && (
         <div className="mb-1 flex w-full items-center">
-          <div className="min-w-[150px]">{t('common:name')}</div>
+          <div className="min-w-[150px]">{t('databaseName')}</div>
           <div>{database.name || ''}</div>
         </div>
       )}
 
       {isShowType && (
         <div className="mb-1 flex w-full items-center">
-          <div className="min-w-[150px]">{t('databases:databaseType')}</div>
+          <div className="min-w-[150px]">{t('databaseType')}</div>
           <div className="flex items-center">
-            <span>{database.type === 'POSTGRES' ? 'PostgreSQL' : 'MySQL'}</span>
+            <span>{getDatabaseTypeName()}</span>
             <img
               src={getDatabaseLogoFromType(database.type)}
               alt="databaseIcon"

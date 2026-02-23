@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
 
 const StarIcon = () => (
   <svg
@@ -18,7 +17,6 @@ const StarIcon = () => (
 );
 
 export function StarButtonComponent() {
-  const { t } = useTranslation('common');
   const [starCount, setStarCount] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -50,7 +48,7 @@ export function StarButtonComponent() {
     >
       <div className="flex items-center gap-2 border-r border-gray-200 px-2.5 py-1 !text-black dark:border-gray-600 dark:!text-white">
         <StarIcon />
-        <span>{t('starOnGithub')}</span>
+        <span>Star on GitHub</span>
       </div>
 
       {!isLoading && starCount !== null && (

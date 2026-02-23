@@ -42,7 +42,7 @@ export const EditPostgreSqlSpecificDataComponent = ({
   isShowDbName = true,
   isRestoreMode = false,
 }: Props) => {
-  const { t } = useTranslation(['common', 'databases']);
+  const { t } = useTranslation('databases');
   const { message } = App.useApp();
 
   const [editingDatabase, setEditingDatabase] = useState<Database>();
@@ -64,7 +64,7 @@ export const EditPostgreSqlSpecificDataComponent = ({
       const trimmedText = text.trim();
 
       if (!trimmedText) {
-        message.error(t('databases:clipboardIsEmpty'));
+        message.error(t('clipboardIsEmpty'));
         return;
       }
 
@@ -93,9 +93,9 @@ export const EditPostgreSqlSpecificDataComponent = ({
 
       setEditingDatabase(autoAddPublicSchemaForSupabase(updatedDatabase));
       setIsConnectionTested(false);
-      message.success(t('databases:connectionStringParsedSuccessfully'));
+      message.success(t('connectionStringParsedSuccessfully'));
     } catch {
-      message.error(t('databases:failedToReadClipboard'));
+      message.error(t('failedToReadClipboard'));
     }
   };
 
@@ -141,8 +141,8 @@ export const EditPostgreSqlSpecificDataComponent = ({
       await databaseApi.testDatabaseConnectionDirect(trimmedDatabase);
       setIsConnectionTested(true);
       ToastHelper.showToast({
-        title: t('databases:connectionTestPassed'),
-        description: t('databases:youCanContinueWithNextStep'),
+        title: t('connectionTestPassed'),
+        description: t('youCanContinueWithNextStep'),
       });
     } catch (e) {
       setIsConnectionFailed(true);
@@ -213,12 +213,12 @@ export const EditPostgreSqlSpecificDataComponent = ({
           onClick={parseFromClipboard}
         >
           <CopyOutlined className="mr-1" />
-          {t('databases:parseFromClipboard')}
+          {t('parseFromClipboard')}
         </div>
       </div>
 
       <div className="mb-1 flex w-full items-center">
-        <div className="min-w-[150px]">{t('databases:host')}</div>
+        <div className="min-w-[150px]">{t('host')}</div>
         <Input
           value={editingDatabase.postgresql?.host}
           onChange={(e) => {
@@ -236,7 +236,7 @@ export const EditPostgreSqlSpecificDataComponent = ({
           }}
           size="small"
           className="max-w-[200px] grow"
-          placeholder={t('databases:hostPlaceholder')}
+          placeholder={t('enterPgHost')}
         />
       </div>
 
@@ -244,16 +244,16 @@ export const EditPostgreSqlSpecificDataComponent = ({
         <div className="mb-1 flex">
           <div className="min-w-[150px]" />
           <div className="max-w-[200px] text-xs text-gray-500 dark:text-gray-400">
-            {t('databases:please')}{' '}
+            {t('please')}{' '}
             <a
               href="https://databasus.com/faq/localhost"
               target="_blank"
               rel="noreferrer"
               className="!text-blue-600 dark:!text-blue-400"
             >
-              {t('databases:readThisDocument')}
+              {t('readThisDocument')}
             </a>{' '}
-            {t('databases:toStudyHowToBackupLocalDatabase')}
+            {t('toStudyHowToBackupLocalDatabase')}
           </div>
         </div>
       )}
@@ -262,22 +262,22 @@ export const EditPostgreSqlSpecificDataComponent = ({
         <div className="mb-1 flex">
           <div className="min-w-[150px]" />
           <div className="max-w-[200px] text-xs text-gray-500 dark:text-gray-400">
-            {t('databases:please')}{' '}
+            {t('please')}{' '}
             <a
               href="https://databasus.com/faq/supabase"
               target="_blank"
               rel="noreferrer"
               className="!text-blue-600 dark:!text-blue-400"
             >
-              {t('databases:readThisDocument')}
+              {t('readThisDocument')}
             </a>{' '}
-            {t('databases:toStudyHowToBackupSupabaseDatabase')}
+            {t('toStudyHowToBackupSupabaseDatabase')}
           </div>
         </div>
       )}
 
       <div className="mb-1 flex w-full items-center">
-        <div className="min-w-[150px]">{t('databases:port')}</div>
+        <div className="min-w-[150px]">{t('port')}</div>
         <InputNumber
           type="number"
           value={editingDatabase.postgresql?.port}
@@ -292,12 +292,12 @@ export const EditPostgreSqlSpecificDataComponent = ({
           }}
           size="small"
           className="max-w-[200px] grow"
-          placeholder={t('databases:portPlaceholder')}
+          placeholder={t('enterPgPort')}
         />
       </div>
 
       <div className="mb-1 flex w-full items-center">
-        <div className="min-w-[150px]">{t('databases:username')}</div>
+        <div className="min-w-[150px]">{t('username')}</div>
         <Input
           value={editingDatabase.postgresql?.username}
           onChange={(e) => {
@@ -312,12 +312,12 @@ export const EditPostgreSqlSpecificDataComponent = ({
           }}
           size="small"
           className="max-w-[200px] grow"
-          placeholder={t('databases:usernamePlaceholder')}
+          placeholder={t('enterPgUsername')}
         />
       </div>
 
       <div className="mb-1 flex w-full items-center">
-        <div className="min-w-[150px]">{t('databases:databasePassword')}</div>
+        <div className="min-w-[150px]">{t('password')}</div>
         <Input.Password
           value={editingDatabase.postgresql?.password}
           onChange={(e) => {
@@ -331,7 +331,7 @@ export const EditPostgreSqlSpecificDataComponent = ({
           }}
           size="small"
           className="max-w-[200px] grow"
-          placeholder={t('databases:databasePasswordPlaceholder')}
+          placeholder={t('enterPgPassword')}
           autoComplete="off"
           data-1p-ignore
           data-lpignore="true"
@@ -341,7 +341,7 @@ export const EditPostgreSqlSpecificDataComponent = ({
 
       {isShowDbName && (
         <div className="mb-1 flex w-full items-center">
-          <div className="min-w-[150px]">{t('databases:databaseName')}</div>
+          <div className="min-w-[150px]">{t('dbName')}</div>
           <Input
             value={editingDatabase.postgresql?.database}
             onChange={(e) => {
@@ -355,13 +355,13 @@ export const EditPostgreSqlSpecificDataComponent = ({
             }}
             size="small"
             className="max-w-[200px] grow"
-            placeholder={t('databases:databaseNamePlaceholder')}
+            placeholder={t('enterPgDatabaseName')}
           />
         </div>
       )}
 
       <div className="mb-1 flex w-full items-center">
-        <div className="min-w-[150px]">{t('databases:useHttps')}</div>
+        <div className="min-w-[150px]">{t('useHttps')}</div>
         <Switch
           checked={editingDatabase.postgresql?.isHttps}
           onChange={(checked) => {
@@ -379,7 +379,7 @@ export const EditPostgreSqlSpecificDataComponent = ({
 
       {isRestoreMode && !IS_CLOUD && (
         <div className="mb-5 flex w-full items-center">
-          <div className="min-w-[150px]">{t('databases:cpuCount')}</div>
+          <div className="min-w-[150px]">{t('cpuCount')}</div>
           <div className="flex items-center">
             <InputNumber
               min={1}
@@ -398,7 +398,7 @@ export const EditPostgreSqlSpecificDataComponent = ({
               className="max-w-[75px] grow"
             />
 
-            <Tooltip className="cursor-pointer" title={t('databases:cpuCountDescription')}>
+            <Tooltip className="cursor-pointer" title={t('cpuCountDescription')}>
               <InfoCircleOutlined className="ml-2" style={{ color: 'gray' }} />
             </Tooltip>
           </div>
@@ -410,7 +410,7 @@ export const EditPostgreSqlSpecificDataComponent = ({
           className="flex cursor-pointer items-center text-sm text-blue-600 hover:text-blue-800"
           onClick={() => setShowAdvanced(!isShowAdvanced)}
         >
-          <span className="mr-2">{t('databases:advancedSettings')}</span>
+          <span className="mr-2">{t('advancedSettings')}</span>
 
           {isShowAdvanced ? (
             <UpOutlined style={{ fontSize: '12px' }} />
@@ -424,7 +424,7 @@ export const EditPostgreSqlSpecificDataComponent = ({
         <>
           {!isRestoreMode && (
             <div className="mb-1 flex w-full items-center">
-              <div className="min-w-[150px]">{t('databases:includeSchemas')}</div>
+              <div className="min-w-[150px]">{t('includeSchemas')}</div>
               <Select
                 mode="tags"
                 value={editingDatabase.postgresql?.includeSchemas || []}
@@ -438,7 +438,7 @@ export const EditPostgreSqlSpecificDataComponent = ({
                 }}
                 size="small"
                 className="max-w-[200px] grow"
-                placeholder={t('databases:allSchemasDefault')}
+                placeholder={t('allSchemasDefault')}
                 tokenSeparators={[',']}
               />
             </div>
@@ -446,7 +446,7 @@ export const EditPostgreSqlSpecificDataComponent = ({
 
           {isRestoreMode && (
             <div className="mb-1 flex w-full items-center">
-              <div className="min-w-[150px]">{t('databases:excludeExtensions')}</div>
+              <div className="min-w-[150px]">{t('excludeExtensions')}</div>
               <div className="flex items-center">
                 <Checkbox
                   checked={editingDatabase.postgresql?.isExcludeExtensions || false}
@@ -462,13 +462,10 @@ export const EditPostgreSqlSpecificDataComponent = ({
                     });
                   }}
                 >
-                  {t('databases:skipExtensions')}
+                  {t('skipExtensions')}
                 </Checkbox>
 
-                <Tooltip
-                  className="cursor-pointer"
-                  title={t('databases:skipExtensionsDescription')}
-                >
+                <Tooltip className="cursor-pointer" title={t('skipExtensionsTooltip')}>
                   <InfoCircleOutlined className="ml-2" style={{ color: 'gray' }} />
                 </Tooltip>
               </div>
@@ -509,7 +506,7 @@ export const EditPostgreSqlSpecificDataComponent = ({
             disabled={!isAllFieldsFilled}
             className="mr-5"
           >
-            {t('databases:testConnection')}
+            {t('testConnection')}
           </Button>
         )}
 
@@ -528,7 +525,7 @@ export const EditPostgreSqlSpecificDataComponent = ({
 
       {isConnectionFailed && !IS_CLOUD && (
         <div className="mt-3 text-sm text-gray-500 dark:text-gray-400">
-          {t('databases:ifYourDatabaseUsesIpWhitelist')}
+          {t('ifYourDatabaseUsesIpWhitelist')}
         </div>
       )}
     </div>

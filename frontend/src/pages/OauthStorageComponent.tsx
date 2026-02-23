@@ -9,13 +9,13 @@ import { userApi } from '../entity/users';
 import { EditStorageComponent } from '../features/storages/ui/edit/EditStorageComponent';
 
 export function OauthStorageComponent() {
-  const { t } = useTranslation(['common', 'storages']);
+  const { t } = useTranslation('storages');
   const [storage, setStorage] = useState<Storage | undefined>();
   const [user, setUser] = useState<UserProfile | undefined>();
 
   const exchangeGoogleOauthCode = async (oauthDto: StorageOauthDto) => {
     if (!oauthDto.storage.googleDriveStorage) {
-      alert(t('common:googleDriveStorageConfigurationNotFound'));
+      alert(t('googleDriveStorageConfigNotFound'));
       return;
     }
 
@@ -43,8 +43,7 @@ export function OauthStorageComponent() {
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(
-          errorData.error_description ||
-            `${t('common:oauthExchangeFailed')} ${response.statusText}`,
+          errorData.error_description || `OAuth exchange failed: ${response.statusText}`,
         );
       }
 
@@ -53,27 +52,23 @@ export function OauthStorageComponent() {
       oauthDto.storage.googleDriveStorage.tokenJson = JSON.stringify(tokenData);
       setStorage(oauthDto.storage);
     } catch (error) {
-      alert(`${t('common:failedToExchangeOAuthCode')} ${error}`);
-      // Return to home if exchange fails
+      alert(t('failedToExchangeOAuthCode') + `: ${error}`);
       setTimeout(() => {
         window.location.href = '/';
       }, 3000);
     }
   };
 
-  /**
-   * Helper to validate the DTO and start the exchange process
-   */
   const processOauthDto = (oauthDto: StorageOauthDto) => {
     if (oauthDto.storage.type === StorageType.GOOGLE_DRIVE) {
       if (!oauthDto.storage.googleDriveStorage) {
-        alert(t('common:googleDriveStorageConfigurationNotFoundInDto'));
+        alert(t('googleDriveStorageConfigNotFoundInDto'));
         return;
       }
 
       exchangeGoogleOauthCode(oauthDto);
     } else {
-      alert(t('common:unsupportedStorageTypeForOAuth'));
+      alert(t('unsupportedStorageTypeForOAuth'));
     }
   };
 
@@ -100,13 +95,13 @@ export function OauthStorageComponent() {
         return;
       } catch (e) {
         console.error('Error parsing OAuth state:', e);
-        alert(t('common:oauthStateParameterIsInvalid'));
+        alert(t('oauthStateParameterInvalid'));
         return;
       }
     }
 
-    alert(t('common:oauthParamNotFound'));
-  }, [t]);
+    alert(t('oauthParamNotFound'));
+  }, []);
 
   if (!storage || !user) {
     return (
@@ -119,7 +114,7 @@ export function OauthStorageComponent() {
   return (
     <div>
       <Modal
-        title={t('storages:addStorage')}
+        title={t('addStorage')}
         footer={<div />}
         open
         onCancel={() => {
@@ -127,7 +122,7 @@ export function OauthStorageComponent() {
         }}
       >
         <div className="my-3 max-w-[250px] text-gray-500 dark:text-gray-400">
-          {t('storages:storageDescription')}
+          {t('storageDescription')}
         </div>
 
         <EditStorageComponent

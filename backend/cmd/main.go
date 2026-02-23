@@ -37,6 +37,7 @@ import (
 	env_utils "databasus-backend/internal/util/env"
 	files_utils "databasus-backend/internal/util/files"
 	"databasus-backend/internal/util/logger"
+	_ "databasus-backend/swagger" // swagger docs
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-contrib/gzip"

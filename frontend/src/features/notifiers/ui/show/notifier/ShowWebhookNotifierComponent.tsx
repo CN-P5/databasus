@@ -26,13 +26,13 @@ export function ShowWebhookNotifierComponent({ notifier }: Props) {
 
       {hasHeaders && (
         <div className="mt-1 mb-1 flex items-start">
-          <div className="min-w-[110px]">{t('customHeaders')}</div>
+          <div className="min-w-[110px]">{t('headers')}</div>
           <div className="flex flex-col text-sm">
             {headers
               .filter((h: WebhookHeader) => h.key)
               .map((h: WebhookHeader, i: number) => (
                 <div key={i} className="text-gray-600">
-                  <span className="font-medium">{h.key}:</span> {h.value || t('hidden')}
+                  <span className="font-medium">{h.key}:</span> {h.value || `(${t('hidden')})`}
                 </div>
               ))}
           </div>

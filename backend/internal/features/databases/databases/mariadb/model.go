@@ -26,13 +26,14 @@ type MariadbDatabase struct {
 
 	Version tools.MariadbVersion `json:"version" gorm:"type:text;not null"`
 
-	Host       string  `json:"host"       gorm:"type:text;not null"`
-	Port       int     `json:"port"       gorm:"type:int;not null"`
-	Username   string  `json:"username"   gorm:"type:text;not null"`
-	Password   string  `json:"password"   gorm:"type:text;not null"`
-	Database   *string `json:"database"   gorm:"type:text"`
-	IsHttps    bool    `json:"isHttps"    gorm:"type:boolean;default:false"`
-	Privileges string  `json:"privileges" gorm:"column:privileges;type:text;not null;default:''"`
+	Host            string  `json:"host"            gorm:"type:text;not null"`
+	Port            int     `json:"port"            gorm:"type:int;not null"`
+	Username        string  `json:"username"        gorm:"type:text;not null"`
+	Password        string  `json:"password"        gorm:"type:text;not null"`
+	Database        *string `json:"database"        gorm:"type:text"`
+	IsHttps         bool    `json:"isHttps"         gorm:"type:boolean;default:false"`
+	IsExcludeEvents bool    `json:"isExcludeEvents" gorm:"type:boolean;default:false"`
+	Privileges      string  `json:"privileges"      gorm:"column:privileges;type:text;not null;default:''"`
 }
 
 func (m *MariadbDatabase) TableName() string {
@@ -59,7 +60,7 @@ func (m *MariadbDatabase) TestConnection(
 	logger *slog.Logger,
 	encryptor encryption.FieldEncryptor,
 	databaseID uuid.UUID,
-	sshTunnel *ssh.Config,
+	sshConfig *ssh.Config,
 ) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
@@ -73,18 +74,29 @@ func (m *MariadbDatabase) TestConnection(
 		return fmt.Errorf("failed to decrypt password: %w", err)
 	}
 
-	db, cleanup, err := connectWithSSHTunnelMariaDB(
-		ctx,
-		m,
-		password,
-		sshTunnel,
-		encryptor,
-		databaseID,
-	)
+	// Start SSH tunnel if configured
+	var tunnel *ssh.Tunnel
+	var localPort int
+	if sshConfig != nil {
+		tunnel = ssh.NewTunnel(sshConfig)
+		if err := tunnel.Start(ctx, m.Host, m.Port); err != nil {
+			return fmt.Errorf("failed to start SSH tunnel: %w", err)
+		}
+		defer tunnel.Stop()
+		localPort = tunnel.GetLocalPort()
+	}
+
+	dsn := m.buildDSNWithPort(password, *m.Database, localPort)
+
+	db, err := sql.Open("mysql", dsn)
 	if err != nil {
 		return fmt.Errorf("failed to connect to MariaDB database '%s': %w", *m.Database, err)
 	}
-	defer cleanup()
+	defer func() {
+		if closeErr := db.Close(); closeErr != nil {
+			logger.Error("Failed to close MariaDB connection", "error", closeErr)
+		}
+	}()
 
 	db.SetConnMaxLifetime(15 * time.Second)
 	db.SetMaxOpenConns(1)
@@ -127,6 +139,7 @@ func (m *MariadbDatabase) Update(incoming *MariadbDatabase) {
 	m.Username = incoming.Username
 	m.Database = incoming.Database
 	m.IsHttps = incoming.IsHttps
+	m.IsExcludeEvents = incoming.IsExcludeEvents
 	m.Privileges = incoming.Privileges
 
 	if incoming.Password != "" {
@@ -152,7 +165,6 @@ func (m *MariadbDatabase) PopulateDbData(
 	logger *slog.Logger,
 	encryptor encryption.FieldEncryptor,
 	databaseID uuid.UUID,
-	sshTunnel *ssh.Config,
 ) error {
 	if m.Database == nil || *m.Database == "" {
 		return nil
@@ -166,18 +178,17 @@ func (m *MariadbDatabase) PopulateDbData(
 		return fmt.Errorf("failed to decrypt password: %w", err)
 	}
 
-	db, cleanup, err := connectWithSSHTunnelMariaDB(
-		ctx,
-		m,
-		password,
-		sshTunnel,
-		encryptor,
-		databaseID,
-	)
+	dsn := m.buildDSN(password, *m.Database)
+
+	db, err := sql.Open("mysql", dsn)
 	if err != nil {
 		return fmt.Errorf("failed to connect to database: %w", err)
 	}
-	defer cleanup()
+	defer func() {
+		if closeErr := db.Close(); closeErr != nil {
+			logger.Error("Failed to close connection", "error", closeErr)
+		}
+	}()
 
 	detectedVersion, err := detectMariadbVersion(ctx, db)
 	if err != nil {
@@ -198,7 +209,6 @@ func (m *MariadbDatabase) PopulateVersion(
 	logger *slog.Logger,
 	encryptor encryption.FieldEncryptor,
 	databaseID uuid.UUID,
-	sshTunnel *ssh.Config,
 ) error {
 	if m.Database == nil || *m.Database == "" {
 		return nil
@@ -212,18 +222,17 @@ func (m *MariadbDatabase) PopulateVersion(
 		return fmt.Errorf("failed to decrypt password: %w", err)
 	}
 
-	db, cleanup, err := connectWithSSHTunnelMariaDB(
-		ctx,
-		m,
-		password,
-		sshTunnel,
-		encryptor,
-		databaseID,
-	)
+	dsn := m.buildDSN(password, *m.Database)
+
+	db, err := sql.Open("mysql", dsn)
 	if err != nil {
 		return fmt.Errorf("failed to connect to database: %w", err)
 	}
-	defer cleanup()
+	defer func() {
+		if closeErr := db.Close(); closeErr != nil {
+			logger.Error("Failed to close connection", "error", closeErr)
+		}
+	}()
 
 	detectedVersion, err := detectMariadbVersion(ctx, db)
 	if err != nil {
@@ -239,25 +248,23 @@ func (m *MariadbDatabase) IsUserReadOnly(
 	logger *slog.Logger,
 	encryptor encryption.FieldEncryptor,
 	databaseID uuid.UUID,
-	sshTunnel *ssh.Config,
 ) (bool, []string, error) {
 	password, err := decryptPasswordIfNeeded(m.Password, encryptor, databaseID)
 	if err != nil {
 		return false, nil, fmt.Errorf("failed to decrypt password: %w", err)
 	}
 
-	db, cleanup, err := connectWithSSHTunnelMariaDB(
-		ctx,
-		m,
-		password,
-		sshTunnel,
-		encryptor,
-		databaseID,
-	)
+	dsn := m.buildDSN(password, *m.Database)
+
+	db, err := sql.Open("mysql", dsn)
 	if err != nil {
 		return false, nil, fmt.Errorf("failed to connect to database: %w", err)
 	}
-	defer cleanup()
+	defer func() {
+		if closeErr := db.Close(); closeErr != nil {
+			logger.Error("Failed to close connection", "error", closeErr)
+		}
+	}()
 
 	rows, err := db.QueryContext(ctx, "SHOW GRANTS FOR CURRENT_USER()")
 	if err != nil {
@@ -306,28 +313,27 @@ func (m *MariadbDatabase) CreateReadOnlyUser(
 	logger *slog.Logger,
 	encryptor encryption.FieldEncryptor,
 	databaseID uuid.UUID,
-	sshTunnel *ssh.Config,
 ) (string, string, error) {
 	password, err := decryptPasswordIfNeeded(m.Password, encryptor, databaseID)
 	if err != nil {
 		return "", "", fmt.Errorf("failed to decrypt password: %w", err)
 	}
 
-	db, cleanup, err := connectWithSSHTunnelMariaDB(
-		ctx,
-		m,
-		password,
-		sshTunnel,
-		encryptor,
-		databaseID,
-	)
+	dsn := m.buildDSN(password, *m.Database)
+
+	db, err := sql.Open("mysql", dsn)
 	if err != nil {
 		return "", "", fmt.Errorf("failed to connect to database: %w", err)
 	}
-	defer cleanup()
+	defer func() {
+		if closeErr := db.Close(); closeErr != nil {
+			logger.Error("Failed to close connection", "error", closeErr)
+		}
+	}()
 
 	maxRetries := 3
 	for attempt := range maxRetries {
+		// MariaDB 5.5 has a 16-character username limit, use shorter prefix
 		newUsername := fmt.Sprintf("pgs-%s", uuid.New().String()[:8])
 		newPassword := encryption.GenerateComplexPassword()
 
@@ -405,6 +411,42 @@ func HasPrivilege(privileges, priv string) bool {
 		}
 	}
 	return false
+}
+
+func (m *MariadbDatabase) buildDSN(password string, database string) string {
+	return m.buildDSNWithPort(password, database, 0)
+}
+
+func (m *MariadbDatabase) buildDSNWithPort(password string, database string, localPort int) string {
+	tlsConfig := "false"
+
+	if m.IsHttps {
+		err := mysql.RegisterTLSConfig("mariadb-skip-verify", &tls.Config{
+			InsecureSkipVerify: true,
+		})
+		if err != nil {
+			// Config might already be registered, which is fine
+			_ = err
+		}
+		tlsConfig = "mariadb-skip-verify"
+	}
+
+	host := m.Host
+	port := m.Port
+	if localPort > 0 {
+		host = "localhost"
+		port = localPort
+	}
+
+	return fmt.Sprintf(
+		"%s:%s@tcp(%s:%d)/%s?parseTime=true&timeout=15s&tls=%s&charset=utf8mb4",
+		m.Username,
+		password,
+		host,
+		port,
+		database,
+		tlsConfig,
+	)
 }
 
 // detectMariadbVersion parses VERSION() output to detect MariaDB version
@@ -595,122 +637,4 @@ func decryptPasswordIfNeeded(
 		return password, nil
 	}
 	return encryptor.Decrypt(databaseID, password)
-}
-
-func decryptSSHTunnelCredentials(
-	sshConfig *ssh.Config,
-	encryptor encryption.FieldEncryptor,
-	databaseID uuid.UUID,
-) error {
-	if sshConfig == nil || encryptor == nil {
-		return nil
-	}
-
-	if sshConfig.Password != "" {
-		decrypted, err := encryptor.Decrypt(databaseID, sshConfig.Password)
-		if err != nil {
-			return fmt.Errorf("failed to decrypt SSH password: %w", err)
-		}
-		sshConfig.Password = decrypted
-	}
-
-	if sshConfig.PrivateKey != "" {
-		decrypted, err := encryptor.Decrypt(databaseID, sshConfig.PrivateKey)
-		if err != nil {
-			return fmt.Errorf("failed to decrypt SSH private key: %w", err)
-		}
-		sshConfig.PrivateKey = decrypted
-	}
-
-	if sshConfig.Passphrase != "" {
-		decrypted, err := encryptor.Decrypt(databaseID, sshConfig.Passphrase)
-		if err != nil {
-			return fmt.Errorf("failed to decrypt SSH passphrase: %w", err)
-		}
-		sshConfig.Passphrase = decrypted
-	}
-
-	return nil
-}
-
-func connectWithSSHTunnelMariaDB(
-	ctx context.Context,
-	m *MariadbDatabase,
-	password string,
-	sshConfig *ssh.Config,
-	encryptor encryption.FieldEncryptor,
-	databaseID uuid.UUID,
-) (*sql.DB, func(), error) {
-	host := m.Host
-	port := m.Port
-
-	var tunnel *ssh.Tunnel
-	cleanup := func() {}
-
-	if sshConfig != nil && sshConfig.HasAuth() {
-		if err := decryptSSHTunnelCredentials(sshConfig, encryptor, databaseID); err != nil {
-			return nil, cleanup, err
-		}
-
-		tunnel = ssh.NewTunnel(sshConfig)
-
-		if err := tunnel.Start(ctx, m.Host, m.Port); err != nil {
-			return nil, cleanup, fmt.Errorf("failed to start SSH tunnel: %w", err)
-		}
-
-		host = "127.0.0.1"
-		port = tunnel.GetLocalPort()
-
-		cleanup = func() {
-			_ = tunnel.Stop()
-		}
-	}
-
-	dsn := m.buildDSNWithHostPort(password, *m.Database, host, port)
-
-	db, err := sql.Open("mysql", dsn)
-	if err != nil {
-		if tunnel != nil {
-			_ = tunnel.Stop()
-		}
-		return nil, func() {}, err
-	}
-
-	originalCleanup := cleanup
-	cleanup = func() {
-		_ = db.Close()
-		originalCleanup()
-	}
-
-	return db, cleanup, nil
-}
-
-func (m *MariadbDatabase) buildDSNWithHostPort(
-	password string,
-	database string,
-	host string,
-	port int,
-) string {
-	tlsConfig := "false"
-
-	if m.IsHttps {
-		err := mysql.RegisterTLSConfig("mariadb-skip-verify", &tls.Config{
-			InsecureSkipVerify: true,
-		})
-		if err != nil {
-			_ = err
-		}
-
-		tlsConfig = "mariadb-skip-verify"
-	}
-
-	return fmt.Sprintf(
-		"%s:%s@tcp(%s:%d)/%s?parseTime=true&timeout=15s&tls=%s&charset=utf8mb4",
-		m.Username,
-		password,
-		host,
-		port,
-		database,
-		tlsConfig,
-	)
 }

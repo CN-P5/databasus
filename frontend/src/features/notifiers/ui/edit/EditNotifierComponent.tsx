@@ -44,7 +44,6 @@ export function EditNotifierComponent({
   onChanged,
 }: Props) {
   const { t } = useTranslation('notifiers');
-
   const [notifier, setNotifier] = useState<Notifier | undefined>();
   const [isUnsaved, setIsUnsaved] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -233,12 +232,12 @@ export function EditNotifierComponent({
           <Select
             value={notifier?.notifierType}
             options={[
-              { label: t('telegram'), value: NotifierType.TELEGRAM },
-              { label: t('email'), value: NotifierType.EMAIL },
-              { label: t('webhook'), value: NotifierType.WEBHOOK },
-              { label: t('slack'), value: NotifierType.SLACK },
-              { label: t('discord'), value: NotifierType.DISCORD },
-              { label: t('teams'), value: NotifierType.TEAMS },
+              { label: 'Telegram', value: NotifierType.TELEGRAM },
+              { label: 'Email', value: NotifierType.EMAIL },
+              { label: 'Webhook', value: NotifierType.WEBHOOK },
+              { label: 'Slack', value: NotifierType.SLACK },
+              { label: 'Discord', value: NotifierType.DISCORD },
+              { label: 'Teams', value: NotifierType.TEAMS },
             ]}
             onChange={(value) => {
               setNotifierType(value);
@@ -344,7 +343,7 @@ export function EditNotifierComponent({
             type="primary"
             onClick={save}
           >
-            {t('save')}
+            {t('common:save')}
           </Button>
         ) : (
           <div />
@@ -359,7 +358,7 @@ export function EditNotifierComponent({
             ghost
             onClick={onClose}
           >
-            {t('cancel')}
+            {t('common:cancel')}
           </Button>
         ) : (
           <div />

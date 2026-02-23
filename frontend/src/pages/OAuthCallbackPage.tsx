@@ -8,7 +8,7 @@ import { getOAuthRedirectUri } from '../constants';
 import { userApi } from '../entity/users';
 
 export function OAuthCallbackPage() {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation('auth');
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const [error, setError] = useState<string>('');
@@ -47,7 +47,7 @@ export function OAuthCallbackPage() {
     };
 
     handleOAuthCallback();
-  }, [searchParams, navigate, t]);
+  }, [searchParams, navigate]);
 
   return (
     <div className="flex h-screen w-screen flex-col items-center justify-center">

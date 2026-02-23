@@ -17,50 +17,50 @@ const postgresqlVersionLabels = {
 };
 
 export const ShowPostgreSqlSpecificDataComponent = ({ database }: Props) => {
-  const { t } = useTranslation(['common', 'databases']);
+  const { t } = useTranslation('databases');
 
   return (
     <div>
       <div className="mb-1 flex w-full items-center">
-        <div className="min-w-[150px]">{t('databases:postgresqlVersion')}</div>
+        <div className="min-w-[150px]">{t('pgVersion')}</div>
         <div>
           {database.postgresql?.version ? postgresqlVersionLabels[database.postgresql.version] : ''}
         </div>
       </div>
 
       <div className="mb-1 flex w-full items-center">
-        <div className="min-w-[150px] break-all">{t('databases:host')}</div>
+        <div className="min-w-[150px] break-all">{t('host')}</div>
         <div>{database.postgresql?.host || ''}</div>
       </div>
 
       <div className="mb-1 flex w-full items-center">
-        <div className="min-w-[150px]">{t('databases:port')}</div>
+        <div className="min-w-[150px]">{t('port')}</div>
         <div>{database.postgresql?.port || ''}</div>
       </div>
 
       <div className="mb-1 flex w-full items-center">
-        <div className="min-w-[150px]">{t('databases:username')}</div>
+        <div className="min-w-[150px]">{t('username')}</div>
         <div>{database.postgresql?.username || ''}</div>
       </div>
 
       <div className="mb-1 flex w-full items-center">
-        <div className="min-w-[150px]">{t('databases:databasePassword')}</div>
+        <div className="min-w-[150px]">{t('password')}</div>
         <div>{'*************'}</div>
       </div>
 
       <div className="mb-1 flex w-full items-center">
-        <div className="min-w-[150px]">{t('databases:databaseName')}</div>
+        <div className="min-w-[150px]">{t('dbName')}</div>
         <div>{database.postgresql?.database || ''}</div>
       </div>
 
       <div className="mb-1 flex w-full items-center">
-        <div className="min-w-[150px]">{t('databases:useHttps')}</div>
-        <div>{database.postgresql?.isHttps ? t('databases:yes') : t('databases:no')}</div>
+        <div className="min-w-[150px]">{t('useHttps')}</div>
+        <div>{database.postgresql?.isHttps ? t('yes') : t('no')}</div>
       </div>
 
       {!!database.postgresql?.includeSchemas?.length && (
         <div className="mb-1 flex w-full items-center">
-          <div className="min-w-[150px]">{t('databases:includeSchemas')}</div>
+          <div className="min-w-[150px]">{t('includeSchemas')}</div>
           <div>{database.postgresql.includeSchemas.join(', ')}</div>
         </div>
       )}
@@ -68,38 +68,38 @@ export const ShowPostgreSqlSpecificDataComponent = ({ database }: Props) => {
       {database.sshTunnel?.enabled && (
         <>
           <div className="mb-1 flex w-full items-center">
-            <div className="min-w-[150px]">{t('databases:sshTunnel')}</div>
-            <div>{t('databases:enabled')}</div>
+            <div className="min-w-[150px]">{t('sshTunnel')}</div>
+            <div>{t('enabled')}</div>
           </div>
 
           <div className="mb-1 flex w-full items-center">
-            <div className="min-w-[150px] break-all">{t('databases:sshHost')}</div>
+            <div className="min-w-[150px] break-all">{t('sshHost')}</div>
             <div>{database.sshTunnel.host}</div>
           </div>
 
           <div className="mb-1 flex w-full items-center">
-            <div className="min-w-[150px]">{t('databases:sshPort')}</div>
+            <div className="min-w-[150px]">{t('sshPort')}</div>
             <div>{database.sshTunnel.port}</div>
           </div>
 
           <div className="mb-1 flex w-full items-center">
-            <div className="min-w-[150px]">{t('databases:sshUsername')}</div>
+            <div className="min-w-[150px]">{t('sshUsername')}</div>
             <div>{database.sshTunnel.username}</div>
           </div>
 
           <div className="mb-1 flex w-full items-center">
-            <div className="min-w-[150px]">{t('databases:sshAuthType')}</div>
+            <div className="min-w-[150px]">{t('sshAuthType')}</div>
             <div>
               {database.sshTunnel.authType === 'password'
-                ? t('databases:sshPasswordAuth')
-                : t('databases:sshPrivateKeyAuth')}
+                ? t('sshPasswordAuth')
+                : t('sshPrivateKeyAuth')}
             </div>
           </div>
 
           {database.sshTunnel.skipHostKeyVerify && (
             <div className="mb-1 flex w-full items-center">
-              <div className="min-w-[150px]">{t('databases:sshSkipHostKeyVerify')}</div>
-              <div>{t('databases:yes')}</div>
+              <div className="min-w-[150px]">{t('sshSkipHostKeyVerify')}</div>
+              <div>{t('yes')}</div>
             </div>
           )}
         </>

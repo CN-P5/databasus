@@ -19,10 +19,9 @@ const DEFAULT_BODY_TEMPLATE = `{
 
 function validateJsonTemplate(template: string): string | null {
   if (!template.trim()) {
-    return null; // Empty is valid (will use default)
+    return null;
   }
 
-  // Replace placeholders with valid JSON strings before parsing
   const testJson = template.replace(/\{\{heading\}\}/g, 'test').replace(/\{\{message\}\}/g, 'test');
 
   try {
@@ -116,7 +115,7 @@ export function EditWebhookNotifierComponent({ notifier, setNotifier, setUnsaved
 
         {notifier.id && (
           <div className="mb-1 text-xs text-orange-700">
-            {t('savedHeadersHiddenForSecurityReasons')}
+            *{t('savedHeadersHiddenForSecurityReasons')}
           </div>
         )}
 
@@ -170,13 +169,13 @@ export function EditWebhookNotifierComponent({ notifier, setNotifier, setUnsaved
               <code className="rounded bg-gray-100 px-1.5 py-0.5 dark:bg-gray-700">
                 {'{{heading}}'}
               </code>{' '}
-              — {t('headingPlaceholder')}
+              — {t('notificationTitle')}
             </span>
             <span>
               <code className="rounded bg-gray-100 px-1.5 py-0.5 dark:bg-gray-700">
                 {'{{message}}'}
               </code>{' '}
-              — {t('messagePlaceholder')}
+              — {t('notificationMessage')}
             </span>
           </div>
 
@@ -190,7 +189,7 @@ export function EditWebhookNotifierComponent({ notifier, setNotifier, setUnsaved
             placeholder={DEFAULT_BODY_TEMPLATE}
             status={jsonError ? 'error' : undefined}
           />
-          {jsonError && <div className="mt-1 text-xs text-red-500">{jsonError}</div>}
+          {jsonError && <div className="mt-1 text-xs text-red-500">{t('invalidJsonFormat')}</div>}
         </div>
       )}
 
@@ -210,14 +209,14 @@ export function EditWebhookNotifierComponent({ notifier, setNotifier, setUnsaved
               {headers.length > 0 && (
                 <div className="mt-2 border-t border-gray-200 pt-2 dark:border-gray-600">
                   <div className="text-xs font-semibold text-gray-500 dark:text-gray-400">
-                    {t('headers')}
+                    {t('headers')}:
                   </div>
 
                   {headers
                     .filter((h) => h.key)
                     .map((h, i) => (
                       <div key={i} className="text-xs">
-                        {h.key}: {h.value || t('hidden')}
+                        {h.key}: {h.value || `(${t('hidden')})`}
                       </div>
                     ))}
                 </div>

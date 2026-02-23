@@ -25,15 +25,15 @@ import {
   WorkspaceSettingsComponent,
 } from '../../features/workspaces';
 import { useIsMobile, useScreenHeight } from '../../shared/hooks';
-import { LanguageSwitcher } from '../../shared/ui/LanguageSwitcherComponent';
+import { LanguageSwitcher } from '../../shared/i18n';
 import { StarButtonComponent } from '../../shared/ui/StarButtonComponent';
 import { ThemeToggleComponent } from '../../shared/ui/ThemeToggleComponent';
 import { SidebarComponent } from './SidebarComponent';
 import { WorkspaceSelectionComponent } from './WorkspaceSelectionComponent';
 
 export const MainScreenComponent = () => {
-  const { message } = App.useApp();
   const { t } = useTranslation(['common', 'sidebar']);
+  const { message } = App.useApp();
   const screenHeight = useScreenHeight();
   const isMobile = useIsMobile();
   const contentHeight = screenHeight - (isMobile ? 70 : 95);
@@ -124,7 +124,7 @@ export const MainScreenComponent = () => {
 
   const tabs = [
     {
-      text: t('databases', { ns: 'sidebar' }),
+      text: t('sidebar:databases'),
       name: 'databases',
       icon: '/icons/menu/database-gray.svg',
       selectedIcon: '/icons/menu/database-white.svg',
@@ -134,7 +134,7 @@ export const MainScreenComponent = () => {
       isVisible: true,
     },
     {
-      text: t('storages', { ns: 'sidebar' }),
+      text: t('sidebar:storages'),
       name: 'storages',
       icon: '/icons/menu/storage-gray.svg',
       selectedIcon: '/icons/menu/storage-white.svg',
@@ -144,7 +144,7 @@ export const MainScreenComponent = () => {
       isVisible: !!selectedWorkspace,
     },
     {
-      text: t('notifiers', { ns: 'sidebar' }),
+      text: t('sidebar:notifiers'),
       name: 'notifiers',
       icon: '/icons/menu/notifier-gray.svg',
       selectedIcon: '/icons/menu/notifier-white.svg',
@@ -154,7 +154,7 @@ export const MainScreenComponent = () => {
       isVisible: !!selectedWorkspace,
     },
     {
-      text: t('settings', { ns: 'sidebar' }),
+      text: t('sidebar:settings'),
       name: 'settings',
       icon: '/icons/menu/workspace-settings-gray.svg',
       selectedIcon: '/icons/menu/workspace-settings-white.svg',
@@ -164,7 +164,7 @@ export const MainScreenComponent = () => {
       isVisible: !!selectedWorkspace,
     },
     {
-      text: t('profile', { ns: 'sidebar' }),
+      text: t('sidebar:profile'),
       name: 'profile',
       icon: '/icons/menu/profile-gray.svg',
       selectedIcon: '/icons/menu/profile-white.svg',
@@ -174,7 +174,7 @@ export const MainScreenComponent = () => {
       isVisible: true,
     },
     {
-      text: t('settings', { ns: 'common' }),
+      text: t('sidebar:databasusSettings'),
       name: 'databasus-settings',
       icon: '/icons/menu/global-settings-gray.svg',
       selectedIcon: '/icons/menu/global-settings-white.svg',
@@ -184,7 +184,7 @@ export const MainScreenComponent = () => {
       isVisible: true,
     },
     {
-      text: t('users', { ns: 'sidebar' }),
+      text: t('sidebar:users'),
       name: 'users',
       icon: '/icons/menu/user-card-gray.svg',
       selectedIcon: '/icons/menu/user-card-white.svg',
@@ -222,7 +222,7 @@ export const MainScreenComponent = () => {
             target="_blank"
             rel="noreferrer"
           >
-            Docs
+            {t('common:docs')}
           </a>
 
           <a
@@ -231,7 +231,7 @@ export const MainScreenComponent = () => {
             target="_blank"
             rel="noreferrer"
           >
-            Community
+            {t('common:community')}
           </a>
 
           {isUsedMoreThan85Percent && (

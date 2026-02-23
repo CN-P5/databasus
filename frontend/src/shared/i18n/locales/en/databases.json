@@ -1,6 +1,7 @@
 {
   "databases": "Databases",
   "addDatabase": "Add database",
+  "creatingDatabase": "Creating database...",
   "editDatabase": "Edit database",
   "deleteDatabase": "Delete database",
   "databaseName": "Database name",
@@ -36,6 +37,7 @@
   "parseFromClipboard": "Parse from clipboard",
   "clipboardIsEmpty": "Clipboard is empty",
   "connectionStringParsedSuccessfully": "Connection string parsed successfully",
+  "connectionStringParsedPleaseEnterPassword": "Connection string parsed successfully. Please enter the password manually.",
   "failedToReadClipboard": "Failed to read clipboard. Please check browser permissions.",
   "connectionTestPassed": "Connection test passed",
   "youCanContinueWithNextStep": "You can continue with next step",

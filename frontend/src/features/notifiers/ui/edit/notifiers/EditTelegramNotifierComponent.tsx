@@ -103,7 +103,7 @@ export function EditTelegramNotifierComponent({ notifier, setNotifier, setUnsave
             <a href="https://t.me/getmyid_bot" target="_blank" rel="noreferrer">
               @getmyid_bot
             </a>{' '}
-            {t('inTelegram')} <u>{t('makeSureYouStartedChatWithBot')}</u>
+            {t('inTelegram')}. <u>{t('makeSureYouStartedChatWithBot')}</u>
             <br />
             <br />
             {t('ifYouWantToGetChatIdOfAGroup')}{' '}
@@ -194,7 +194,7 @@ export function EditTelegramNotifierComponent({ notifier, setNotifier, setUnsave
               <br />
               <br />
               <strong>{t('note')}</strong>{' '}
-              {t('threadFunctionalityOnlyWorksInGroupChatsNotInPrivateChats')}
+              {t('threadFunctionalityOnlyWorksInGroupChatsNotInPrivateChats')}.
             </div>
           </div>
         </>

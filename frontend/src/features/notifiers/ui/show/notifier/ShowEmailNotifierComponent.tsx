@@ -38,7 +38,7 @@ export function ShowEmailNotifierComponent({ notifier }: Props) {
 
       <div className="mb-1 flex items-center">
         <div className="min-w-[110px]">{t('from')}</div>
-        {notifier?.emailNotifier?.from || '(auto)'}
+        {notifier?.emailNotifier?.from || `(${t('auto')})`}
       </div>
     </>
   );

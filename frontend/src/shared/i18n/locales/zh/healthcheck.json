@@ -1,0 +1,22 @@
+{
+  "enableHealthcheck": "启用健康检查",
+  "enableHealthcheckTooltip": "为此数据库启用或禁用健康检查监控",
+  "notifyWhenUnavailable": "不可用时通知",
+  "notifyWhenUnavailableTooltip": "当数据库变得不可用时发送通知",
+  "checkIntervalMinutes": "检查间隔（分钟）",
+  "checkIntervalMinutesTooltip": "检查数据库健康的频率（分钟）",
+  "attemptsBeforeDown": "标记为宕机前的尝试次数",
+  "attemptsBeforeDownTooltip": "将数据库标记为宕机之前的失败尝试次数",
+  "storeAttemptsDays": "存储尝试记录（天）",
+  "storeAttemptsDaysTooltip": "存储健康检查尝试历史记录的天数",
+  "isHealthCheckEnabled": "是否启用健康检查",
+  "healthcheckAttempts": "健康检查尝试",
+  "period": "时间段",
+  "today": "今天",
+  "7days": "7 天",
+  "30days": "30 天",
+  "allTime": "全部时间",
+  "noDataYet": "暂无数据",
+  "yes": "是",
+  "no": "否"
+}

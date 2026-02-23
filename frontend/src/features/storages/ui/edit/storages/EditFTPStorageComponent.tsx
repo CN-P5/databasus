@@ -1,7 +1,6 @@
 import { DownOutlined, InfoCircleOutlined, UpOutlined } from '@ant-design/icons';
 import { Checkbox, Input, InputNumber, Tooltip } from 'antd';
 import { useState } from 'react';
-import { useTranslation } from 'react-i18next';
 
 import type { Storage } from '../../../../../entity/storages';
 
@@ -12,14 +11,13 @@ interface Props {
 }
 
 export function EditFTPStorageComponent({ storage, setStorage, setUnsaved }: Props) {
-  const { t } = useTranslation('storages');
   const hasAdvancedValues = !!storage?.ftpStorage?.skipTlsVerify;
   const [showAdvanced, setShowAdvanced] = useState(hasAdvancedValues);
 
   return (
     <>
       <div className="mb-1 flex w-full flex-col items-start sm:flex-row sm:items-center">
-        <div className="mb-1 min-w-[110px] sm:mb-0">{t('host')}</div>
+        <div className="mb-1 min-w-[110px] sm:mb-0">Host</div>
         <Input
           value={storage?.ftpStorage?.host || ''}
           onChange={(e) => {
@@ -41,7 +39,7 @@ export function EditFTPStorageComponent({ storage, setStorage, setUnsaved }: Pro
       </div>
 
       <div className="mb-1 flex w-full flex-col items-start sm:flex-row sm:items-center">
-        <div className="mb-1 min-w-[110px] sm:mb-0">{t('port')}</div>
+        <div className="mb-1 min-w-[110px] sm:mb-0">Port</div>
         <InputNumber
           value={storage?.ftpStorage?.port}
           onChange={(value) => {
@@ -65,7 +63,7 @@ export function EditFTPStorageComponent({ storage, setStorage, setUnsaved }: Pro
       </div>
 
       <div className="mb-1 flex w-full flex-col items-start sm:flex-row sm:items-center">
-        <div className="mb-1 min-w-[110px] sm:mb-0">{t('username')}</div>
+        <div className="mb-1 min-w-[110px] sm:mb-0">Username</div>
         <Input
           value={storage?.ftpStorage?.username || ''}
           onChange={(e) => {
@@ -87,7 +85,7 @@ export function EditFTPStorageComponent({ storage, setStorage, setUnsaved }: Pro
       </div>
 
       <div className="mb-1 flex w-full flex-col items-start sm:flex-row sm:items-center">
-        <div className="mb-1 min-w-[110px] sm:mb-0">{t('password')}</div>
+        <div className="mb-1 min-w-[110px] sm:mb-0">Password</div>
         <Input.Password
           value={storage?.ftpStorage?.password || ''}
           onChange={(e) => {
@@ -113,7 +111,7 @@ export function EditFTPStorageComponent({ storage, setStorage, setUnsaved }: Pro
       </div>
 
       <div className="mb-1 flex w-full flex-col items-start sm:flex-row sm:items-center">
-        <div className="mb-1 min-w-[110px] sm:mb-0">{t('path')}</div>
+        <div className="mb-1 min-w-[110px] sm:mb-0">Path</div>
         <div className="flex items-center">
           <Input
             value={storage?.ftpStorage?.path || ''}
@@ -139,14 +137,17 @@ export function EditFTPStorageComponent({ storage, setStorage, setUnsaved }: Pro
             placeholder="backups (optional)"
           />
 
-          <Tooltip className="cursor-pointer" title={t('remoteDirectoryPathForStoringBackups')}>
+          <Tooltip
+            className="cursor-pointer"
+            title="Remote directory path for storing backups (optional)"
+          >
             <InfoCircleOutlined className="ml-2" style={{ color: 'gray' }} />
           </Tooltip>
         </div>
       </div>
 
       <div className="mb-1 flex w-full flex-col items-start sm:flex-row sm:items-center">
-        <div className="mb-1 min-w-[110px] sm:mb-0">{t('useSsl')}</div>
+        <div className="mb-1 min-w-[110px] sm:mb-0">Use SSL/TLS</div>
         <div className="flex items-center">
           <Checkbox
             checked={storage?.ftpStorage?.useSsl || false}
@@ -163,12 +164,12 @@ export function EditFTPStorageComponent({ storage, setStorage, setUnsaved }: Pro
               setUnsaved();
             }}
           >
-            {t('enableFtps')}
+            Enable FTPS
           </Checkbox>
 
           <Tooltip
             className="cursor-pointer"
-            title={t('useExplicitTlsEncryptionForSecureFileTransfer')}
+            title="Use explicit TLS encryption (FTPS) for secure file transfer"
           >
             <InfoCircleOutlined className="ml-2" style={{ color: 'gray' }} />
           </Tooltip>
@@ -180,7 +181,7 @@ export function EditFTPStorageComponent({ storage, setStorage, setUnsaved }: Pro
           className="flex cursor-pointer items-center text-sm text-blue-600 hover:text-blue-800"
           onClick={() => setShowAdvanced(!showAdvanced)}
         >
-          <span className="mr-2">{t('advancedSettings')}</span>
+          <span className="mr-2">Advanced settings</span>
 
           {showAdvanced ? (
             <UpOutlined style={{ fontSize: '12px' }} />
@@ -194,7 +195,7 @@ export function EditFTPStorageComponent({ storage, setStorage, setUnsaved }: Pro
         <>
           {storage?.ftpStorage?.useSsl && (
             <div className="mb-1 flex w-full flex-col items-start sm:flex-row sm:items-center">
-              <div className="mb-1 min-w-[110px] sm:mb-0">{t('skipTlsVerify')}</div>
+              <div className="mb-1 min-w-[110px] sm:mb-0">Skip TLS verify</div>
               <div className="flex items-center">
                 <Checkbox
                   checked={storage?.ftpStorage?.skipTlsVerify || false}
@@ -211,10 +212,13 @@ export function EditFTPStorageComponent({ storage, setStorage, setUnsaved }: Pro
                     setUnsaved();
                   }}
                 >
-                  {t('skipCertificateVerification')}
+                  Skip certificate verification
                 </Checkbox>
 
-                <Tooltip className="cursor-pointer" title={t('skipTlsCertificateVerification')}>
+                <Tooltip
+                  className="cursor-pointer"
+                  title="Skip TLS certificate verification. Enable this if your FTP server uses a self-signed certificate. Warning: this reduces security."
+                >
                   <InfoCircleOutlined className="ml-2" style={{ color: 'gray' }} />
                 </Tooltip>
               </div>

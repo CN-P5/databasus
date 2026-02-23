@@ -1,5 +1,3 @@
-import { useTranslation } from 'react-i18next';
-
 import { type Storage, StorageType } from '../../../../entity/storages';
 import { getStorageLogoFromType } from '../../../../entity/storages/models/getStorageLogoFromType';
 import { getStorageNameFromType } from '../../../../entity/storages/models/getStorageNameFromType';
@@ -18,8 +16,6 @@ interface Props {
 }
 
 export function ShowStorageComponent({ storage, user }: Props) {
-  const { t } = useTranslation('storages');
-
   if (!storage) return null;
 
   if (storage?.isSystem && user.role !== UserRole.ADMIN) return <div />;
@@ -27,7 +23,7 @@ export function ShowStorageComponent({ storage, user }: Props) {
   return (
     <div>
       <div className="mb-1 flex items-center">
-        <div className="min-w-[110px]">{t('type')}</div>
+        <div className="min-w-[110px]">Type</div>
 
         {getStorageNameFromType(storage.type)}
 
@@ -40,8 +36,8 @@ export function ShowStorageComponent({ storage, user }: Props) {
 
       {storage.isSystem && user.role === UserRole.ADMIN && (
         <div className="mb-1 flex items-center">
-          <div className="min-w-[110px]">{t('systemStorage')}</div>
-          <div>{t('yes')}</div>
+          <div className="min-w-[110px]">System storage</div>
+          <div>Yes</div>
         </div>
       )}
 

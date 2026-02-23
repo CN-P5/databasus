@@ -28,7 +28,7 @@ function AppContent() {
       theme={{
         algorithm: resolvedTheme === 'dark' ? theme.darkAlgorithm : theme.defaultAlgorithm,
         token: {
-          colorPrimary: '#155dfc',
+          colorPrimary: '#155dfc', // Tailwind blue-600
         },
       }}
     >

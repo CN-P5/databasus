@@ -23,7 +23,7 @@ export const CreateReadOnlyComponent = ({
   onSkipped,
   onAlreadyExists,
 }: Props) => {
-  const { t } = useTranslation(['common', 'databases']);
+  const { t } = useTranslation(['databases', 'common']);
   const [isCheckingReadOnlyUser, setIsCheckingReadOnlyUser] = useState(false);
   const [isCreatingReadOnlyUser, setIsCreatingReadOnlyUser] = useState(false);
   const [isShowSkipConfirmation, setShowSkipConfirmation] = useState(false);
@@ -35,14 +35,14 @@ export const CreateReadOnlyComponent = ({
   const isMariadb = database.type === DatabaseType.MARIADB;
   const isMongodb = database.type === DatabaseType.MONGODB;
   const databaseTypeName = isPostgres
-    ? t('databases:typePostgres')
+    ? 'PostgreSQL'
     : isMysql
-      ? t('databases:typeMysql')
+      ? 'MySQL'
       : isMariadb
-        ? t('databases:typeMariadb')
+        ? 'MariaDB'
         : isMongodb
-          ? t('databases:typeMongodb')
-          : 'database';
+          ? 'MongoDB'
+          : t('databases:database');
 
   const privilegesLabel = isMongodb ? t('databases:roles') : t('databases:privileges');
 
@@ -134,20 +134,18 @@ export const CreateReadOnlyComponent = ({
   return (
     <div>
       <div className="mb-5">
-        <p className="mb-3 text-lg font-bold">{t('databases:createReadOnlyUserTitle')}</p>
+        <p className="mb-3 text-lg font-bold">{t('databases:createReadOnlyUserQuestion')}</p>
 
-        <p className="mb-2">
-          {t('databases:createReadOnlyUserDescription', { type: databaseTypeName })}
-        </p>
+        <p className="mb-2">{t('databases:readOnlyUserDescription', { databaseTypeName })}</p>
 
         <ul className="mb-2 ml-5 list-disc">
-          <li>{t('databases:createReadOnlyUserReason1')}</li>
-          <li>{t('databases:createReadOnlyUserReason2')}</li>
-          <li>{t('databases:createReadOnlyUserReason3')}</li>
+          <li>{t('databases:readOnlyBenefit1')}</li>
+          <li>{t('databases:readOnlyBenefit2')}</li>
+          <li>{t('databases:readOnlyBenefit3')}</li>
         </ul>
 
         <p className="mb-2">
-          {t('databases:createReadOnlyUserSecurity')}
+          {t('databases:databasusSecurityPrefix')}
           <a
             href="https://databasus.com/security"
             target="_blank"
@@ -156,19 +154,19 @@ export const CreateReadOnlyComponent = ({
           >
             {t('databases:readInDetailsHere')}
           </a>
-          {t('databases:createReadOnlyUserSecurityEnd')}
+          {t('databases:databasusSecuritySuffix')}
         </p>
 
         <p className="mt-3">
-          <b>{t('databases:createReadOnlyUserWarning')}</b>
+          <b>{t('databases:readOnlyUserAvoidStoringCredentials')}</b>
         </p>
 
         <p className="mt-3">
           {privileges.length === 0 ? (
-            <>{t('databases:currentUserNoWritePrivileges', { privileges: privilegesLabel })}</>
+            <>{t('databases:currentUserNoWritePrivileges', { privilegesLabel })}</>
           ) : (
             <>
-              {t('databases:currentUserHasWritePrivileges', { privileges: privilegesLabel })}{' '}
+              {t('databases:currentUserHasWritePrivileges', { privilegesLabel })}{' '}
               <span
                 className={shouldShowExpandToggle() ? 'cursor-pointer hover:opacity-80' : ''}
                 onClick={() =>
@@ -178,7 +176,7 @@ export const CreateReadOnlyComponent = ({
                 {getPrivilegesDisplay()}
                 {shouldShowExpandToggle() && (
                   <span className="ml-1 text-xs text-blue-600 hover:opacity-80">
-                    ({isPrivilegesExpanded ? t('common:collapse') : t('common:expand')})
+                    ({isPrivilegesExpanded ? t('databases:collapse') : t('databases:expand')})
                   </span>
                 )}
               </span>
@@ -194,7 +192,7 @@ export const CreateReadOnlyComponent = ({
 
         {!IS_CLOUD && (
           <Button className="mr-2 ml-auto" danger ghost onClick={handleSkip}>
-            {t('common:skip')}
+            {t('databases:skip')}
           </Button>
         )}
 
@@ -209,7 +207,7 @@ export const CreateReadOnlyComponent = ({
       </div>
 
       <Modal
-        title={t('databases:skipReadOnlyUserCreation')}
+        title={t('databases:skipReadOnlyUserCreationTitle')}
         open={isShowSkipConfirmation}
         onCancel={() => setShowSkipConfirmation(false)}
         footer={null}
@@ -225,11 +223,11 @@ export const CreateReadOnlyComponent = ({
 
         <div className="flex justify-end">
           <Button className="mr-2" danger ghost onClick={handleSkipConfirmed}>
-            {t('databases:yesIAcceptRisks')}
+            {t('databases:yesAcceptRisks')}
           </Button>
 
           <Button type="primary" onClick={() => setShowSkipConfirmation(false)}>
-            {t('databases:letsContinueSecure')}
+            {t('databases:continueWithSecureWay')}
           </Button>
         </div>
       </Modal>

@@ -1,6 +1,5 @@
 import { Dropdown } from 'antd';
 import type { MenuProps } from 'antd';
-import { useTranslation } from 'react-i18next';
 
 import { type ThemeMode, useTheme } from '../theme';
 
@@ -63,7 +62,6 @@ const SystemIcon = () => (
 );
 
 export function ThemeToggleComponent() {
-  const { t } = useTranslation('common');
   const { theme, setTheme, resolvedTheme } = useTheme();
 
   const items: MenuProps['items'] = [
@@ -72,7 +70,7 @@ export function ThemeToggleComponent() {
       label: (
         <div className="flex items-center gap-2">
           <SunIcon />
-          <span>{t('light')}</span>
+          <span>Light</span>
         </div>
       ),
       onClick: () => setTheme('light'),
@@ -82,7 +80,7 @@ export function ThemeToggleComponent() {
       label: (
         <div className="flex items-center gap-2">
           <MoonIcon />
-          <span>{t('dark')}</span>
+          <span>Dark</span>
         </div>
       ),
       onClick: () => setTheme('dark'),
@@ -92,7 +90,7 @@ export function ThemeToggleComponent() {
       label: (
         <div className="flex items-center gap-2">
           <SystemIcon />
-          <span>{t('system')}</span>
+          <span>System</span>
         </div>
       ),
       onClick: () => setTheme('system'),

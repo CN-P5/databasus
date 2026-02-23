@@ -1,7 +1,6 @@
 import { InfoCircleOutlined } from '@ant-design/icons';
 import { Button, Input, Select, Switch, Tooltip } from 'antd';
 import { useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
 
 import { IS_CLOUD } from '../../../../constants';
 import {
@@ -43,8 +42,6 @@ export function EditStorageComponent({
   onChanged,
   user,
 }: Props) {
-  const { t: tStorages } = useTranslation('storages');
-  const { t: tCommon } = useTranslation('common');
   const [storage, setStorage] = useState<Storage | undefined>();
   const [isUnsaved, setIsUnsaved] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -79,8 +76,8 @@ export function EditStorageComponent({
       await storageApi.testStorageConnectionDirect(storage);
       setIsTestConnectionSuccess(true);
       ToastHelper.showToast({
-        title: tStorages('connectionTestSuccessful'),
-        description: tStorages('storageConnectionTestedSuccessfully'),
+        title: 'Connection test successful!',
+        description: 'Storage connection tested successfully',
       });
     } catch (e) {
       const errorMessage = (e as Error).message;
@@ -330,14 +327,14 @@ export function EditStorageComponent({
   if (!storage) return <div />;
 
   const storageTypeOptions = [
-    { label: tStorages('local'), value: StorageType.LOCAL },
-    { label: tStorages('s3'), value: StorageType.S3 },
-    { label: tStorages('googleDrive'), value: StorageType.GOOGLE_DRIVE },
-    { label: tStorages('nas'), value: StorageType.NAS },
-    { label: tStorages('azureBlob'), value: StorageType.AZURE_BLOB },
-    { label: tStorages('ftp'), value: StorageType.FTP },
-    { label: tStorages('sftp'), value: StorageType.SFTP },
-    { label: tStorages('rclone'), value: StorageType.RCLONE },
+    { label: 'Local storage', value: StorageType.LOCAL },
+    { label: 'S3', value: StorageType.S3 },
+    { label: 'Google Drive', value: StorageType.GOOGLE_DRIVE },
+    { label: 'NAS', value: StorageType.NAS },
+    { label: 'Azure Blob Storage', value: StorageType.AZURE_BLOB },
+    { label: 'FTP', value: StorageType.FTP },
+    { label: 'SFTP', value: StorageType.SFTP },
+    { label: 'Rclone', value: StorageType.RCLONE },
   ].filter((option) => {
     if (IS_CLOUD && option.value === StorageType.LOCAL && user.role !== UserRole.ADMIN) {
       return false;
@@ -349,7 +346,7 @@ export function EditStorageComponent({
     <div>
       {isShowName && (
         <div className="mb-1 flex w-full flex-col items-start sm:flex-row sm:items-center">
-          <div className="mb-1 min-w-[110px] sm:mb-0">{tStorages('storageName')}</div>
+          <div className="mb-1 min-w-[110px] sm:mb-0">Name</div>
 
           <Input
             value={storage?.name || ''}
@@ -359,13 +356,13 @@ export function EditStorageComponent({
             }}
             size="small"
             className="w-full max-w-[250px]"
-            placeholder={tStorages('storageNamePlaceholder')}
+            placeholder="My Storage"
           />
         </div>
       )}
 
       <div className="mb-1 flex w-full flex-col items-start sm:flex-row sm:items-center">
-        <div className="mb-1 min-w-[110px] sm:mb-0">{tStorages('storageType')}</div>
+        <div className="mb-1 min-w-[110px] sm:mb-0">Type</div>
 
         <div className="flex items-center">
           <Select
@@ -385,7 +382,7 @@ export function EditStorageComponent({
 
       {IS_CLOUD && user.role === UserRole.ADMIN && (
         <div className="mb-1 flex w-full flex-col items-start sm:flex-row sm:items-center">
-          <div className="mb-1 min-w-[110px] sm:mb-0">{tStorages('isSystem')}</div>
+          <div className="mb-1 min-w-[110px] sm:mb-0">Is system?</div>
 
           <div className="flex items-center">
             <Switch
@@ -398,7 +395,10 @@ export function EditStorageComponent({
               size="small"
             />
 
-            <Tooltip className="cursor-pointer" title={tStorages('systemStorageTooltip')}>
+            <Tooltip
+              className="cursor-pointer"
+              title="System storage is accessible by all workspaces in this instance. Regular storage is only accessible by the current workspace."
+            >
               <InfoCircleOutlined className="ml-2" style={{ color: 'gray' }} />
             </Tooltip>
           </div>
@@ -497,7 +497,7 @@ export function EditStorageComponent({
             type="primary"
             onClick={testConnection}
           >
-            {tStorages('testConnection')}
+            Test connection
           </Button>
         ) : (
           <div />
@@ -511,7 +511,7 @@ export function EditStorageComponent({
             type="primary"
             onClick={save}
           >
-            {tCommon('save')}
+            Save
           </Button>
         ) : (
           <div />
@@ -526,7 +526,7 @@ export function EditStorageComponent({
             ghost
             onClick={onClose}
           >
-            {tCommon('cancel')}
+            Cancel
           </Button>
         ) : (
           <div />

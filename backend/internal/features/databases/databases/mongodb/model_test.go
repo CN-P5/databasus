@@ -64,21 +64,23 @@ func Test_TestConnection_InsufficientPermissions_ReturnsError(t *testing.T) {
 
 			defer dropUserSafe(container.Client, limitedUsername, container.AuthDatabase)
 
+			port := container.Port
 			mongodbModel := &MongodbDatabase{
 				Version:      tc.version,
 				Host:         container.Host,
-				Port:         container.Port,
+				Port:         &port,
 				Username:     limitedUsername,
 				Password:     limitedPassword,
 				Database:     container.Database,
 				AuthDatabase: container.AuthDatabase,
 				IsHttps:      false,
+				IsSrv:        false,
 				CpuCount:     1,
 			}
 
 			logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 
-			err = mongodbModel.TestConnection(logger, nil, uuid.New(), nil)
+			err = mongodbModel.TestConnection(logger, nil, uuid.New())
 			assert.Error(t, err)
 			assert.Contains(t, err.Error(), "insufficient permissions")
 		})
@@ -133,21 +135,23 @@ func Test_TestConnection_SufficientPermissions_Success(t *testing.T) {
 
 			defer dropUserSafe(container.Client, backupUsername, container.AuthDatabase)
 
+			port := container.Port
 			mongodbModel := &MongodbDatabase{
 				Version:      tc.version,
 				Host:         container.Host,
-				Port:         container.Port,
+				Port:         &port,
 				Username:     backupUsername,
 				Password:     backupPassword,
 				Database:     container.Database,
 				AuthDatabase: container.AuthDatabase,
 				IsHttps:      false,
+				IsSrv:        false,
 				CpuCount:     1,
 			}
 
 			logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 
-			err = mongodbModel.TestConnection(logger, nil, uuid.New(), nil)
+			err = mongodbModel.TestConnection(logger, nil, uuid.New())
 			assert.NoError(t, err)
 		})
 	}
@@ -180,7 +184,7 @@ func Test_IsUserReadOnly_AdminUser_ReturnsFalse(t *testing.T) {
 			logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 			ctx := context.Background()
 
-			isReadOnly, roles, err := mongodbModel.IsUserReadOnly(ctx, logger, nil, uuid.New(), nil)
+			isReadOnly, roles, err := mongodbModel.IsUserReadOnly(ctx, logger, nil, uuid.New())
 			assert.NoError(t, err)
 			assert.False(t, isReadOnly, "Root user should not be read-only")
 			assert.NotEmpty(t, roles, "Root user should have roles")
@@ -203,7 +207,7 @@ func Test_IsUserReadOnly_ReadOnlyUser_ReturnsTrue(t *testing.T) {
 	mongodbModel := createMongodbModel(container)
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 
-	username, password, err := mongodbModel.CreateReadOnlyUser(ctx, logger, nil, uuid.New(), nil)
+	username, password, err := mongodbModel.CreateReadOnlyUser(ctx, logger, nil, uuid.New())
 	assert.NoError(t, err)
 
 	readOnlyModel := &MongodbDatabase{
@@ -218,7 +222,7 @@ func Test_IsUserReadOnly_ReadOnlyUser_ReturnsTrue(t *testing.T) {
 		CpuCount:     1,
 	}
 
-	isReadOnly, roles, err := readOnlyModel.IsUserReadOnly(ctx, logger, nil, uuid.New(), nil)
+	isReadOnly, roles, err := readOnlyModel.IsUserReadOnly(ctx, logger, nil, uuid.New())
 	assert.NoError(t, err)
 	assert.True(t, isReadOnly, "Read-only user should be read-only")
 	assert.NotEmpty(t, roles, "Read-only user should have roles (read, backup)")
@@ -264,7 +268,7 @@ func Test_CreateReadOnlyUser_UserCanReadButNotWrite(t *testing.T) {
 			mongodbModel := createMongodbModel(container)
 			logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 
-			username, password, err := mongodbModel.CreateReadOnlyUser(ctx, logger, nil, uuid.New(), nil)
+			username, password, err := mongodbModel.CreateReadOnlyUser(ctx, logger, nil, uuid.New())
 			assert.NoError(t, err)
 			assert.NotEmpty(t, username)
 			assert.NotEmpty(t, password)
@@ -321,7 +325,7 @@ func Test_ReadOnlyUser_FutureCollections_CanSelect(t *testing.T) {
 	mongodbModel := createMongodbModel(container)
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 
-	username, password, err := mongodbModel.CreateReadOnlyUser(ctx, logger, nil, uuid.New(), nil)
+	username, password, err := mongodbModel.CreateReadOnlyUser(ctx, logger, nil, uuid.New())
 	assert.NoError(t, err)
 
 	_ = db.Collection("future_collection").Drop(ctx)
@@ -356,7 +360,7 @@ func Test_ReadOnlyUser_CannotDropOrModifyCollections(t *testing.T) {
 	mongodbModel := createMongodbModel(container)
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 
-	username, password, err := mongodbModel.CreateReadOnlyUser(ctx, logger, nil, uuid.New(), nil)
+	username, password, err := mongodbModel.CreateReadOnlyUser(ctx, logger, nil, uuid.New())
 	assert.NoError(t, err)
 
 	readOnlyClient := connectWithCredentials(t, container, username, password)
@@ -442,15 +446,17 @@ func connectToMongodbContainer(
 }
 
 func createMongodbModel(container *MongodbContainer) *MongodbDatabase {
+	port := container.Port
 	return &MongodbDatabase{
 		Version:      container.Version,
 		Host:         container.Host,
-		Port:         container.Port,
+		Port:         &port,
 		Username:     container.Username,
 		Password:     container.Password,
 		Database:     container.Database,
 		AuthDatabase: container.AuthDatabase,
 		IsHttps:      false,
+		IsSrv:        false,
 		CpuCount:     1,
 	}
 }
@@ -488,4 +494,241 @@ func assertWriteDenied(t *testing.T, err error) {
 			strings.Contains(errStr, "unauthorized") ||
 			strings.Contains(errStr, "permission denied"),
 		"Expected authorization error, got: %v", err)
+}
+
+func Test_BuildConnectionURI_WithSrvFormat_ReturnsCorrectUri(t *testing.T) {
+	port := 27017
+	model := &MongodbDatabase{
+		Host:         "cluster0.example.mongodb.net",
+		Port:         &port,
+		Username:     "testuser",
+		Password:     "testpass123",
+		Database:     "mydb",
+		AuthDatabase: "admin",
+		IsHttps:      false,
+		IsSrv:        true,
+	}
+
+	uri := model.buildConnectionURI("testpass123")
+
+	assert.Contains(t, uri, "mongodb+srv://")
+	assert.Contains(t, uri, "testuser")
+	assert.Contains(t, uri, "testpass123")
+	assert.Contains(t, uri, "cluster0.example.mongodb.net")
+	assert.Contains(t, uri, "/mydb")
+	assert.Contains(t, uri, "authSource=admin")
+	assert.Contains(t, uri, "connectTimeoutMS=15000")
+	assert.NotContains(t, uri, ":27017")
+}
+
+func Test_BuildConnectionURI_WithStandardFormat_ReturnsCorrectUri(t *testing.T) {
+	port := 27017
+	model := &MongodbDatabase{
+		Host:         "localhost",
+		Port:         &port,
+		Username:     "testuser",
+		Password:     "testpass123",
+		Database:     "mydb",
+		AuthDatabase: "admin",
+		IsHttps:      false,
+		IsSrv:        false,
+	}
+
+	uri := model.buildConnectionURI("testpass123")
+
+	assert.Contains(t, uri, "mongodb://")
+	assert.Contains(t, uri, "testuser")
+	assert.Contains(t, uri, "testpass123")
+	assert.Contains(t, uri, "localhost:27017")
+	assert.Contains(t, uri, "/mydb")
+	assert.Contains(t, uri, "authSource=admin")
+	assert.Contains(t, uri, "connectTimeoutMS=15000")
+	assert.NotContains(t, uri, "mongodb+srv://")
+}
+
+func Test_BuildConnectionURI_WithNullPort_UsesDefault(t *testing.T) {
+	model := &MongodbDatabase{
+		Host:         "localhost",
+		Port:         nil,
+		Username:     "testuser",
+		Password:     "testpass123",
+		Database:     "mydb",
+		AuthDatabase: "admin",
+		IsHttps:      false,
+		IsSrv:        false,
+	}
+
+	uri := model.buildConnectionURI("testpass123")
+
+	assert.Contains(t, uri, "localhost:27017")
+}
+
+func Test_BuildMongodumpURI_WithSrvFormat_ReturnsCorrectUri(t *testing.T) {
+	port := 27017
+	model := &MongodbDatabase{
+		Host:         "cluster0.example.mongodb.net",
+		Port:         &port,
+		Username:     "testuser",
+		Password:     "testpass123",
+		Database:     "mydb",
+		AuthDatabase: "admin",
+		IsHttps:      false,
+		IsSrv:        true,
+	}
+
+	uri := model.BuildMongodumpURI("testpass123")
+
+	assert.Contains(t, uri, "mongodb+srv://")
+	assert.Contains(t, uri, "testuser")
+	assert.Contains(t, uri, "testpass123")
+	assert.Contains(t, uri, "cluster0.example.mongodb.net")
+	assert.Contains(t, uri, "/?authSource=admin")
+	assert.Contains(t, uri, "connectTimeoutMS=15000")
+	assert.NotContains(t, uri, ":27017")
+	assert.NotContains(t, uri, "/mydb")
+}
+
+func Test_BuildMongodumpURI_WithStandardFormat_ReturnsCorrectUri(t *testing.T) {
+	port := 27017
+	model := &MongodbDatabase{
+		Host:         "localhost",
+		Port:         &port,
+		Username:     "testuser",
+		Password:     "testpass123",
+		Database:     "mydb",
+		AuthDatabase: "admin",
+		IsHttps:      false,
+		IsSrv:        false,
+	}
+
+	uri := model.BuildMongodumpURI("testpass123")
+
+	assert.Contains(t, uri, "mongodb://")
+	assert.Contains(t, uri, "testuser")
+	assert.Contains(t, uri, "testpass123")
+	assert.Contains(t, uri, "localhost:27017")
+	assert.Contains(t, uri, "/?authSource=admin")
+	assert.Contains(t, uri, "connectTimeoutMS=15000")
+	assert.NotContains(t, uri, "mongodb+srv://")
+	assert.NotContains(t, uri, "/mydb")
+}
+
+func Test_Validate_SrvConnection_AllowsNullPort(t *testing.T) {
+	model := &MongodbDatabase{
+		Host:         "cluster0.example.mongodb.net",
+		Port:         nil,
+		Username:     "testuser",
+		Password:     "testpass123",
+		Database:     "mydb",
+		AuthDatabase: "admin",
+		IsHttps:      false,
+		IsSrv:        true,
+		CpuCount:     1,
+	}
+
+	err := model.Validate()
+
+	assert.NoError(t, err)
+}
+
+func Test_BuildConnectionURI_WithDirectConnection_ReturnsCorrectUri(t *testing.T) {
+	port := 27017
+	model := &MongodbDatabase{
+		Host:               "mongo.example.local",
+		Port:               &port,
+		Username:           "testuser",
+		Password:           "testpass123",
+		Database:           "mydb",
+		AuthDatabase:       "admin",
+		IsHttps:            false,
+		IsSrv:              false,
+		IsDirectConnection: true,
+	}
+
+	uri := model.buildConnectionURI("testpass123")
+
+	assert.Contains(t, uri, "mongodb://")
+	assert.Contains(t, uri, "directConnection=true")
+	assert.Contains(t, uri, "mongo.example.local:27017")
+	assert.Contains(t, uri, "authSource=admin")
+}
+
+func Test_BuildConnectionURI_WithoutDirectConnection_OmitsParam(t *testing.T) {
+	port := 27017
+	model := &MongodbDatabase{
+		Host:               "localhost",
+		Port:               &port,
+		Username:           "testuser",
+		Password:           "testpass123",
+		Database:           "mydb",
+		AuthDatabase:       "admin",
+		IsHttps:            false,
+		IsSrv:              false,
+		IsDirectConnection: false,
+	}
+
+	uri := model.buildConnectionURI("testpass123")
+
+	assert.NotContains(t, uri, "directConnection")
+}
+
+func Test_BuildMongodumpURI_WithDirectConnection_ReturnsCorrectUri(t *testing.T) {
+	port := 27017
+	model := &MongodbDatabase{
+		Host:               "mongo.example.local",
+		Port:               &port,
+		Username:           "testuser",
+		Password:           "testpass123",
+		Database:           "mydb",
+		AuthDatabase:       "admin",
+		IsHttps:            false,
+		IsSrv:              false,
+		IsDirectConnection: true,
+	}
+
+	uri := model.BuildMongodumpURI("testpass123")
+
+	assert.Contains(t, uri, "mongodb://")
+	assert.Contains(t, uri, "directConnection=true")
+	assert.NotContains(t, uri, "/mydb")
+}
+
+func Test_BuildConnectionURI_WithDirectConnectionAndTls_ReturnsBothParams(t *testing.T) {
+	port := 27017
+	model := &MongodbDatabase{
+		Host:               "mongo.example.local",
+		Port:               &port,
+		Username:           "testuser",
+		Password:           "testpass123",
+		Database:           "mydb",
+		AuthDatabase:       "admin",
+		IsHttps:            true,
+		IsSrv:              false,
+		IsDirectConnection: true,
+	}
+
+	uri := model.buildConnectionURI("testpass123")
+
+	assert.Contains(t, uri, "directConnection=true")
+	assert.Contains(t, uri, "tls=true")
+	assert.Contains(t, uri, "tlsInsecure=true")
+}
+
+func Test_Validate_StandardConnection_RequiresPort(t *testing.T) {
+	model := &MongodbDatabase{
+		Host:         "localhost",
+		Port:         nil,
+		Username:     "testuser",
+		Password:     "testpass123",
+		Database:     "mydb",
+		AuthDatabase: "admin",
+		IsHttps:      false,
+		IsSrv:        false,
+		CpuCount:     1,
+	}
+
+	err := model.Validate()
+
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "port is required for standard connections")
 }

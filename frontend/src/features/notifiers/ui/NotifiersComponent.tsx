@@ -20,7 +20,6 @@ const SELECTED_NOTIFIER_STORAGE_KEY = 'selectedNotifierId';
 
 export const NotifiersComponent = ({ contentHeight, workspace, isCanManageNotifiers }: Props) => {
   const { t } = useTranslation('notifiers');
-
   const isMobile = useIsMobile();
   const [isLoading, setIsLoading] = useState(true);
   const [notifiers, setNotifiers] = useState<Notifier[]>([]);
@@ -131,14 +130,14 @@ export const NotifiersComponent = ({ contentHeight, workspace, isCanManageNotifi
                 ))
               : searchQuery && (
                   <div className="mb-4 text-center text-sm text-gray-500 dark:text-gray-400">
-                    {t('noNotifiersFoundMatching', { searchQuery })}
+                    {t('noNotifiersFound', { query: searchQuery })}
                   </div>
                 )}
 
             {notifiers.length < 5 && isCanManageNotifiers && addNotifierButton}
 
             <div className="mx-3 text-center text-xs text-gray-500 dark:text-gray-400">
-              {t('notifierIsAPlaceWhereNotificationsWillBeSent')}
+              {t('notifierDescription')}
             </div>
           </div>
         )}
@@ -152,7 +151,7 @@ export const NotifiersComponent = ({ contentHeight, workspace, isCanManageNotifi
                   onClick={() => updateSelectedNotifierId(undefined)}
                   className="w-full"
                 >
-                  {t('backToNotifiers')}
+                  ← {t('backToNotifiers')}
                 </Button>
               </div>
             )}
@@ -191,7 +190,7 @@ export const NotifiersComponent = ({ contentHeight, workspace, isCanManageNotifi
           maskClosable={false}
         >
           <div className="my-3 max-w-[250px] text-gray-500 dark:text-gray-400">
-            {t('notifierIsAPlaceWhereNotificationsWillBeSent')}
+            {t('notifierDescription')}
           </div>
 
           <EditNotifierComponent

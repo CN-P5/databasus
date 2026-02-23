@@ -14,19 +14,19 @@ interface Props {
   contentHeight: number;
 }
 
-const getRoleDisplayText = (role: UserRole): string => {
+const getRoleDisplayText = (role: UserRole, t: (key: string) => string): string => {
   switch (role) {
     case UserRole.ADMIN:
-      return 'Admin';
+      return t('users:admin');
     case UserRole.MEMBER:
-      return 'Member';
+      return t('users:member');
     default:
       return role;
   }
 };
 
 export function ProfileComponent({ contentHeight }: Props) {
-  const { t } = useTranslation('users');
+  const { t } = useTranslation(['common', 'users']);
   const { message } = App.useApp();
   const [user, setUser] = useState<UserProfile | undefined>(undefined);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
@@ -73,7 +73,7 @@ export function ProfileComponent({ contentHeight }: Props) {
       isValid = false;
     } else if (newPassword.length < 6) {
       setNewPasswordError(true);
-      message.error(t('passwordMustBeAtLeast6CharactersLong'));
+      message.error(t('users:passwordMinLength'));
       isValid = false;
     } else {
       setNewPasswordError(false);
@@ -84,7 +84,7 @@ export function ProfileComponent({ contentHeight }: Props) {
       isValid = false;
     } else if (newPassword !== confirmPassword) {
       setConfirmPasswordError(true);
-      message.error(t('newPasswordsDoNotMatch'));
+      message.error(t('users:passwordsDoNotMatch'));
       isValid = false;
     } else {
       setConfirmPasswordError(false);
@@ -119,10 +119,12 @@ export function ProfileComponent({ contentHeight }: Props) {
             password: newPassword,
           };
           await userApi.signIn(signInRequest);
-          message.success(t('successfullySignedInWithNewPassword'));
+          message.success(t('users:signedInWithNewPassword'));
         } catch (signInError: unknown) {
           const errorMessage =
-            signInError instanceof Error ? signInError.message : t('failedToSignInWithNewPassword');
+            signInError instanceof Error
+              ? signInError.message
+              : t('users:failedToSignInWithNewPassword');
           message.error(errorMessage);
           // If sign in fails, logout and redirect to login page
           userApi.logout();
@@ -131,7 +133,8 @@ export function ProfileComponent({ contentHeight }: Props) {
         }
       }
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : t('failedToChangePassword');
+      const errorMessage =
+        error instanceof Error ? error.message : t('users:failedToChangePassword');
       message.error(errorMessage);
     } finally {
       setIsChangingPassword(false);
@@ -142,7 +145,7 @@ export function ProfileComponent({ contentHeight }: Props) {
     // Validate name
     if (!editName || editName.trim() === '') {
       setEditNameError(true);
-      message.error(t('nameIsRequired'));
+      message.error(t('users:nameRequired'));
       return;
     }
     setEditNameError(false);
@@ -151,7 +154,7 @@ export function ProfileComponent({ contentHeight }: Props) {
     if (user?.email !== 'admin') {
       if (!editEmail || editEmail.trim() === '') {
         setEditEmailError(true);
-        message.error(t('emailIsRequired'));
+        message.error(t('users:emailRequired'));
         return;
       }
       setEditEmailError(false);
@@ -173,18 +176,19 @@ export function ProfileComponent({ contentHeight }: Props) {
 
       // If nothing changed, just show a message
       if (Object.keys(request).length === 0) {
-        message.info(t('noChangesToSave'));
+        message.info(t('users:noChangesToSave'));
         setIsUpdatingProfile(false);
         return;
       }
 
       await userApi.updateUserInfo(request);
-      message.success(t('profileUpdatedSuccessfully'));
+      message.success(t('users:profileUpdated'));
 
       // Reload user profile
       loadUserProfile();
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : t('failedToUpdateProfile');
+      const errorMessage =
+        error instanceof Error ? error.message : t('users:failedToUpdateProfile');
       message.error(errorMessage);
     } finally {
       setIsUpdatingProfile(false);
@@ -203,21 +207,23 @@ export function ProfileComponent({ contentHeight }: Props) {
           className="grow overflow-y-auto rounded bg-white p-5 shadow dark:bg-gray-800"
           style={{ height: contentHeight }}
         >
-          <h1 className="text-2xl font-bold dark:text-white">{t('profile')}</h1>
+          <h1 className="text-2xl font-bold dark:text-white">{t('users:profile')}</h1>
 
           <div className="mt-5">
             {user ? (
               <>
                 <div className="mb-6">
                   <h3 className="mb-4 text-lg font-semibold dark:text-white">
-                    {t('profileInformation')}
+                    {t('users:profileInformation')}
                   </h3>
                   <div className="max-w-md">
-                    <div className="text-xs font-semibold dark:text-gray-200">{t('userId')}</div>
+                    <div className="text-xs font-semibold dark:text-gray-200">
+                      {t('users:userId')}
+                    </div>
                     <div className="mb-4 text-sm text-gray-600 dark:text-gray-400">{user.id}</div>
 
                     <div className="mb-1 text-xs font-semibold dark:text-gray-200">
-                      {t('userName')}
+                      {t('users:name')}
                     </div>
                     <Input
                       value={editName}
@@ -226,12 +232,12 @@ export function ProfileComponent({ contentHeight }: Props) {
                         setEditName(e.currentTarget.value);
                       }}
                       status={editNameError ? 'error' : undefined}
-                      placeholder={t('enterYourName')}
+                      placeholder={t('users:enterName')}
                       className="mb-4"
                     />
 
                     <div className="mt-2 mb-1 text-xs font-semibold dark:text-gray-200">
-                      {t('userEmail')}
+                      {t('users:email')}
                     </div>
                     <Input
                       value={editEmail}
@@ -240,23 +246,23 @@ export function ProfileComponent({ contentHeight }: Props) {
                         setEditEmail(e.currentTarget.value.trim().toLowerCase());
                       }}
                       status={editEmailError ? 'error' : undefined}
-                      placeholder={t('enterYourEmail')}
+                      placeholder={t('users:enterEmail')}
                       type="email"
                       className="mb-4"
                       disabled={user.email === 'admin'}
                     />
                     {user.email === 'admin' && (
                       <div className="mb-4 text-xs text-gray-500 dark:text-gray-400">
-                        {t('adminEmailCannotBeChanged')}
+                        {t('users:adminEmailCannotBeChanged')}
                       </div>
                     )}
 
                     <div className="mt-2 mb-1 text-xs font-semibold dark:text-gray-200">
-                      {t('userRole')}
+                      {t('users:role')}
                     </div>
                     <div className="mb-4">
                       <span className="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800 dark:bg-blue-900 dark:text-blue-200">
-                        {getRoleDisplayText(user.role)}
+                        {getRoleDisplayText(user.role, t)}
                       </span>
                     </div>
 
@@ -268,7 +274,7 @@ export function ProfileComponent({ contentHeight }: Props) {
                         disabled={isUpdatingProfile}
                         className="border-blue-600 bg-blue-600 hover:border-blue-700 hover:bg-blue-700"
                       >
-                        {t('saveChanges')}
+                        {t('common:saveChanges')}
                       </Button>
                     )}
                   </div>
@@ -276,21 +282,21 @@ export function ProfileComponent({ contentHeight }: Props) {
 
                 <div className="mb-8">
                   <Button type="primary" ghost onClick={handleLogout} danger>
-                    {t('logout')}
+                    {t('common:logout')}
                   </Button>
                 </div>
 
                 <div className="max-w-xs">
                   <h3 className="mb-4 text-lg font-semibold dark:text-white">
-                    {t('changePassword')}
+                    {t('users:changePassword')}
                   </h3>
 
                   <div className="max-w-sm">
                     <div className="my-1 text-xs font-semibold dark:text-gray-200">
-                      {t('newPassword')}
+                      {t('users:newPassword')}
                     </div>
                     <Input.Password
-                      placeholder={t('enterNewPassword')}
+                      placeholder={t('users:enterNewPassword')}
                       value={newPassword}
                       onChange={(e) => {
                         setNewPasswordError(false);
@@ -308,10 +314,10 @@ export function ProfileComponent({ contentHeight }: Props) {
                     />
 
                     <div className="mt-2 mb-1 text-xs font-semibold dark:text-gray-200">
-                      {t('confirmNewPassword')}
+                      {t('users:confirmNewPassword')}
                     </div>
                     <Input.Password
-                      placeholder={t('confirmNewPasswordPlaceholder')}
+                      placeholder={t('users:confirmNewPasswordPlaceholder')}
                       value={confirmPassword}
                       onChange={(e) => {
                         setConfirmPasswordError(false);
@@ -338,7 +344,9 @@ export function ProfileComponent({ contentHeight }: Props) {
                         disabled={isChangingPassword}
                         className="border-blue-600 bg-blue-600 hover:border-blue-700 hover:bg-blue-700"
                       >
-                        {isChangingPassword ? t('changingPassword') : t('changePassword')}
+                        {isChangingPassword
+                          ? t('users:changingPassword')
+                          : t('users:changePassword')}
                       </Button>
                     )}
                   </div>

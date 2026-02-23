@@ -104,6 +104,10 @@ type EnvVariables struct {
 	GoogleClientID     string `env:"GOOGLE_CLIENT_ID"`
 	GoogleClientSecret string `env:"GOOGLE_CLIENT_SECRET"`
 
+	// Cloudflare Turnstile
+	CloudflareTurnstileSecretKey string `env:"CLOUDFLARE_TURNSTILE_SECRET_KEY"`
+	CloudflareTurnstileSiteKey   string `env:"CLOUDFLARE_TURNSTILE_SITE_KEY"`
+
 	// testing Telegram
 	TestTelegramBotToken string `env:"TEST_TELEGRAM_BOT_TOKEN"`
 	TestTelegramChatID   string `env:"TEST_TELEGRAM_CHAT_ID"`

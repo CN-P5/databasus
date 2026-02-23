@@ -17,7 +17,6 @@ import (
 	users_models "databasus-backend/internal/features/users/models"
 	workspaces_services "databasus-backend/internal/features/workspaces/services"
 	"databasus-backend/internal/util/encryption"
-	"databasus-backend/internal/util/ssh"
 
 	"github.com/google/uuid"
 )
@@ -193,6 +192,8 @@ func (s *DatabaseService) UpdateDatabase(
 		}
 	}
 
+	oldName := existingDatabase.Name
+
 	if err := existingDatabase.EncryptSensitiveFields(s.fieldEncryptor); err != nil {
 		return fmt.Errorf("failed to encrypt sensitive fields: %w", err)
 	}
@@ -202,11 +203,23 @@ func (s *DatabaseService) UpdateDatabase(
 		return err
 	}
 
-	s.auditLogService.WriteAuditLog(
-		fmt.Sprintf("Database updated: %s", existingDatabase.Name),
-		&user.ID,
-		existingDatabase.WorkspaceID,
-	)
+	if oldName != existingDatabase.Name {
+		s.auditLogService.WriteAuditLog(
+			fmt.Sprintf(
+				"Database updated and renamed from '%s' to '%s'",
+				oldName,
+				existingDatabase.Name,
+			),
+			&user.ID,
+			existingDatabase.WorkspaceID,
+		)
+	} else {
+		s.auditLogService.WriteAuditLog(
+			fmt.Sprintf("Database updated: %s", existingDatabase.Name),
+			&user.ID,
+			existingDatabase.WorkspaceID,
+		)
+	}
 
 	return nil
 }
@@ -572,9 +585,19 @@ func (s *DatabaseService) TransferDatabaseToWorkspace(
 		return err
 	}
 
+	sourceWorkspace, err := s.workspaceService.GetWorkspaceByID(*sourceWorkspaceID)
+	if err != nil {
+		return fmt.Errorf("failed to get source workspace: %w", err)
+	}
+
+	targetWorkspace, err := s.workspaceService.GetWorkspaceByID(targetWorkspaceID)
+	if err != nil {
+		return fmt.Errorf("failed to get target workspace: %w", err)
+	}
+
 	s.auditLogService.WriteAuditLog(
-		fmt.Sprintf("Database transferred: %s from workspace %s to workspace %s",
-			database.Name, sourceWorkspaceID, targetWorkspaceID),
+		fmt.Sprintf("Database transferred: %s from workspace '%s' to workspace '%s'",
+			database.Name, sourceWorkspace.Name, targetWorkspace.Name),
 		nil,
 		&targetWorkspaceID,
 	)
@@ -744,30 +767,25 @@ func (s *DatabaseService) CreateReadOnlyUser(
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
-	var sshConfig *ssh.Config
-	if usingDatabase.SSHTunnel != nil && usingDatabase.SSHTunnel.Enabled {
-		sshConfig = usingDatabase.SSHTunnel.ToSSHConfig()
-	}
-
 	var username, password string
 	var err error
 
 	switch usingDatabase.Type {
 	case DatabaseTypePostgres:
 		username, password, err = usingDatabase.Postgresql.CreateReadOnlyUser(
-			ctx, s.logger, s.fieldEncryptor, usingDatabase.ID, sshConfig,
+			ctx, s.logger, s.fieldEncryptor, usingDatabase.ID,
 		)
 	case DatabaseTypeMysql:
 		username, password, err = usingDatabase.Mysql.CreateReadOnlyUser(
-			ctx, s.logger, s.fieldEncryptor, usingDatabase.ID, sshConfig,
+			ctx, s.logger, s.fieldEncryptor, usingDatabase.ID,
 		)
 	case DatabaseTypeMariadb:
 		username, password, err = usingDatabase.Mariadb.CreateReadOnlyUser(
-			ctx, s.logger, s.fieldEncryptor, usingDatabase.ID, sshConfig,
+			ctx, s.logger, s.fieldEncryptor, usingDatabase.ID,
 		)
 	case DatabaseTypeMongodb:
 		username, password, err = usingDatabase.Mongodb.CreateReadOnlyUser(
-			ctx, s.logger, s.fieldEncryptor, usingDatabase.ID, sshConfig,
+			ctx, s.logger, s.fieldEncryptor, usingDatabase.ID,
 		)
 	default:
 		return "", "", errors.New("read-only user creation not supported for this database type")

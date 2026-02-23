@@ -12,7 +12,7 @@ interface AdminPasswordComponentProps {
 export function AdminPasswordComponent({
   onPasswordSet,
 }: AdminPasswordComponentProps): JSX.Element {
-  const { t } = useTranslation('users');
+  const { t } = useTranslation('auth');
   const { message } = App.useApp();
   const [password, setPassword] = useState('');
   const [passwordVisible, setPasswordVisible] = useState(false);
@@ -84,13 +84,13 @@ export function AdminPasswordComponent({
       <div className="mb-5 text-center text-2xl font-bold">{t('signUpAdmin')}</div>
 
       <div className="mx-auto mb-4 max-w-[250px] text-center text-sm text-gray-600 dark:text-gray-400">
-        {t('thenYouWillBeAbleToSignInWithAdminAndPassword')}
+        {t('adminSignUpDescription')}
       </div>
 
-      <div className="my-1 text-xs font-semibold">{t('yourEmail')}</div>
+      <div className="my-1 text-xs font-semibold">{t('email')}</div>
       <Input value="admin" disabled />
 
-      <div className="my-1 text-xs font-semibold">{t('newPassword')}</div>
+      <div className="my-1 text-xs font-semibold">{t('password')}</div>
       <Input.Password
         placeholder="********"
         value={password}

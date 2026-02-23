@@ -1,5 +1,3 @@
-import { useTranslation } from 'react-i18next';
-
 import type { Storage } from '../../../../../entity/storages';
 
 interface Props {
@@ -7,44 +5,42 @@ interface Props {
 }
 
 export function ShowFTPStorageComponent({ storage }: Props) {
-  const { t } = useTranslation('storages');
-
   return (
     <>
       <div className="mb-1 flex items-center">
-        <div className="min-w-[110px]">{t('host')}</div>
+        <div className="min-w-[110px]">Host</div>
         {storage?.ftpStorage?.host || '-'}
       </div>
 
       <div className="mb-1 flex items-center">
-        <div className="min-w-[110px]">{t('port')}</div>
+        <div className="min-w-[110px]">Port</div>
         {storage?.ftpStorage?.port || '-'}
       </div>
 
       <div className="mb-1 flex items-center">
-        <div className="min-w-[110px]">{t('username')}</div>
+        <div className="min-w-[110px]">Username</div>
         {storage?.ftpStorage?.username || '-'}
       </div>
 
       <div className="mb-1 flex items-center">
-        <div className="min-w-[110px]">{t('password')}</div>
+        <div className="min-w-[110px]">Password</div>
         {'*************'}
       </div>
 
       <div className="mb-1 flex items-center">
-        <div className="min-w-[110px]">{t('path')}</div>
+        <div className="min-w-[110px]">Path</div>
         {storage?.ftpStorage?.path || '-'}
       </div>
 
       <div className="mb-1 flex items-center">
-        <div className="min-w-[110px]">{t('useSslTls')}</div>
-        {storage?.ftpStorage?.useSsl ? t('yes') : t('no')}
+        <div className="min-w-[110px]">Use SSL/TLS</div>
+        {storage?.ftpStorage?.useSsl ? 'Yes' : 'No'}
       </div>
 
       {storage?.ftpStorage?.useSsl && storage?.ftpStorage?.skipTlsVerify && (
         <div className="mb-1 flex items-center">
-          <div className="min-w-[110px]">{t('skipTLS')}</div>
-          {t('enabled')}
+          <div className="min-w-[110px]">Skip TLS</div>
+          Enabled
         </div>
       )}
     </>

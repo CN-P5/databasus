@@ -36,10 +36,17 @@ export const EditDatabaseBaseInfoComponent = ({
   isSaveToApi,
   onSaved,
 }: Props) => {
-  const { t } = useTranslation(['common', 'databases']);
+  const { t } = useTranslation(['databases', 'common']);
   const [editingDatabase, setEditingDatabase] = useState<Database>();
   const [isUnsaved, setIsUnsaved] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const getDatabaseTypeOptions = (t: (key: string) => string) => [
+    { value: DatabaseType.POSTGRES, label: t('typePostgres') },
+    { value: DatabaseType.MYSQL, label: t('typeMysql') },
+    { value: DatabaseType.MARIADB, label: t('typeMariadb') },
+    { value: DatabaseType.MONGODB, label: t('typeMongodb') },
+  ];
+  const databaseTypeOptions = getDatabaseTypeOptions(t);
 
   const updateDatabase = (patch: Partial<Database>) => {
     setEditingDatabase((prev) => (prev ? { ...prev, ...patch } : prev));
@@ -110,12 +117,12 @@ export const EditDatabaseBaseInfoComponent = ({
     <div>
       {isShowName && (
         <div className="mb-1 flex w-full items-center">
-          <div className="min-w-[100px] md:min-w-[150px]">{t('common:name')}</div>
+          <div className="min-w-[100px] md:min-w-[150px]">{t('databases:databaseName')}</div>
           <Input
             value={editingDatabase.name || ''}
             onChange={(e) => updateDatabase({ name: e.target.value })}
             size="small"
-            placeholder={t('databases:myFavouriteDB')}
+            placeholder={t('databases:databaseNamePlaceholder')}
             className="max-w-[150px] grow md:max-w-[200px]"
           />
         </div>
@@ -129,12 +136,7 @@ export const EditDatabaseBaseInfoComponent = ({
             <Select
               value={editingDatabase.type}
               onChange={handleTypeChange}
-              options={[
-                { value: DatabaseType.POSTGRES, label: t('databases:typePostgres') },
-                { value: DatabaseType.MYSQL, label: t('databases:typeMysql') },
-                { value: DatabaseType.MARIADB, label: t('databases:typeMariadb') },
-                { value: DatabaseType.MONGODB, label: t('databases:typeMongodb') },
-              ]}
+              options={databaseTypeOptions}
               size="small"
               className="w-[150px] grow md:w-[200px]"
             />

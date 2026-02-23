@@ -14,8 +14,6 @@ interface Props {
 
 export const NotifierTransferDialogComponent = ({ notifier, onClose, onTransferred }: Props) => {
   const { t } = useTranslation('notifiers');
-  const { t: tCommon } = useTranslation('common');
-
   const [isLoading, setIsLoading] = useState(true);
   const [isNotifierInUse, setIsNotifierInUse] = useState(false);
   const [workspaces, setWorkspaces] = useState<WorkspaceResponse[]>([]);
@@ -80,7 +78,7 @@ export const NotifierTransferDialogComponent = ({ notifier, onClose, onTransferr
 
           <div className="mt-5">
             <Button type="primary" onClick={onClose}>
-              {tCommon('ok')}
+              {t('ok')}
             </Button>
           </div>
         </div>
@@ -104,7 +102,7 @@ export const NotifierTransferDialogComponent = ({ notifier, onClose, onTransferr
 
           <div className="flex gap-2">
             <Button type="default" onClick={onClose}>
-              {tCommon('cancel')}
+              {t('cancel')}
             </Button>
 
             <Button

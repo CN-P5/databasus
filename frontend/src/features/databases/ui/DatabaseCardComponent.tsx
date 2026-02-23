@@ -20,7 +20,7 @@ export const DatabaseCardComponent = ({
   selectedDatabaseId,
   setSelectedDatabaseId,
 }: Props) => {
-  const { t } = useTranslation(['databases']);
+  const { t } = useTranslation(['databases', 'common']);
   const [storage, setStorage] = useState<Storage | undefined>();
 
   useEffect(() => {
@@ -45,8 +45,8 @@ export const DatabaseCardComponent = ({
               }`}
             >
               {database.healthStatus === HealthStatus.AVAILABLE
-                ? t('databases:healthy')
-                : t('databases:unhealthy')}
+                ? t('databases:available')
+                : t('databases:unavailable')}
             </div>
           </div>
         )}

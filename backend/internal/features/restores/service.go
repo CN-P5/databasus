@@ -190,11 +190,7 @@ func (s *RestoreService) RestoreBackupWithAuth(
 	}
 
 	s.auditLogService.WriteAuditLog(
-		fmt.Sprintf(
-			"Database restored from backup %s for database: %s",
-			backupID.String(),
-			database.Name,
-		),
+		fmt.Sprintf("Database restored for database: %s", database.Name),
 		&user.ID,
 		database.WorkspaceID,
 	)
@@ -206,12 +202,12 @@ func (s *RestoreService) validateVersionCompatibility(
 	backupDatabase *databases.Database,
 	requestDTO restores_core.RestoreBackupRequest,
 ) error {
+	// populate version
 	if requestDTO.MariadbDatabase != nil {
 		err := requestDTO.MariadbDatabase.PopulateVersion(
 			s.logger,
 			s.fieldEncryptor,
 			backupDatabase.ID,
-			nil,
 		)
 		if err != nil {
 			return err
@@ -222,7 +218,6 @@ func (s *RestoreService) validateVersionCompatibility(
 			s.logger,
 			s.fieldEncryptor,
 			backupDatabase.ID,
-			nil,
 		)
 		if err != nil {
 			return err
@@ -233,7 +228,6 @@ func (s *RestoreService) validateVersionCompatibility(
 			s.logger,
 			s.fieldEncryptor,
 			backupDatabase.ID,
-			nil,
 		)
 		if err != nil {
 			return err
@@ -244,7 +238,6 @@ func (s *RestoreService) validateVersionCompatibility(
 			s.logger,
 			s.fieldEncryptor,
 			backupDatabase.ID,
-			nil,
 		)
 		if err != nil {
 			return err
@@ -415,11 +408,7 @@ func (s *RestoreService) CancelRestore(
 	}
 
 	s.auditLogService.WriteAuditLog(
-		fmt.Sprintf(
-			"Restore cancelled for database: %s (ID: %s)",
-			database.Name,
-			restoreID.String(),
-		),
+		fmt.Sprintf("Restore cancelled for database: %s", database.Name),
 		&user.ID,
 		database.WorkspaceID,
 	)

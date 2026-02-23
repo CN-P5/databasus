@@ -58,6 +58,9 @@
   "notifyTo": "Notify to",
   "hasSendError": "Has send error",
   "notifierIsUsedBySomeDatabasesRemoveFirst": "Notifier is used by some databases. Please remove notifier from databases first.",
+  "notifierIsUsedByDatabases": "Notifier is used by some databases. Please remove notifier from databases first.",
+  "sendTestNotificationHint": "send test notification via button below (even if you updated settings)",
+  "waitNextNotification": "wait until next notification is sent without errors",
   "enterName": "Enter name...",
   "sendError": "Send error",
   "theError": "The error:",
@@ -134,5 +137,8 @@
   "hidden": "(hidden)",
   "powerAutomateUrlWithColon": "Power Automate URL: ",
   "hide": "Hide",
-  "show": "Show"
+  "show": "Show",
+  "howToConnectSlack": "How to connect Slack (how to get bot token and chat ID)?",
+  "notificationTitle": "notification title",
+  "notificationMessage": "notification message"
 }

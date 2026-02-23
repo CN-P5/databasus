@@ -6,6 +6,7 @@ import enAuth from './locales/en/auth.json';
 import enBackups from './locales/en/backups.json';
 import enCommon from './locales/en/common.json';
 import enDatabases from './locales/en/databases.json';
+import enHealthcheck from './locales/en/healthcheck.json';
 import enNotifiers from './locales/en/notifiers.json';
 import enRestores from './locales/en/restores.json';
 import enSettings from './locales/en/settings.json';
@@ -17,6 +18,7 @@ import zhAuth from './locales/zh/auth.json';
 import zhBackups from './locales/zh/backups.json';
 import zhCommon from './locales/zh/common.json';
 import zhDatabases from './locales/zh/databases.json';
+import zhHealthcheck from './locales/zh/healthcheck.json';
 import zhNotifiers from './locales/zh/notifiers.json';
 import zhRestores from './locales/zh/restores.json';
 import zhSettings from './locales/zh/settings.json';
@@ -38,6 +40,7 @@ const resources = {
     settings: enSettings,
     sidebar: enSidebar,
     restores: enRestores,
+    healthcheck: enHealthcheck,
   },
   zh: {
     common: zhCommon,
@@ -51,6 +54,7 @@ const resources = {
     settings: zhSettings,
     sidebar: zhSidebar,
     restores: zhRestores,
+    healthcheck: zhHealthcheck,
   },
 };
 
@@ -73,6 +77,7 @@ i18n
       'settings',
       'sidebar',
       'restores',
+      'healthcheck',
     ],
     interpolation: {
       escapeValue: false,

@@ -1,5 +1,3 @@
-import { useTranslation } from 'react-i18next';
-
 import type { Storage } from '../../../../../entity/storages';
 
 interface Props {
@@ -7,47 +5,45 @@ interface Props {
 }
 
 export function ShowNASStorageComponent({ storage }: Props) {
-  const { t } = useTranslation('storages');
-
   return (
     <>
       <div className="mb-1 flex items-center">
-        <div className="min-w-[110px]">{t('host')}</div>
+        <div className="min-w-[110px]">Host</div>
         {storage?.nasStorage?.host || '-'}
       </div>
 
       <div className="mb-1 flex items-center">
-        <div className="min-w-[110px]">{t('port')}</div>
+        <div className="min-w-[110px]">Port</div>
         {storage?.nasStorage?.port || '-'}
       </div>
 
       <div className="mb-1 flex items-center">
-        <div className="min-w-[110px]">{t('share')}</div>
+        <div className="min-w-[110px]">Share</div>
         {storage?.nasStorage?.share || '-'}
       </div>
 
       <div className="mb-1 flex items-center">
-        <div className="min-w-[110px]">{t('username')}</div>
+        <div className="min-w-[110px]">Username</div>
         {storage?.nasStorage?.username || '-'}
       </div>
 
       <div className="mb-1 flex items-center">
-        <div className="min-w-[110px]">{t('password')}</div>
+        <div className="min-w-[110px]">Password</div>
         {'*************'}
       </div>
 
       <div className="mb-1 flex items-center">
-        <div className="min-w-[110px]">{t('useSsl')}</div>
-        {storage?.nasStorage?.useSsl ? t('yes') : t('no')}
+        <div className="min-w-[110px]">Use SSL</div>
+        {storage?.nasStorage?.useSsl ? 'Yes' : 'No'}
       </div>
 
       <div className="mb-1 flex items-center">
-        <div className="min-w-[110px]">{t('domain')}</div>
+        <div className="min-w-[110px]">Domain</div>
         {storage?.nasStorage?.domain || '-'}
       </div>
 
       <div className="mb-1 flex items-center">
-        <div className="min-w-[110px]">{t('path')}</div>
+        <div className="min-w-[110px]">Path</div>
         {storage?.nasStorage?.path || '-'}
       </div>
     </>

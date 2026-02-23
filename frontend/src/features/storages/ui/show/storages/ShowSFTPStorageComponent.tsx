@@ -1,5 +1,3 @@
-import { useTranslation } from 'react-i18next';
-
 import type { Storage } from '../../../../../entity/storages';
 
 interface Props {
@@ -7,45 +5,44 @@ interface Props {
 }
 
 export function ShowSFTPStorageComponent({ storage }: Props) {
-  const { t } = useTranslation('storages');
-  const authMethod = storage?.sftpStorage?.privateKey ? t('privateKey') : t('password');
+  const authMethod = storage?.sftpStorage?.privateKey ? 'Private Key' : 'Password';
 
   return (
     <>
       <div className="mb-1 flex items-center">
-        <div className="min-w-[110px]">{t('host')}</div>
+        <div className="min-w-[110px]">Host</div>
         {storage?.sftpStorage?.host || '-'}
       </div>
 
       <div className="mb-1 flex items-center">
-        <div className="min-w-[110px]">{t('port')}</div>
+        <div className="min-w-[110px]">Port</div>
         {storage?.sftpStorage?.port || '-'}
       </div>
 
       <div className="mb-1 flex items-center">
-        <div className="min-w-[110px]">{t('username')}</div>
+        <div className="min-w-[110px]">Username</div>
         {storage?.sftpStorage?.username || '-'}
       </div>
 
       <div className="mb-1 flex items-center">
-        <div className="min-w-[110px]">{t('authMethod')}</div>
+        <div className="min-w-[110px]">Auth Method</div>
         {authMethod}
       </div>
 
       <div className="mb-1 flex items-center">
-        <div className="min-w-[110px]">{t('credentials')}</div>
+        <div className="min-w-[110px]">Credentials</div>
         {'*************'}
       </div>
 
       <div className="mb-1 flex items-center">
-        <div className="min-w-[110px]">{t('path')}</div>
+        <div className="min-w-[110px]">Path</div>
         {storage?.sftpStorage?.path || '-'}
       </div>
 
       {storage?.sftpStorage?.skipHostKeyVerify && (
         <div className="mb-1 flex items-center">
-          <div className="min-w-[110px]">{t('skipHostKeyLabel')}</div>
-          {t('enabled')}
+          <div className="min-w-[110px]">Skip host key</div>
+          Enabled
         </div>
       )}
     </>
