@@ -1,5 +1,6 @@
 import { Button, Input, Select } from 'antd';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import {
   type Database,
@@ -25,12 +26,7 @@ interface Props {
   onSaved: (db: Database) => void;
 }
 
-const databaseTypeOptions = [
-  { value: DatabaseType.POSTGRES, label: 'PostgreSQL' },
-  { value: DatabaseType.MYSQL, label: 'MySQL' },
-  { value: DatabaseType.MARIADB, label: 'MariaDB' },
-  { value: DatabaseType.MONGODB, label: 'MongoDB' },
-];
+
 
 export const EditDatabaseBaseInfoComponent = ({
   database,
@@ -42,9 +38,17 @@ export const EditDatabaseBaseInfoComponent = ({
   isSaveToApi,
   onSaved,
 }: Props) => {
+  const { t } = useTranslation(['databases', 'common']);
   const [editingDatabase, setEditingDatabase] = useState<Database>();
   const [isUnsaved, setIsUnsaved] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const getDatabaseTypeOptions = (t: (key: string) => string) => [
+    { value: DatabaseType.POSTGRES, label: t('typePostgres') },
+    { value: DatabaseType.MYSQL, label: t('typeMysql') },
+    { value: DatabaseType.MARIADB, label: t('typeMariadb') },
+    { value: DatabaseType.MONGODB, label: t('typeMongodb') },
+  ];
+  const databaseTypeOptions = getDatabaseTypeOptions(t);
 
   const updateDatabase = (patch: Partial<Database>) => {
     setEditingDatabase((prev) => (prev ? { ...prev, ...patch } : prev));
@@ -115,12 +119,12 @@ export const EditDatabaseBaseInfoComponent = ({
     <div>
       {isShowName && (
         <div className="mb-1 flex w-full items-center">
-          <div className="min-w-[100px] md:min-w-[150px]">Name</div>
+          <div className="min-w-[100px] md:min-w-[150px]">{t('databases:databaseName')}</div>
           <Input
             value={editingDatabase.name || ''}
             onChange={(e) => updateDatabase({ name: e.target.value })}
             size="small"
-            placeholder="My favourite DB"
+            placeholder={t('databases:databaseNamePlaceholder')}
             className="max-w-[150px] grow md:max-w-[200px]"
           />
         </div>
@@ -128,7 +132,7 @@ export const EditDatabaseBaseInfoComponent = ({
 
       {isShowType && (
         <div className="mb-1 flex w-full items-center">
-          <div className="min-w-[100px] md:min-w-[150px]">Database type</div>
+          <div className="min-w-[100px] md:min-w-[150px]">{t('databases:databaseType')}</div>
 
           <div className="flex items-center">
             <Select
@@ -151,7 +155,7 @@ export const EditDatabaseBaseInfoComponent = ({
       <div className="mt-5 flex">
         {isShowCancelButton && (
           <Button danger ghost className="mr-1" onClick={onCancel}>
-            Cancel
+            {t('common:cancel')}
           </Button>
         )}
 
@@ -162,7 +166,7 @@ export const EditDatabaseBaseInfoComponent = ({
           loading={isSaving}
           disabled={(isSaveToApi && !isUnsaved) || !isAllFieldsFilled}
         >
-          {saveButtonText || 'Save'}
+          {saveButtonText || t('common:save')}
         </Button>
       </div>
     </div>

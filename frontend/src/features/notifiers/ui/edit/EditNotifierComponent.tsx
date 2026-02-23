@@ -1,5 +1,6 @@
 import { Button, Input, Select } from 'antd';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import {
   type Notifier,
@@ -42,6 +43,7 @@ export function EditNotifierComponent({
   editingNotifier,
   onChanged,
 }: Props) {
+  const { t } = useTranslation('notifiers');
   const [notifier, setNotifier] = useState<Notifier | undefined>();
   const [isUnsaved, setIsUnsaved] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -74,16 +76,14 @@ export function EditNotifierComponent({
       await notifierApi.sendTestNotificationDirect(notifier);
       setIsTestNotificationSuccess(true);
       ToastHelper.showToast({
-        title: 'Test notification sent!',
-        description: 'Test notification sent successfully',
+        title: t('testNotificationSent'),
+        description: t('testNotificationSentSuccessfully'),
       });
     } catch (e) {
       alert((e as Error).message);
 
       if (notifier.notifierType === NotifierType.SLACK) {
-        alert(
-          'Make sure channel is public or bot is added to the private channel (via @invite) or group. For direct messages use User ID from Slack profile.',
-        );
+        alert(t('makeSureChannelIsPublicOrBotIsAddedToPrivateChannel'));
       }
     }
 
@@ -210,7 +210,7 @@ export function EditNotifierComponent({
     <div>
       {isShowName && (
         <div className="mb-1 flex w-full flex-col items-start sm:flex-row sm:items-center">
-          <div className="mb-1 min-w-[150px] sm:mb-0">Name</div>
+          <div className="mb-1 min-w-[150px] sm:mb-0">{t('name')}</div>
 
           <Input
             value={notifier?.name || ''}
@@ -226,7 +226,7 @@ export function EditNotifierComponent({
       )}
 
       <div className="mb-1 flex w-full flex-col items-start sm:flex-row sm:items-center">
-        <div className="mb-1 min-w-[150px] sm:mb-0">Type</div>
+        <div className="mb-1 min-w-[150px] sm:mb-0">{t('type')}</div>
 
         <div className="flex items-center">
           <Select
@@ -329,7 +329,7 @@ export function EditNotifierComponent({
             type="primary"
             onClick={sendTestNotification}
           >
-            Send test notification
+            {t('sendTestNotification')}
           </Button>
         ) : (
           <div />
@@ -343,7 +343,7 @@ export function EditNotifierComponent({
             type="primary"
             onClick={save}
           >
-            Save
+            {t('common:save')}
           </Button>
         ) : (
           <div />
@@ -358,7 +358,7 @@ export function EditNotifierComponent({
             ghost
             onClick={onClose}
           >
-            Cancel
+            {t('common:cancel')}
           </Button>
         ) : (
           <div />

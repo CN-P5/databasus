@@ -1,6 +1,9 @@
 import { CopyOutlined } from '@ant-design/icons';
 import { App, Button, Input, InputNumber, Switch } from 'antd';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+
+import { SshTunnelConfigComponent } from '../components/SshTunnelConfigComponent';
 
 import { IS_CLOUD } from '../../../../constants';
 import { type Database, databaseApi } from '../../../../entity/databases';
@@ -37,6 +40,7 @@ export const EditMySqlSpecificDataComponent = ({
   onSaved,
   isShowDbName = true,
 }: Props) => {
+  const { t } = useTranslation('databases');
   const { message } = App.useApp();
 
   const [editingDatabase, setEditingDatabase] = useState<Database>();
@@ -52,7 +56,7 @@ export const EditMySqlSpecificDataComponent = ({
       const trimmedText = text.trim();
 
       if (!trimmedText) {
-        message.error('Clipboard is empty');
+        message.error(t('clipboardIsEmpty'));
         return;
       }
 
@@ -80,9 +84,9 @@ export const EditMySqlSpecificDataComponent = ({
 
       setEditingDatabase(updatedDatabase);
       setIsConnectionTested(false);
-      message.success('Connection string parsed successfully');
+      message.success(t('connectionStringParsedSuccessfully'));
     } catch {
-      message.error('Failed to read clipboard. Please check browser permissions.');
+      message.error(t('failedToReadClipboard'));
     }
   };
 
@@ -103,8 +107,8 @@ export const EditMySqlSpecificDataComponent = ({
       await databaseApi.testDatabaseConnectionDirect(trimmedDatabase);
       setIsConnectionTested(true);
       ToastHelper.showToast({
-        title: 'Connection test passed',
-        description: 'You can continue with the next step',
+        title: t('connectionTestPassed'),
+        description: t('youCanContinueWithNextStep'),
       });
     } catch (e) {
       setIsConnectionFailed(true);
@@ -171,12 +175,12 @@ export const EditMySqlSpecificDataComponent = ({
           onClick={parseFromClipboard}
         >
           <CopyOutlined className="mr-1" />
-          Parse from clipboard
+          {t('parseFromClipboard')}
         </div>
       </div>
 
       <div className="mb-1 flex w-full items-center">
-        <div className="min-w-[150px]">Host</div>
+        <div className="min-w-[150px]">{t('host')}</div>
         <Input
           value={editingDatabase.mysql?.host}
           onChange={(e) => {
@@ -193,7 +197,7 @@ export const EditMySqlSpecificDataComponent = ({
           }}
           size="small"
           className="max-w-[200px] grow"
-          placeholder="Enter MySQL host"
+          placeholder={t('enterMysqlHost')}
         />
       </div>
 
@@ -201,22 +205,22 @@ export const EditMySqlSpecificDataComponent = ({
         <div className="mb-1 flex">
           <div className="min-w-[150px]" />
           <div className="max-w-[200px] text-xs text-gray-500 dark:text-gray-400">
-            Please{' '}
+            {t('please')}{' '}
             <a
               href="https://databasus.com/faq/localhost"
               target="_blank"
               rel="noreferrer"
               className="!text-blue-600 dark:!text-blue-400"
             >
-              read this document
+              {t('readThisDocument')}
             </a>{' '}
-            to study how to backup local database
+            {t('toStudyHowToBackupLocalDatabase')}
           </div>
         </div>
       )}
 
       <div className="mb-1 flex w-full items-center">
-        <div className="min-w-[150px]">Port</div>
+        <div className="min-w-[150px]">{t('port')}</div>
         <InputNumber
           type="number"
           value={editingDatabase.mysql?.port}
@@ -231,12 +235,12 @@ export const EditMySqlSpecificDataComponent = ({
           }}
           size="small"
           className="max-w-[200px] grow"
-          placeholder="Enter MySQL port"
+          placeholder={t('enterMysqlPort')}
         />
       </div>
 
       <div className="mb-1 flex w-full items-center">
-        <div className="min-w-[150px]">Username</div>
+        <div className="min-w-[150px]">{t('username')}</div>
         <Input
           value={editingDatabase.mysql?.username}
           onChange={(e) => {
@@ -250,12 +254,12 @@ export const EditMySqlSpecificDataComponent = ({
           }}
           size="small"
           className="max-w-[200px] grow"
-          placeholder="Enter MySQL username"
+          placeholder={t('enterMysqlUsername')}
         />
       </div>
 
       <div className="mb-1 flex w-full items-center">
-        <div className="min-w-[150px]">Password</div>
+        <div className="min-w-[150px]">{t('password')}</div>
         <Input.Password
           value={editingDatabase.mysql?.password}
           onChange={(e) => {
@@ -269,7 +273,7 @@ export const EditMySqlSpecificDataComponent = ({
           }}
           size="small"
           className="max-w-[200px] grow"
-          placeholder="Enter MySQL password"
+          placeholder={t('enterMysqlPassword')}
           autoComplete="off"
           data-1p-ignore
           data-lpignore="true"
@@ -279,7 +283,7 @@ export const EditMySqlSpecificDataComponent = ({
 
       {isShowDbName && (
         <div className="mb-1 flex w-full items-center">
-          <div className="min-w-[150px]">DB name</div>
+          <div className="min-w-[150px]">{t('dbName')}</div>
           <Input
             value={editingDatabase.mysql?.database}
             onChange={(e) => {
@@ -293,13 +297,13 @@ export const EditMySqlSpecificDataComponent = ({
             }}
             size="small"
             className="max-w-[200px] grow"
-            placeholder="Enter MySQL database name"
+            placeholder={t('enterMysqlDatabaseName')}
           />
         </div>
       )}
 
       <div className="mb-3 flex w-full items-center">
-        <div className="min-w-[150px]">Use HTTPS</div>
+        <div className="min-w-[150px]">{t('useHttps')}</div>
         <Switch
           checked={editingDatabase.mysql?.isHttps}
           onChange={(checked) => {
@@ -315,16 +319,27 @@ export const EditMySqlSpecificDataComponent = ({
         />
       </div>
 
+      <SshTunnelConfigComponent
+        sshTunnel={editingDatabase.sshTunnel}
+        onChange={(sshTunnel) => {
+          setEditingDatabase({
+            ...editingDatabase,
+            sshTunnel,
+          });
+          setIsConnectionTested(false);
+        }}
+      />
+
       <div className="mt-5 flex">
         {isShowCancelButton && (
           <Button className="mr-1" danger ghost onClick={() => onCancel()}>
-            Cancel
+            {t('common:cancel')}
           </Button>
         )}
 
         {isShowBackButton && (
           <Button className="mr-auto" type="primary" ghost onClick={() => onBack()}>
-            Back
+            {t('common:back')}
           </Button>
         )}
 
@@ -336,7 +351,7 @@ export const EditMySqlSpecificDataComponent = ({
             disabled={!isAllFieldsFilled}
             className="mr-5"
           >
-            Test connection
+            {t('testConnection')}
           </Button>
         )}
 
@@ -348,15 +363,14 @@ export const EditMySqlSpecificDataComponent = ({
             disabled={!isAllFieldsFilled}
             className="mr-5"
           >
-            {saveButtonText || 'Save'}
+            {saveButtonText || t('common:save')}
           </Button>
         )}
       </div>
 
       {isConnectionFailed && !IS_CLOUD && (
         <div className="mt-3 text-sm text-gray-500 dark:text-gray-400">
-          If your database uses IP whitelist, make sure Databasus server IP is added to the allowed
-          list.
+          {t('ifYourDatabaseUsesIpWhitelist')}
         </div>
       )}
     </div>

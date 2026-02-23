@@ -1,5 +1,6 @@
 import { Button, Modal, Spin } from 'antd';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { IS_CLOUD } from '../../../../constants';
 import { type Database, DatabaseType, databaseApi } from '../../../../entity/databases';
@@ -22,6 +23,7 @@ export const CreateReadOnlyComponent = ({
   onSkipped,
   onAlreadyExists,
 }: Props) => {
+  const { t } = useTranslation(['databases', 'common']);
   const [isCheckingReadOnlyUser, setIsCheckingReadOnlyUser] = useState(false);
   const [isCreatingReadOnlyUser, setIsCreatingReadOnlyUser] = useState(false);
   const [isShowSkipConfirmation, setShowSkipConfirmation] = useState(false);
@@ -40,9 +42,9 @@ export const CreateReadOnlyComponent = ({
         ? 'MariaDB'
         : isMongodb
           ? 'MongoDB'
-          : 'database';
+          : t('databases:database');
 
-  const privilegesLabel = isMongodb ? 'roles' : 'privileges';
+  const privilegesLabel = isMongodb ? t('databases:roles') : t('databases:privileges');
 
   const checkReadOnlyUser = async (): Promise<boolean> => {
     try {
@@ -124,7 +126,7 @@ export const CreateReadOnlyComponent = ({
     return (
       <div className="flex items-center">
         <Spin />
-        <span className="ml-3">Checking read-only user...</span>
+        <span className="ml-3">{t('databases:checkingReadOnlyUser')}</span>
       </div>
     );
   }
@@ -132,45 +134,43 @@ export const CreateReadOnlyComponent = ({
   return (
     <div>
       <div className="mb-5">
-        <p className="mb-3 text-lg font-bold">Create a read-only user for Databasus?</p>
+        <p className="mb-3 text-lg font-bold">{t('databases:createReadOnlyUserQuestion')}</p>
 
         <p className="mb-2">
-          A read-only user is a {databaseTypeName} user with limited permissions that can only read
-          data from your database, not modify it. This is recommended for backup operations because:
+          {t('databases:readOnlyUserDescription', { databaseTypeName })}
         </p>
 
         <ul className="mb-2 ml-5 list-disc">
-          <li>it prevents accidental data modifications during backup</li>
-          <li>it follows the principle of least privilege</li>
-          <li>it&apos;s a security best practice</li>
+          <li>{t('databases:readOnlyBenefit1')}</li>
+          <li>{t('databases:readOnlyBenefit2')}</li>
+          <li>{t('databases:readOnlyBenefit3')}</li>
         </ul>
 
         <p className="mb-2">
-          Databasus enforce enterprise-grade security (
+          {t('databases:databasusSecurityPrefix')}
           <a
             href="https://databasus.com/security"
             target="_blank"
             rel="noreferrer"
             className="!text-blue-600 dark:!text-blue-400"
           >
-            read in details here
+            {t('databases:readInDetailsHere')}
           </a>
-          ). However, it is not possible to be covered from all possible risks.
+          {t('databases:databasusSecuritySuffix')}
         </p>
 
         <p className="mt-3">
-          <b>Read-only user allows to avoid storing credentials with write access at all</b>. Even
-          in the worst case of hacking, nobody will be able to corrupt your data.
+          <b>{t('databases:readOnlyUserAvoidStoringCredentials')}</b>
         </p>
 
         <p className="mt-3">
           {privileges.length === 0 ? (
             <>
-              Current user has <b>no write {privilegesLabel}</b>.
+              {t('databases:currentUserNoWritePrivileges', { privilegesLabel })}
             </>
           ) : (
             <>
-              Current user has the following write {privilegesLabel}:{' '}
+              {t('databases:currentUserHasWritePrivileges', { privilegesLabel })}{' '}
               <span
                 className={shouldShowExpandToggle() ? 'cursor-pointer hover:opacity-80' : ''}
                 onClick={() =>
@@ -180,7 +180,7 @@ export const CreateReadOnlyComponent = ({
                 {getPrivilegesDisplay()}
                 {shouldShowExpandToggle() && (
                   <span className="ml-1 text-xs text-blue-600 hover:opacity-80">
-                    ({isPrivilegesExpanded ? 'collapse' : 'expand'})
+                    ({isPrivilegesExpanded ? t('databases:collapse') : t('databases:expand')})
                   </span>
                 )}
               </span>
@@ -191,12 +191,12 @@ export const CreateReadOnlyComponent = ({
 
       <div className="mt-5 flex">
         <Button className="mr-auto" type="primary" ghost onClick={() => onGoBack()}>
-          Back
+          {t('common:back')}
         </Button>
 
         {!IS_CLOUD && (
           <Button className="mr-2 ml-auto" danger ghost onClick={handleSkip}>
-            Skip
+            {t('databases:skip')}
           </Button>
         )}
 
@@ -206,38 +206,36 @@ export const CreateReadOnlyComponent = ({
           loading={isCreatingReadOnlyUser}
           disabled={isCreatingReadOnlyUser}
         >
-          Yes, create read-only user
+          {t('databases:yesCreateReadOnlyUser')}
         </Button>
       </div>
 
       <Modal
-        title="Skip read-only user creation?"
+        title={t('databases:skipReadOnlyUserCreationTitle')}
         open={isShowSkipConfirmation}
         onCancel={() => setShowSkipConfirmation(false)}
         footer={null}
         width={450}
       >
         <div className="mb-5">
-          <p className="mb-2">Are you sure you want to skip creating a read-only user?</p>
+          <p className="mb-2">{t('databases:skipReadOnlyUserConfirmation')}</p>
 
           <p className="mb-2">
-            Using a user with full permissions for backups is not recommended and may pose security
-            risks. Databasus is highly recommending you to not skip this step.
+            {t('databases:skipReadOnlyUserWarning')}
           </p>
 
           <p>
-            100% protection is never possible. It&apos;s better to be safe in case of 0.01% risk of
-            full hacking. So it is better to follow the secure way with read-only user.
+            {t('databases:skipReadOnlyUserRisk')}
           </p>
         </div>
 
         <div className="flex justify-end">
           <Button className="mr-2" danger ghost onClick={handleSkipConfirmed}>
-            Yes, I accept risks
+            {t('databases:yesAcceptRisks')}
           </Button>
 
           <Button type="primary" onClick={() => setShowSkipConfirmation(false)}>
-            Let&apos;s continue with the secure way
+            {t('databases:continueWithSecureWay')}
           </Button>
         </div>
       </Modal>

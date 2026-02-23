@@ -1,6 +1,7 @@
 import { CloseOutlined } from '@ant-design/icons';
 import { Drawer, Tooltip } from 'antd';
 import { useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { type DiskUsage } from '../../entity/disk';
 import { type UserProfile, UserRole } from '../../entity/users';
@@ -39,6 +40,7 @@ export const SidebarComponent = ({
   diskUsage,
   contentHeight,
 }: Props) => {
+  const { t } = useTranslation(['common', 'sidebar']);
   const isMobile = useIsMobile();
   const { resolvedTheme } = useTheme();
 
@@ -169,14 +171,14 @@ export const SidebarComponent = ({
         <div className="border-t border-gray-200 bg-gray-50 px-3 py-4 dark:border-gray-700 dark:bg-gray-800">
           {diskUsage && (
             <div className="mb-4">
-              <Tooltip title="To make backups locally and restore them, you need to have enough space on your disk. For restore, you need to have same amount of space that the backup size.">
+              <Tooltip title={t('common:diskUsageTooltip')}>
                 <div
                   className={`cursor-pointer text-xs ${isUsedMoreThan95Percent ? 'text-red-500' : 'text-gray-600 dark:text-gray-400'}`}
                 >
-                  <div className="font-medium">Disk Usage</div>
+                  <div className="font-medium">{t('common:diskUsage')}</div>
                   <div className="mt-1">
-                    {(diskUsage.usedSpaceBytes / 1024 ** 3).toFixed(1)} of{' '}
-                    {(diskUsage.totalSpaceBytes / 1024 ** 3).toFixed(1)} GB used (
+                    {(diskUsage.usedSpaceBytes / 1024 ** 3).toFixed(1)} {t('common:of')}{' '}
+                    {(diskUsage.totalSpaceBytes / 1024 ** 3).toFixed(1)} GB {t('common:used')} (
                     {((diskUsage.usedSpaceBytes / diskUsage.totalSpaceBytes) * 100).toFixed(1)}%)
                   </div>
                 </div>
@@ -191,7 +193,7 @@ export const SidebarComponent = ({
               target="_blank"
               rel="noreferrer"
             >
-              Documentation
+              {t('common:docs')}
             </a>
 
             <a
@@ -200,7 +202,7 @@ export const SidebarComponent = ({
               target="_blank"
               rel="noreferrer"
             >
-              Community
+              {t('common:community')}
             </a>
 
             <div className="flex pt-2">

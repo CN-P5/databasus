@@ -1,3 +1,5 @@
+import { useTranslation } from 'react-i18next';
+
 import { type Database, MariadbVersion } from '../../../../entity/databases';
 
 interface Props {
@@ -19,48 +21,90 @@ const mariadbVersionLabels: Record<MariadbVersion, string> = {
 };
 
 export const ShowMariaDbSpecificDataComponent = ({ database }: Props) => {
+  const { t } = useTranslation('databases');
+
   return (
     <div>
       <div className="mb-1 flex w-full items-center">
-        <div className="min-w-[150px]">MariaDB version</div>
+        <div className="min-w-[150px]">{t('mariadbVersion')}</div>
         <div>{database.mariadb?.version ? mariadbVersionLabels[database.mariadb.version] : ''}</div>
       </div>
 
       <div className="mb-1 flex w-full items-center">
-        <div className="min-w-[150px] break-all">Host</div>
+        <div className="min-w-[150px] break-all">{t('host')}</div>
         <div>{database.mariadb?.host || ''}</div>
       </div>
 
       <div className="mb-1 flex w-full items-center">
-        <div className="min-w-[150px]">Port</div>
+        <div className="min-w-[150px]">{t('port')}</div>
         <div>{database.mariadb?.port || ''}</div>
       </div>
 
       <div className="mb-1 flex w-full items-center">
-        <div className="min-w-[150px]">Username</div>
+        <div className="min-w-[150px]">{t('username')}</div>
         <div>{database.mariadb?.username || ''}</div>
       </div>
 
       <div className="mb-1 flex w-full items-center">
-        <div className="min-w-[150px]">Password</div>
+        <div className="min-w-[150px]">{t('password')}</div>
         <div>{'*************'}</div>
       </div>
 
       <div className="mb-1 flex w-full items-center">
-        <div className="min-w-[150px]">DB name</div>
+        <div className="min-w-[150px]">{t('dbName')}</div>
         <div>{database.mariadb?.database || ''}</div>
       </div>
 
       <div className="mb-1 flex w-full items-center">
-        <div className="min-w-[150px]">Use HTTPS</div>
-        <div>{database.mariadb?.isHttps ? 'Yes' : 'No'}</div>
+        <div className="min-w-[150px]">{t('useHttps')}</div>
+        <div>{database.mariadb?.isHttps ? t('yes') : t('no')}</div>
       </div>
 
       {database.mariadb?.isExcludeEvents && (
         <div className="mb-1 flex w-full items-center">
-          <div className="min-w-[150px]">Exclude events</div>
-          <div>Yes</div>
+          <div className="min-w-[150px]">{t('excludeEvents')}</div>
+          <div>{t('yes')}</div>
         </div>
+      )}
+
+      {database.sshTunnel?.enabled && (
+        <>
+          <div className="mb-1 flex w-full items-center">
+            <div className="min-w-[150px]">{t('sshTunnel')}</div>
+            <div>{t('enabled')}</div>
+          </div>
+
+          <div className="mb-1 flex w-full items-center">
+            <div className="min-w-[150px] break-all">{t('sshHost')}</div>
+            <div>{database.sshTunnel.host}</div>
+          </div>
+
+          <div className="mb-1 flex w-full items-center">
+            <div className="min-w-[150px]">{t('sshPort')}</div>
+            <div>{database.sshTunnel.port}</div>
+          </div>
+
+          <div className="mb-1 flex w-full items-center">
+            <div className="min-w-[150px]">{t('sshUsername')}</div>
+            <div>{database.sshTunnel.username}</div>
+          </div>
+
+          <div className="mb-1 flex w-full items-center">
+            <div className="min-w-[150px]">{t('sshAuthType')}</div>
+            <div>
+              {database.sshTunnel.authType === 'password'
+                ? t('sshPasswordAuth')
+                : t('sshPrivateKeyAuth')}
+            </div>
+          </div>
+
+          {database.sshTunnel.skipHostKeyVerify && (
+            <div className="mb-1 flex w-full items-center">
+              <div className="min-w-[150px]">{t('sshSkipHostKeyVerify')}</div>
+              <div>{t('yes')}</div>
+            </div>
+          )}
+        </>
       )}
     </div>
   );

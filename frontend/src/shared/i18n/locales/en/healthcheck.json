@@ -1,0 +1,22 @@
+{
+  "enableHealthcheck": "Enable healthcheck",
+  "enableHealthcheckTooltip": "Enable or disable healthcheck monitoring for this database",
+  "notifyWhenUnavailable": "Notify when unavailable",
+  "notifyWhenUnavailableTooltip": "Send notifications when database becomes unavailable",
+  "checkIntervalMinutes": "Check interval (minutes)",
+  "checkIntervalMinutesTooltip": "How often to check database health (in minutes)",
+  "attemptsBeforeDown": "Attempts before down",
+  "attemptsBeforeDownTooltip": "Number of failed attempts before marking database as down",
+  "storeAttemptsDays": "Store attempts (days)",
+  "storeAttemptsDaysTooltip": "How many days to store health check attempt history",
+  "isHealthCheckEnabled": "Is health check enabled",
+  "healthcheckAttempts": "Healthcheck attempts",
+  "period": "Period",
+  "today": "Today",
+  "7days": "7 days",
+  "30days": "30 days",
+  "allTime": "All time",
+  "noDataYet": "No data yet",
+  "yes": "Yes",
+  "no": "No"
+}

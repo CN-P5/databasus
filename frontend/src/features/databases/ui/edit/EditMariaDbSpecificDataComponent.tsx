@@ -1,6 +1,9 @@
 import { CopyOutlined, DownOutlined, InfoCircleOutlined, UpOutlined } from '@ant-design/icons';
 import { App, Button, Checkbox, Input, InputNumber, Switch, Tooltip } from 'antd';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+
+import { SshTunnelConfigComponent } from '../components/SshTunnelConfigComponent';
 
 import { IS_CLOUD } from '../../../../constants';
 import { type Database, databaseApi } from '../../../../entity/databases';
@@ -37,6 +40,7 @@ export const EditMariaDbSpecificDataComponent = ({
   onSaved,
   isShowDbName = true,
 }: Props) => {
+  const { t } = useTranslation('databases');
   const { message } = App.useApp();
 
   const [editingDatabase, setEditingDatabase] = useState<Database>();
@@ -55,7 +59,7 @@ export const EditMariaDbSpecificDataComponent = ({
       const trimmedText = text.trim();
 
       if (!trimmedText) {
-        message.error('Clipboard is empty');
+        message.error(t('clipboardIsEmpty'));
         return;
       }
 
@@ -83,9 +87,9 @@ export const EditMariaDbSpecificDataComponent = ({
 
       setEditingDatabase(updatedDatabase);
       setIsConnectionTested(false);
-      message.success('Connection string parsed successfully');
+      message.success(t('connectionStringParsedSuccessfully'));
     } catch {
-      message.error('Failed to read clipboard. Please check browser permissions.');
+      message.error(t('failedToReadClipboard'));
     }
   };
 
@@ -106,8 +110,8 @@ export const EditMariaDbSpecificDataComponent = ({
       await databaseApi.testDatabaseConnectionDirect(trimmedDatabase);
       setIsConnectionTested(true);
       ToastHelper.showToast({
-        title: 'Connection test passed',
-        description: 'You can continue with the next step',
+        title: t('connectionTestPassed'),
+        description: t('youCanContinueWithNextStep'),
       });
     } catch (e) {
       setIsConnectionFailed(true);
@@ -174,12 +178,12 @@ export const EditMariaDbSpecificDataComponent = ({
           onClick={parseFromClipboard}
         >
           <CopyOutlined className="mr-1" />
-          Parse from clipboard
+          {t('parseFromClipboard')}
         </div>
       </div>
 
       <div className="mb-1 flex w-full items-center">
-        <div className="min-w-[150px]">Host</div>
+        <div className="min-w-[150px]">{t('host')}</div>
         <Input
           value={editingDatabase.mariadb?.host}
           onChange={(e) => {
@@ -196,7 +200,7 @@ export const EditMariaDbSpecificDataComponent = ({
           }}
           size="small"
           className="max-w-[200px] grow"
-          placeholder="Enter MariaDB host"
+          placeholder={t('enterMariadbHost')}
         />
       </div>
 
@@ -204,22 +208,22 @@ export const EditMariaDbSpecificDataComponent = ({
         <div className="mb-1 flex">
           <div className="min-w-[150px]" />
           <div className="max-w-[200px] text-xs text-gray-500 dark:text-gray-400">
-            Please{' '}
+            {t('please')}{' '}
             <a
               href="https://databasus.com/faq/localhost"
               target="_blank"
               rel="noreferrer"
               className="!text-blue-600 dark:!text-blue-400"
             >
-              read this document
+              {t('readThisDocument')}
             </a>{' '}
-            to study how to backup local database
+            {t('toStudyHowToBackupLocalDatabase')}
           </div>
         </div>
       )}
 
       <div className="mb-1 flex w-full items-center">
-        <div className="min-w-[150px]">Port</div>
+        <div className="min-w-[150px]">{t('port')}</div>
         <InputNumber
           type="number"
           value={editingDatabase.mariadb?.port}
@@ -234,12 +238,12 @@ export const EditMariaDbSpecificDataComponent = ({
           }}
           size="small"
           className="max-w-[200px] grow"
-          placeholder="Enter MariaDB port"
+          placeholder={t('enterMariadbPort')}
         />
       </div>
 
       <div className="mb-1 flex w-full items-center">
-        <div className="min-w-[150px]">Username</div>
+        <div className="min-w-[150px]">{t('username')}</div>
         <Input
           value={editingDatabase.mariadb?.username}
           onChange={(e) => {
@@ -253,12 +257,12 @@ export const EditMariaDbSpecificDataComponent = ({
           }}
           size="small"
           className="max-w-[200px] grow"
-          placeholder="Enter MariaDB username"
+          placeholder={t('enterMariadbUsername')}
         />
       </div>
 
       <div className="mb-1 flex w-full items-center">
-        <div className="min-w-[150px]">Password</div>
+        <div className="min-w-[150px]">{t('password')}</div>
         <Input.Password
           value={editingDatabase.mariadb?.password}
           onChange={(e) => {
@@ -272,7 +276,7 @@ export const EditMariaDbSpecificDataComponent = ({
           }}
           size="small"
           className="max-w-[200px] grow"
-          placeholder="Enter MariaDB password"
+          placeholder={t('enterMariadbPassword')}
           autoComplete="off"
           data-1p-ignore
           data-lpignore="true"
@@ -282,7 +286,7 @@ export const EditMariaDbSpecificDataComponent = ({
 
       {isShowDbName && (
         <div className="mb-1 flex w-full items-center">
-          <div className="min-w-[150px]">DB name</div>
+          <div className="min-w-[150px]">{t('dbName')}</div>
           <Input
             value={editingDatabase.mariadb?.database}
             onChange={(e) => {
@@ -296,13 +300,13 @@ export const EditMariaDbSpecificDataComponent = ({
             }}
             size="small"
             className="max-w-[200px] grow"
-            placeholder="Enter MariaDB database name"
+            placeholder={t('enterMariadbDatabaseName')}
           />
         </div>
       )}
 
       <div className="mb-1 flex w-full items-center">
-        <div className="min-w-[150px]">Use HTTPS</div>
+        <div className="min-w-[150px]">{t('useHttps')}</div>
         <Switch
           checked={editingDatabase.mariadb?.isHttps}
           onChange={(checked) => {
@@ -323,7 +327,7 @@ export const EditMariaDbSpecificDataComponent = ({
           className="flex cursor-pointer items-center text-sm text-blue-600 hover:text-blue-800"
           onClick={() => setShowAdvanced(!isShowAdvanced)}
         >
-          <span className="mr-2">Advanced settings</span>
+          <span className="mr-2">{t('advancedSettings')}</span>
 
           {isShowAdvanced ? (
             <UpOutlined style={{ fontSize: '12px' }} />
@@ -335,7 +339,7 @@ export const EditMariaDbSpecificDataComponent = ({
 
       {isShowAdvanced && (
         <div className="mb-1 flex w-full items-center">
-          <div className="min-w-[150px]">Exclude events</div>
+          <div className="min-w-[150px]">{t('excludeEvents')}</div>
           <div className="flex items-center">
             <Checkbox
               checked={editingDatabase.mariadb?.isExcludeEvents || false}
@@ -351,12 +355,12 @@ export const EditMariaDbSpecificDataComponent = ({
                 });
               }}
             >
-              Skip events
+              {t('skipEvents')}
             </Checkbox>
 
             <Tooltip
               className="cursor-pointer"
-              title="Skip backing up database events. Enable this if the event scheduler is disabled on your MariaDB server."
+              title={t('skipBackingUpEvents')}
             >
               <InfoCircleOutlined className="ml-2" style={{ color: 'gray' }} />
             </Tooltip>
@@ -364,16 +368,27 @@ export const EditMariaDbSpecificDataComponent = ({
         </div>
       )}
 
+      <SshTunnelConfigComponent
+        sshTunnel={editingDatabase.sshTunnel}
+        onChange={(sshTunnel) => {
+          setEditingDatabase({
+            ...editingDatabase,
+            sshTunnel,
+          });
+          setIsConnectionTested(false);
+        }}
+      />
+
       <div className="mt-5 flex">
         {isShowCancelButton && (
           <Button className="mr-1" danger ghost onClick={() => onCancel()}>
-            Cancel
+            {t('common:cancel')}
           </Button>
         )}
 
         {isShowBackButton && (
           <Button className="mr-auto" type="primary" ghost onClick={() => onBack()}>
-            Back
+            {t('common:back')}
           </Button>
         )}
 
@@ -385,7 +400,7 @@ export const EditMariaDbSpecificDataComponent = ({
             disabled={!isAllFieldsFilled}
             className="mr-5"
           >
-            Test connection
+            {t('testConnection')}
           </Button>
         )}
 
@@ -397,15 +412,14 @@ export const EditMariaDbSpecificDataComponent = ({
             disabled={!isAllFieldsFilled}
             className="mr-5"
           >
-            {saveButtonText || 'Save'}
+            {saveButtonText || t('common:save')}
           </Button>
         )}
       </div>
 
       {isConnectionFailed && !IS_CLOUD && (
         <div className="mt-3 text-sm text-gray-500 dark:text-gray-400">
-          If your database uses IP whitelist, make sure Databasus server IP is added to the allowed
-          list.
+          {t('ifYourDatabaseUsesIpWhitelist')}
         </div>
       )}
     </div>

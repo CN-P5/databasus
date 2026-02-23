@@ -13,6 +13,7 @@ import { Button, Modal, Spin, Table, Tooltip } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import dayjs from 'dayjs';
 import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import {
   type Backup,
@@ -36,6 +37,7 @@ interface Props {
 }
 
 export const BackupsComponent = ({ database, isCanManageDBs, scrollContainerRef }: Props) => {
+  const { t } = useTranslation(['backups', 'common']);
   const [isBackupsLoading, setIsBackupsLoading] = useState(false);
   const [backups, setBackups] = useState<Backup[]>([]);
 
@@ -231,13 +233,13 @@ export const BackupsComponent = ({ database, isCanManageDBs, scrollContainerRef 
   const renderStatus = (status: BackupStatus, record: Backup) => {
     if (status === BackupStatus.FAILED) {
       return (
-        <Tooltip title="Click to see error details">
+        <Tooltip title={t('backups:clickToSeeErrorDetails')}>
           <div
             className="flex cursor-pointer items-center text-red-600 underline"
             onClick={() => setShowingBackupError(record)}
           >
             <ExclamationCircleOutlined className="mr-2" style={{ fontSize: 16 }} />
-            <div>Failed</div>
+            <div>{t('backups:failed')}</div>
           </div>
         </Tooltip>
       );
@@ -247,9 +249,9 @@ export const BackupsComponent = ({ database, isCanManageDBs, scrollContainerRef 
       return (
         <div className="flex items-center text-green-600">
           <CheckCircleOutlined className="mr-2" style={{ fontSize: 16 }} />
-          <div>Successful</div>
+          <div>{t('backups:successful')}</div>
           {record.encryption === BackupEncryption.ENCRYPTED && (
-            <Tooltip title="Encrypted">
+            <Tooltip title={t('backups:encrypted')}>
               <LockOutlined className="ml-1" style={{ fontSize: 14 }} />
             </Tooltip>
           )}
@@ -261,7 +263,7 @@ export const BackupsComponent = ({ database, isCanManageDBs, scrollContainerRef 
       return (
         <div className="flex items-center text-gray-600">
           <DeleteOutlined className="mr-2" style={{ fontSize: 16 }} />
-          <div>Deleted</div>
+          <div>{t('backups:deleted')}</div>
         </div>
       );
     }
@@ -270,7 +272,7 @@ export const BackupsComponent = ({ database, isCanManageDBs, scrollContainerRef 
       return (
         <div className="flex items-center font-bold text-blue-600">
           <SyncOutlined spin />
-          <span className="ml-2">In progress</span>
+          <span className="ml-2">{t('backups:inProgress')}</span>
         </div>
       );
     }
@@ -279,7 +281,7 @@ export const BackupsComponent = ({ database, isCanManageDBs, scrollContainerRef 
       return (
         <div className="flex items-center text-gray-600">
           <CloseCircleOutlined className="mr-2" style={{ fontSize: 16 }} />
-          <div>Canceled</div>
+          <div>{t('backups:canceled')}</div>
         </div>
       );
     }

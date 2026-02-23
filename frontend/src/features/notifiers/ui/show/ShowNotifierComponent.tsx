@@ -1,6 +1,7 @@
 import { type Notifier, NotifierType } from '../../../../entity/notifiers';
 import { getNotifierLogoFromType } from '../../../../entity/notifiers/models/getNotifierLogoFromType';
 import { getNotifierNameFromType } from '../../../../entity/notifiers/models/getNotifierNameFromType';
+import { useTranslation } from 'react-i18next';
 import { ShowDiscordNotifierComponent } from './notifier/ShowDiscordNotifierComponent';
 import { ShowEmailNotifierComponent } from './notifier/ShowEmailNotifierComponent';
 import { ShowSlackNotifierComponent } from './notifier/ShowSlackNotifierComponent';
@@ -13,10 +14,12 @@ interface Props {
 }
 
 export function ShowNotifierComponent({ notifier }: Props) {
+  const { t } = useTranslation('notifiers');
+
   return (
     <div>
       <div className="mb-1 flex items-center">
-        <div className="min-w-[110px]">Type</div>
+        <div className="min-w-[110px]">{t('type')}</div>
 
         {getNotifierNameFromType(notifier?.notifierType)}
         <img src={getNotifierLogoFromType(notifier?.notifierType)} className="ml-1 h-4 w-4" />

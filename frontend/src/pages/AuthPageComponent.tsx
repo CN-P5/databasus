@@ -1,6 +1,7 @@
 import { LoadingOutlined } from '@ant-design/icons';
 import { Spin } from 'antd';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { userApi } from '../entity/users';
 import { PlaygroundWarningComponent } from '../features/playground';
@@ -15,6 +16,7 @@ import {
 import { useScreenHeight } from '../shared/hooks';
 
 export function AuthPageComponent() {
+  const { t } = useTranslation('auth');
   const [isAdminHasPassword, setIsAdminHasPassword] = useState(false);
   const [authMode, setAuthMode] = useState<'signIn' | 'signUp' | 'requestReset' | 'resetPassword'>(
     'signUp',
@@ -33,7 +35,7 @@ export function AuthPageComponent() {
         setLoading(false);
       })
       .catch((e) => {
-        alert('Failed to check admin password status: ' + (e as Error).message);
+        alert(t('failedToCheckAdminPasswordStatus') + ': ' + (e as Error).message);
       });
   };
 

@@ -1,5 +1,6 @@
 import { Modal, Spin } from 'antd';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { type Storage, StorageType } from '../entity/storages';
 import type { StorageOauthDto } from '../entity/storages/models/StorageOauthDto';
@@ -8,12 +9,13 @@ import { userApi } from '../entity/users';
 import { EditStorageComponent } from '../features/storages/ui/edit/EditStorageComponent';
 
 export function OauthStorageComponent() {
+  const { t } = useTranslation('storages');
   const [storage, setStorage] = useState<Storage | undefined>();
   const [user, setUser] = useState<UserProfile | undefined>();
 
   const exchangeGoogleOauthCode = async (oauthDto: StorageOauthDto) => {
     if (!oauthDto.storage.googleDriveStorage) {
-      alert('Google Drive storage configuration not found');
+      alert(t('googleDriveStorageConfigNotFound'));
       return;
     }
 
@@ -50,27 +52,23 @@ export function OauthStorageComponent() {
       oauthDto.storage.googleDriveStorage.tokenJson = JSON.stringify(tokenData);
       setStorage(oauthDto.storage);
     } catch (error) {
-      alert(`Failed to exchange OAuth code: ${error}`);
-      // Return to home if exchange fails
+      alert(t('failedToExchangeOAuthCode') + `: ${error}`);
       setTimeout(() => {
         window.location.href = '/';
       }, 3000);
     }
   };
 
-  /**
-   * Helper to validate the DTO and start the exchange process
-   */
   const processOauthDto = (oauthDto: StorageOauthDto) => {
     if (oauthDto.storage.type === StorageType.GOOGLE_DRIVE) {
       if (!oauthDto.storage.googleDriveStorage) {
-        alert('Google Drive storage configuration not found in DTO');
+        alert(t('googleDriveStorageConfigNotFoundInDto'));
         return;
       }
 
       exchangeGoogleOauthCode(oauthDto);
     } else {
-      alert('Unsupported storage type for OAuth');
+      alert(t('unsupportedStorageTypeForOAuth'));
     }
   };
 
@@ -97,12 +95,12 @@ export function OauthStorageComponent() {
         return;
       } catch (e) {
         console.error('Error parsing OAuth state:', e);
-        alert('OAuth state parameter is invalid');
+        alert(t('oauthStateParameterInvalid'));
         return;
       }
     }
 
-    alert('OAuth param not found. Ensure the redirect URL is configured correctly.');
+    alert(t('oauthParamNotFound'));
   }, []);
 
   if (!storage || !user) {
@@ -116,7 +114,7 @@ export function OauthStorageComponent() {
   return (
     <div>
       <Modal
-        title="Add storage"
+        title={t('addStorage')}
         footer={<div />}
         open
         onCancel={() => {
@@ -124,7 +122,7 @@ export function OauthStorageComponent() {
         }}
       >
         <div className="my-3 max-w-[250px] text-gray-500 dark:text-gray-400">
-          Storage - is a place where backups will be stored (local disk, S3, etc.)
+          {t('storageDescription')}
         </div>
 
         <EditStorageComponent

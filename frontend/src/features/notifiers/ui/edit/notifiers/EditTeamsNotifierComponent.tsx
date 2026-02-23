@@ -1,6 +1,7 @@
 import { InfoCircleOutlined } from '@ant-design/icons';
 import { Input, Tooltip } from 'antd';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 import type { Notifier } from '../../../../../entity/notifiers';
 
@@ -11,6 +12,7 @@ interface Props {
 }
 
 export function EditTeamsNotifierComponent({ notifier, setNotifier, setUnsaved }: Props) {
+  const { t } = useTranslation('notifiers');
   const value = notifier?.teamsNotifier?.powerAutomateUrl || '';
 
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -34,12 +36,12 @@ export function EditTeamsNotifierComponent({ notifier, setNotifier, setUnsaved }
           target="_blank"
           rel="noreferrer"
         >
-          How to connect Microsoft Teams?
+          {t('howToConnectMicrosoftTeams')}
         </a>
       </div>
 
       <div className="mb-1 flex w-full flex-col items-start sm:flex-row sm:items-center">
-        <div className="mb-1 min-w-[150px] sm:mb-0">Power Automate URL</div>
+        <div className="mb-1 min-w-[150px] sm:mb-0">{t('powerAutomateUrl')}</div>
         <div className="flex items-center">
           <Input
             value={value}
@@ -51,7 +53,7 @@ export function EditTeamsNotifierComponent({ notifier, setNotifier, setUnsaved }
 
           <Tooltip
             className="cursor-pointer"
-            title="HTTP endpoint from your Power Automate flow (When an HTTP request is received)"
+            title={t('httpEndpointFromYourPowerAutomateFlow')}
           >
             <InfoCircleOutlined className="ml-2" style={{ color: 'gray' }} />
           </Tooltip>

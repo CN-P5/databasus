@@ -1,35 +1,37 @@
 import type { Notifier, WebhookHeader } from '../../../../../entity/notifiers';
 import { WebhookMethod } from '../../../../../entity/notifiers';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
   notifier: Notifier;
 }
 
 export function ShowWebhookNotifierComponent({ notifier }: Props) {
+  const { t } = useTranslation('notifiers');
   const headers = notifier?.webhookNotifier?.headers || [];
   const hasHeaders = headers.filter((h: WebhookHeader) => h.key).length > 0;
 
   return (
     <>
       <div className="flex items-center">
-        <div className="min-w-[110px]">Webhook URL</div>
+        <div className="min-w-[110px]">{t('webhookUrl')}</div>
         <div className="max-w-[350px] truncate">{notifier?.webhookNotifier?.webhookUrl || '-'}</div>
       </div>
 
       <div className="mt-1 mb-1 flex items-center">
-        <div className="min-w-[110px]">Method</div>
+        <div className="min-w-[110px]">{t('method')}</div>
         <div>{notifier?.webhookNotifier?.webhookMethod || '-'}</div>
       </div>
 
       {hasHeaders && (
         <div className="mt-1 mb-1 flex items-start">
-          <div className="min-w-[110px]">Headers</div>
+          <div className="min-w-[110px]">{t('headers')}</div>
           <div className="flex flex-col text-sm">
             {headers
               .filter((h: WebhookHeader) => h.key)
               .map((h: WebhookHeader, i: number) => (
                 <div key={i} className="text-gray-600">
-                  <span className="font-medium">{h.key}:</span> {h.value || '(hidden)'}
+                  <span className="font-medium">{h.key}:</span> {h.value || `(${t('hidden')})`}
                 </div>
               ))}
           </div>
@@ -39,7 +41,7 @@ export function ShowWebhookNotifierComponent({ notifier }: Props) {
       {notifier?.webhookNotifier?.webhookMethod === WebhookMethod.POST &&
         notifier?.webhookNotifier?.bodyTemplate && (
           <div className="mt-1 mb-1 flex items-start">
-            <div className="min-w-[110px]">Body Template</div>
+            <div className="min-w-[110px]">{t('bodyTemplate')}</div>
             <div className="max-w-[350px] rounded bg-gray-50 p-2 font-mono text-xs whitespace-pre-wrap">
               {notifier.webhookNotifier.bodyTemplate}
             </div>
