@@ -16,7 +16,7 @@ import {
 import { useScreenHeight } from '../shared/hooks';
 
 export function AuthPageComponent() {
-  const { t } = useTranslation('users');;
+  const { t } = useTranslation('users');
   const [isAdminHasPassword, setIsAdminHasPassword] = useState(false);
   const [authMode, setAuthMode] = useState<'signIn' | 'signUp' | 'requestReset' | 'resetPassword'>(
     'signUp',

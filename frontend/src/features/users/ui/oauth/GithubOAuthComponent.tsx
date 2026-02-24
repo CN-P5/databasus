@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { GITHUB_CLIENT_ID, getOAuthRedirectUri } from '../../../../constants';
 
 export function GithubOAuthComponent() {
-  const { t } = useTranslation('users');;
+  const { t } = useTranslation('users');
 
   if (!GITHUB_CLIENT_ID) {
     return null;
