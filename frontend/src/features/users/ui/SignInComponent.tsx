@@ -22,7 +22,7 @@ export function SignInComponent({
   onSwitchToSignUp,
   onSwitchToResetPassword,
 }: SignInComponentProps): JSX.Element {
-  const { t } = useTranslation('auth');
+  const { t } = useTranslation('users');;
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');

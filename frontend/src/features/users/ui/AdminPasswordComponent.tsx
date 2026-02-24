@@ -12,7 +12,7 @@ interface AdminPasswordComponentProps {
 export function AdminPasswordComponent({
   onPasswordSet,
 }: AdminPasswordComponentProps): JSX.Element {
-  const { t } = useTranslation('auth');
+  const { t } = useTranslation('users');
   const { message } = App.useApp();
   const [password, setPassword] = useState('');
   const [passwordVisible, setPasswordVisible] = useState(false);

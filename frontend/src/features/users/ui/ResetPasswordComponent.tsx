@@ -18,7 +18,7 @@ export function ResetPasswordComponent({
   onSwitchToRequestCode,
   initialEmail = '',
 }: ResetPasswordComponentProps): JSX.Element {
-  const { t } = useTranslation('auth');
+  const { t } = useTranslation('users');;
   const { message } = App.useApp();
   const [email, setEmail] = useState(initialEmail);
   const [code, setCode] = useState('');

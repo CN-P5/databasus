@@ -8,7 +8,7 @@ import { getOAuthRedirectUri } from '../constants';
 import { userApi } from '../entity/users';
 
 export function OAuthCallbackPage() {
-  const { t } = useTranslation('auth');
+  const { t } = useTranslation('users');;
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const [error, setError] = useState<string>('');

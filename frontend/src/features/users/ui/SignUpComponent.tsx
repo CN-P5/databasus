@@ -18,7 +18,7 @@ interface SignUpComponentProps {
 }
 
 export function SignUpComponent({ onSwitchToSignIn }: SignUpComponentProps): JSX.Element {
-  const { t } = useTranslation('auth');
+  const { t } = useTranslation('users');;
   const { message } = App.useApp();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');

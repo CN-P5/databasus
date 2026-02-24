@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { GOOGLE_CLIENT_ID, getOAuthRedirectUri } from '../../../../constants';
 
 export function GoogleOAuthComponent() {
-  const { t } = useTranslation('auth');
+  const { t } = useTranslation('users');;
 
   if (!GOOGLE_CLIENT_ID) {
     return null;
