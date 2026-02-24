@@ -1217,11 +1217,12 @@ func Test_StartBackup_When2BackupsStartedForDifferentDatabases_BothUseCasesAreCa
 	router := CreateTestRouter()
 	workspace := workspaces_testing.CreateTestWorkspace("Test Workspace", user, router)
 	storage := storages.CreateTestStorage(workspace.ID)
-	notifier := notifiers.CreateTestNotifier(workspace.ID)
+	notifier1 := notifiers.CreateTestNotifier(workspace.ID)
+	notifier2 := notifiers.CreateTestNotifier(workspace.ID)
 
 	// Create 2 separate databases
-	database1 := databases.CreateTestDatabase(workspace.ID, storage, notifier)
-	database2 := databases.CreateTestDatabase(workspace.ID, storage, notifier)
+	database1 := databases.CreateTestDatabase(workspace.ID, storage, notifier1)
+	database2 := databases.CreateTestDatabase(workspace.ID, storage, notifier2)
 
 	defer func() {
 		// Cleanup backups for database1
@@ -1240,7 +1241,8 @@ func Test_StartBackup_When2BackupsStartedForDifferentDatabases_BothUseCasesAreCa
 		databases.RemoveTestDatabase(database2)
 		time.Sleep(50 * time.Millisecond)
 		storages.RemoveTestStorage(storage.ID)
-		notifiers.RemoveTestNotifier(notifier)
+		notifiers.RemoveTestNotifier(notifier1)
+		notifiers.RemoveTestNotifier(notifier2)
 		workspaces_testing.RemoveTestWorkspace(workspace, router)
 	}()
 
