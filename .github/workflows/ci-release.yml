@@ -442,7 +442,7 @@ jobs:
     container:
       image: node:20
     needs: [test-backend, test-frontend]
-    if: ${{ github.ref == 'refs/heads/main' && !contains(github.event.head_commit.message, '[skip-release]') }}
+    if: ${{ github.ref == 'refs/heads/zh' && !contains(github.event.head_commit.message, '[skip-release]') }}
     outputs:
       should_release: ${{ steps.version_bump.outputs.should_release }}
       new_version: ${{ steps.version_bump.outputs.new_version }}
@@ -535,7 +535,7 @@ jobs:
   build-only:
     runs-on: ubuntu-latest
     needs: [test-backend, test-frontend]
-    if: ${{ github.ref == 'refs/heads/main' && contains(github.event.head_commit.message, '[skip-release]') }}
+    if: ${{ github.ref == 'refs/heads/zh' && contains(github.event.head_commit.message, '[skip-release]') }}
     steps:
       - name: Clean workspace
         run: |
