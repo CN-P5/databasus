@@ -62,7 +62,11 @@ func (i *Interval) ShouldTriggerBackup(now time.Time, lastBackupTime *time.Time)
 	if lastBackupTime == nil {
 		return true
 	}
-
+	now = now.UTC()
+	if lastBackupTime != nil {
+		utcTime := lastBackupTime.UTC()
+		lastBackupTime = &utcTime
+	}
 	switch i.Interval {
 	case IntervalHourly:
 		return now.Sub(*lastBackupTime) >= time.Hour

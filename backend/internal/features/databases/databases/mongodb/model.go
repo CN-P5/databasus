@@ -95,11 +95,7 @@ func (m *MongodbDatabase) TestConnection(
 		if err := tunnel.Start(ctx, m.Host, port); err != nil {
 			return fmt.Errorf("failed to start SSH tunnel: %w", err)
 		}
-		defer func() {
-			if stopErr := tunnel.Stop(); stopErr != nil {
-				logger.Warn("failed to stop SSH tunnel", "error", stopErr)
-			}
-		}()
+		defer tunnel.Stop()
 		localPort = tunnel.GetLocalPort()
 	}
 
