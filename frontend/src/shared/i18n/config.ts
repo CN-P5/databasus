@@ -2,7 +2,6 @@ import i18n from 'i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
 import { initReactI18next } from 'react-i18next';
 
-import enAuth from './locales/en/auth.json';
 import enBackups from './locales/en/backups.json';
 import enCommon from './locales/en/common.json';
 import enDatabases from './locales/en/databases.json';
@@ -14,7 +13,6 @@ import enSidebar from './locales/en/sidebar.json';
 import enStorages from './locales/en/storages.json';
 import enUsers from './locales/en/users.json';
 import enWorkspaces from './locales/en/workspaces.json';
-import zhAuth from './locales/zh/auth.json';
 import zhBackups from './locales/zh/backups.json';
 import zhCommon from './locales/zh/common.json';
 import zhDatabases from './locales/zh/databases.json';
@@ -30,7 +28,6 @@ import zhWorkspaces from './locales/zh/workspaces.json';
 const resources = {
   en: {
     common: enCommon,
-    auth: enAuth,
     databases: enDatabases,
     backups: enBackups,
     storages: enStorages,
@@ -44,7 +41,6 @@ const resources = {
   },
   zh: {
     common: zhCommon,
-    auth: zhAuth,
     databases: zhDatabases,
     backups: zhBackups,
     storages: zhStorages,
