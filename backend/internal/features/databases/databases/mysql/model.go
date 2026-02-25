@@ -167,6 +167,7 @@ func (m *MysqlDatabase) PopulateDbData(
 	logger *slog.Logger,
 	encryptor encryption.FieldEncryptor,
 	databaseID uuid.UUID,
+	sshConfig *ssh.Config,
 ) error {
 	if m.Database == nil || *m.Database == "" {
 		return nil
@@ -180,7 +181,23 @@ func (m *MysqlDatabase) PopulateDbData(
 		return fmt.Errorf("failed to decrypt password: %w", err)
 	}
 
-	dsn := m.buildDSN(password, *m.Database)
+	// Start SSH tunnel if configured
+	var tunnel *ssh.Tunnel
+	var localPort int
+	if sshConfig != nil {
+		tunnel = ssh.NewTunnel(sshConfig)
+		if err := tunnel.Start(ctx, m.Host, m.Port); err != nil {
+			return fmt.Errorf("failed to start SSH tunnel: %w", err)
+		}
+		defer func() {
+			if stopErr := tunnel.Stop(); stopErr != nil {
+				logger.Warn("failed to stop SSH tunnel", "error", stopErr)
+			}
+		}()
+		localPort = tunnel.GetLocalPort()
+	}
+
+	dsn := m.buildDSNWithPort(password, *m.Database, localPort)
 
 	db, err := sql.Open("mysql", dsn)
 	if err != nil {
@@ -211,6 +228,7 @@ func (m *MysqlDatabase) PopulateVersion(
 	logger *slog.Logger,
 	encryptor encryption.FieldEncryptor,
 	databaseID uuid.UUID,
+	sshConfig *ssh.Config,
 ) error {
 	if m.Database == nil || *m.Database == "" {
 		return nil
@@ -224,7 +242,23 @@ func (m *MysqlDatabase) PopulateVersion(
 		return fmt.Errorf("failed to decrypt password: %w", err)
 	}
 
-	dsn := m.buildDSN(password, *m.Database)
+	// Start SSH tunnel if configured
+	var tunnel *ssh.Tunnel
+	var localPort int
+	if sshConfig != nil {
+		tunnel = ssh.NewTunnel(sshConfig)
+		if err := tunnel.Start(ctx, m.Host, m.Port); err != nil {
+			return fmt.Errorf("failed to start SSH tunnel: %w", err)
+		}
+		defer func() {
+			if stopErr := tunnel.Stop(); stopErr != nil {
+				logger.Warn("failed to stop SSH tunnel", "error", stopErr)
+			}
+		}()
+		localPort = tunnel.GetLocalPort()
+	}
+
+	dsn := m.buildDSNWithPort(password, *m.Database, localPort)
 
 	db, err := sql.Open("mysql", dsn)
 	if err != nil {

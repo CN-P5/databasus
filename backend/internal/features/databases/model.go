@@ -157,17 +157,22 @@ func (d *Database) PopulateDbData(
 	logger *slog.Logger,
 	encryptor encryption.FieldEncryptor,
 ) error {
+	var sshConfig *ssh.Config
+	if d.SSHTunnel != nil && d.SSHTunnel.Enabled {
+		sshConfig = d.SSHTunnel.ToSSHConfig()
+	}
+
 	if d.Postgresql != nil {
-		return d.Postgresql.PopulateDbData(logger, encryptor, d.ID)
+		return d.Postgresql.PopulateDbData(logger, encryptor, d.ID, sshConfig)
 	}
 	if d.Mysql != nil {
-		return d.Mysql.PopulateDbData(logger, encryptor, d.ID)
+		return d.Mysql.PopulateDbData(logger, encryptor, d.ID, sshConfig)
 	}
 	if d.Mariadb != nil {
-		return d.Mariadb.PopulateDbData(logger, encryptor, d.ID)
+		return d.Mariadb.PopulateDbData(logger, encryptor, d.ID, sshConfig)
 	}
 	if d.Mongodb != nil {
-		return d.Mongodb.PopulateDbData(logger, encryptor, d.ID)
+		return d.Mongodb.PopulateDbData(logger, encryptor, d.ID, sshConfig)
 	}
 	return nil
 }

@@ -181,14 +181,16 @@ func (m *MongodbDatabase) PopulateDbData(
 	logger *slog.Logger,
 	encryptor encryption.FieldEncryptor,
 	databaseID uuid.UUID,
+	sshConfig *ssh.Config,
 ) error {
-	return m.PopulateVersion(logger, encryptor, databaseID)
+	return m.PopulateVersion(logger, encryptor, databaseID, sshConfig)
 }
 
 func (m *MongodbDatabase) PopulateVersion(
 	logger *slog.Logger,
 	encryptor encryption.FieldEncryptor,
 	databaseID uuid.UUID,
+	sshConfig *ssh.Config,
 ) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
@@ -198,7 +200,27 @@ func (m *MongodbDatabase) PopulateVersion(
 		return fmt.Errorf("failed to decrypt password: %w", err)
 	}
 
-	uri := m.buildConnectionURI(password)
+	// Start SSH tunnel if configured
+	var tunnel *ssh.Tunnel
+	var localPort int
+	if sshConfig != nil {
+		tunnel = ssh.NewTunnel(sshConfig)
+		port := 27017
+		if m.Port != nil {
+			port = *m.Port
+		}
+		if err := tunnel.Start(ctx, m.Host, port); err != nil {
+			return fmt.Errorf("failed to start SSH tunnel: %w", err)
+		}
+		defer func() {
+			if stopErr := tunnel.Stop(); stopErr != nil {
+				logger.Warn("failed to stop SSH tunnel", "error", stopErr)
+			}
+		}()
+		localPort = tunnel.GetLocalPort()
+	}
+
+	uri := m.buildConnectionURIWithPort(password, localPort)
 
 	clientOptions := options.Client().ApplyURI(uri)
 	client, err := mongo.Connect(ctx, clientOptions)

@@ -202,12 +202,13 @@ func (s *RestoreService) validateVersionCompatibility(
 	backupDatabase *databases.Database,
 	requestDTO restores_core.RestoreBackupRequest,
 ) error {
-	// populate version
+	// populate version (no SSH tunnel needed for version validation during restore)
 	if requestDTO.MariadbDatabase != nil {
 		err := requestDTO.MariadbDatabase.PopulateVersion(
 			s.logger,
 			s.fieldEncryptor,
 			backupDatabase.ID,
+			nil,
 		)
 		if err != nil {
 			return err
@@ -218,6 +219,7 @@ func (s *RestoreService) validateVersionCompatibility(
 			s.logger,
 			s.fieldEncryptor,
 			backupDatabase.ID,
+			nil,
 		)
 		if err != nil {
 			return err
@@ -228,6 +230,7 @@ func (s *RestoreService) validateVersionCompatibility(
 			s.logger,
 			s.fieldEncryptor,
 			backupDatabase.ID,
+			nil,
 		)
 		if err != nil {
 			return err
@@ -238,6 +241,7 @@ func (s *RestoreService) validateVersionCompatibility(
 			s.logger,
 			s.fieldEncryptor,
 			backupDatabase.ID,
+			nil,
 		)
 		if err != nil {
 			return err

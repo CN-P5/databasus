@@ -182,8 +182,9 @@ func (p *PostgresqlDatabase) PopulateDbData(
 	logger *slog.Logger,
 	encryptor encryption.FieldEncryptor,
 	databaseID uuid.UUID,
+	sshConfig *ssh.Config,
 ) error {
-	return p.PopulateVersion(logger, encryptor, databaseID)
+	return p.PopulateVersion(logger, encryptor, databaseID, sshConfig)
 }
 
 // PopulateVersion detects and sets the PostgreSQL version by querying the database.
@@ -191,6 +192,7 @@ func (p *PostgresqlDatabase) PopulateVersion(
 	logger *slog.Logger,
 	encryptor encryption.FieldEncryptor,
 	databaseID uuid.UUID,
+	sshConfig *ssh.Config,
 ) error {
 	if p.Database == nil || *p.Database == "" {
 		return nil
@@ -204,7 +206,23 @@ func (p *PostgresqlDatabase) PopulateVersion(
 		return fmt.Errorf("failed to decrypt password: %w", err)
 	}
 
-	connStr := buildConnectionStringForDB(p, *p.Database, password)
+	// Start SSH tunnel if configured
+	var tunnel *ssh.Tunnel
+	var localPort int
+	if sshConfig != nil {
+		tunnel = ssh.NewTunnel(sshConfig)
+		if err := tunnel.Start(ctx, p.Host, p.Port); err != nil {
+			return fmt.Errorf("failed to start SSH tunnel: %w", err)
+		}
+		defer func() {
+			if stopErr := tunnel.Stop(); stopErr != nil {
+				logger.Warn("failed to stop SSH tunnel", "error", stopErr)
+			}
+		}()
+		localPort = tunnel.GetLocalPort()
+	}
+
+	connStr := buildConnectionStringForDBWithPort(p, *p.Database, password, localPort)
 
 	conn, err := pgx.Connect(ctx, connStr)
 	if err != nil {

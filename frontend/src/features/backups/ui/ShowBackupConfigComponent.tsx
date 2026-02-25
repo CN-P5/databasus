@@ -264,8 +264,8 @@ export const ShowBackupConfigComponent = ({ database }: Props) => {
               <div className="min-w-[150px]">{t('backups:encryption')}</div>
               <div>
                 {backupConfig.encryption === BackupEncryption.ENCRYPTED
-                  ? t('backups:enabled')
-                  : t('backups:none')}
+                  ? t('common:enabled')
+                  : t('common:none')}
               </div>
 
               <Tooltip className="cursor-pointer" title={t('backups:encryptionTooltip')}>
@@ -281,7 +281,7 @@ export const ShowBackupConfigComponent = ({ database }: Props) => {
                 ? backupConfig.sendNotificationsOn
                     .map((type) => notificationLabels[type])
                     .join(', ')
-                : t('backups:none')}
+                : t('common:none')}
             </div>
           </div>
         </>
