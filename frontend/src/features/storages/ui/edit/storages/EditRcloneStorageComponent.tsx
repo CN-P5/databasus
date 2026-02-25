@@ -45,7 +45,9 @@ region = us-east-1`}
 
             <Tooltip
               className="cursor-pointer"
-              title={t('pasteYourRcloneConfContentHereYouCanGetItByRunningRcloneConfigFileAndCopyingTheContentsThisConfigSupports70CloudStorageProviders')}
+              title={t(
+                'pasteYourRcloneConfContentHereYouCanGetItByRunningRcloneConfigFileAndCopyingTheContentsThisConfigSupports70CloudStorageProviders',
+              )}
             >
               <InfoCircleOutlined className="mt-2 ml-2" style={{ color: 'gray' }} />
             </Tooltip>
@@ -58,7 +60,9 @@ region = us-east-1`}
           <div className="hidden min-w-[110px] sm:block" />
 
           <div className="max-w-[300px] text-xs text-gray-400">
-            {t('contentIsHiddenToNotExposeSensitiveDataIfYouWantToUpdateExistingConfigPutANewOneHere')}
+            {t(
+              'contentIsHiddenToNotExposeSensitiveDataIfYouWantToUpdateExistingConfigPutANewOneHere',
+            )}
           </div>
         </div>
       )}

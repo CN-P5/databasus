@@ -262,7 +262,9 @@ export function EditSFTPStorageComponent({ storage, setStorage, setUnsaved }: Pr
 
               <Tooltip
                 className="cursor-pointer"
-                title={t('skipSshHostKeyVerificationEnableThisIfYouTrustTheServerWarningThisReducesSecurity')}
+                title={t(
+                  'skipSshHostKeyVerificationEnableThisIfYouTrustTheServerWarningThisReducesSecurity',
+                )}
               >
                 <InfoCircleOutlined className="ml-2" style={{ color: 'gray' }} />
               </Tooltip>

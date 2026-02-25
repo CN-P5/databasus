@@ -219,7 +219,9 @@ export function EditFTPStorageComponent({ storage, setStorage, setUnsaved }: Pro
 
                 <Tooltip
                   className="cursor-pointer"
-                  title={t('skipTlsCertificateVerificationEnableThisIfYourFtpServerUsesASelfSignedCertificateWarningThisReducesSecurity')}
+                  title={t(
+                    'skipTlsCertificateVerificationEnableThisIfYourFtpServerUsesASelfSignedCertificateWarningThisReducesSecurity',
+                  )}
                 >
                   <InfoCircleOutlined className="ml-2" style={{ color: 'gray' }} />
                 </Tooltip>

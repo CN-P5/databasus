@@ -1,9 +1,9 @@
+import { useTranslation } from 'react-i18next';
+
 import { type Storage, StorageType } from '../../../../entity/storages';
 import { getStorageLogoFromType } from '../../../../entity/storages/models/getStorageLogoFromType';
 import { getStorageNameFromType } from '../../../../entity/storages/models/getStorageNameFromType';
 import { type UserProfile, UserRole } from '../../../../entity/users';
-import { useTranslation } from 'react-i18next';
-
 import { ShowAzureBlobStorageComponent } from './storages/ShowAzureBlobStorageComponent';
 import { ShowFTPStorageComponent } from './storages/ShowFTPStorageComponent';
 import { ShowGoogleDriveStorageComponent } from './storages/ShowGoogleDriveStorageComponent';

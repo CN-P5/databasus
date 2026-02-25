@@ -448,10 +448,7 @@ export const BackupsComponent = ({ database, isCanManageDBs, scrollContainerRef 
       title: (
         <div className="flex items-center">
           {t('backups:size')}
-          <Tooltip
-            className="ml-1"
-            title={t('backups:fileSizeDescription')}
-          >
+          <Tooltip className="ml-1" title={t('backups:fileSizeDescription')}>
             <InfoCircleOutlined />
           </Tooltip>
         </div>
@@ -489,9 +486,7 @@ export const BackupsComponent = ({ database, isCanManageDBs, scrollContainerRef 
       <h2 className="text-lg font-bold md:text-xl dark:text-white">{t('backups:backups')}</h2>
 
       {!isBackupConfigLoading && !backupConfig?.isBackupsEnabled && (
-        <div className="text-sm text-red-600">
-          {t('backups:scheduledBackupsDisabled')}
-        </div>
+        <div className="text-sm text-red-600">{t('backups:scheduledBackupsDisabled')}</div>
       )}
 
       <div className="mt-5" />
@@ -526,7 +521,9 @@ export const BackupsComponent = ({ database, isCanManageDBs, scrollContainerRef 
                   <div className="space-y-3">
                     <div className="flex items-start justify-between">
                       <div>
-                        <div className="text-xs text-gray-500 dark:text-gray-400">{t('backups:createdAt')}</div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400">
+                          {t('backups:createdAt')}
+                        </div>
                         <div className="text-sm font-medium">
                           {dayjs.utc(backup.createdAt).local().format(getUserTimeFormat().format)}
                         </div>
@@ -539,11 +536,15 @@ export const BackupsComponent = ({ database, isCanManageDBs, scrollContainerRef 
 
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <div className="text-xs text-gray-500 dark:text-gray-400">{t('backups:size')}</div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400">
+                          {t('backups:size')}
+                        </div>
                         <div className="text-sm font-medium">{formatSize(backup.backupSizeMb)}</div>
                       </div>
                       <div>
-                        <div className="text-xs text-gray-500 dark:text-gray-400">{t('backups:duration')}</div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400">
+                          {t('backups:duration')}
+                        </div>
                         <div className="text-sm font-medium">
                           {formatDuration(backup.backupDurationMs)}
                         </div>
@@ -570,7 +571,9 @@ export const BackupsComponent = ({ database, isCanManageDBs, scrollContainerRef 
             </div>
           )}
           {!isBackupsLoading && backups.length === 0 && (
-            <div className="py-8 text-center text-gray-500 dark:text-gray-400">{t('backups:noBackupsYet')}</div>
+            <div className="py-8 text-center text-gray-500 dark:text-gray-400">
+              {t('backups:noBackupsYet')}
+            </div>
           )}
         </div>
 

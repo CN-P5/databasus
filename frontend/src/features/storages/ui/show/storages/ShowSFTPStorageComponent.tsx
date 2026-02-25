@@ -1,5 +1,6 @@
-import type { Storage } from '../../../../../entity/storages';
 import { useTranslation } from 'react-i18next';
+
+import type { Storage } from '../../../../../entity/storages';
 
 interface Props {
   storage: Storage;
