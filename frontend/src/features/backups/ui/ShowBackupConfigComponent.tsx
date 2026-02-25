@@ -30,13 +30,13 @@ interface Props {
 }
 
 const getWeekdayLabels = (t: (key: string) => string) => ({
-  1: t('backups:mondayShort'),
-  2: t('backups:tuesdayShort'),
-  3: t('backups:wednesdayShort'),
-  4: t('backups:thursdayShort'),
-  5: t('backups:fridayShort'),
-  6: t('backups:saturdayShort'),
-  7: t('backups:sundayShort'),
+  1: t('backups:mon'),
+  2: t('backups:tue'),
+  3: t('backups:wed'),
+  4: t('backups:thu'),
+  5: t('backups:fri'),
+  6: t('backups:sat'),
+  7: t('backups:sun'),
 });
 
 const getIntervalLabels = (t: (key: string) => string) => ({
@@ -48,17 +48,17 @@ const getIntervalLabels = (t: (key: string) => string) => ({
 });
 
 const getPeriodLabels = (t: (key: string) => string) => ({
-  [Period.DAY]: t('backups:period1Day'),
-  [Period.WEEK]: t('backups:period1Week'),
-  [Period.MONTH]: t('backups:period1Month'),
-  [Period.THREE_MONTH]: t('backups:period3Months'),
-  [Period.SIX_MONTH]: t('backups:period6Months'),
-  [Period.YEAR]: t('backups:period1Year'),
-  [Period.TWO_YEARS]: t('backups:period2Years'),
-  [Period.THREE_YEARS]: t('backups:period3Years'),
-  [Period.FOUR_YEARS]: t('backups:period4Years'),
-  [Period.FIVE_YEARS]: t('backups:period5Years'),
-  [Period.FOREVER]: t('backups:periodForever'),
+  [Period.DAY]: t('backups:1day'),
+  [Period.WEEK]: t('backups:1week'),
+  [Period.MONTH]: t('backups:1month'),
+  [Period.THREE_MONTH]: t('backups:3months'),
+  [Period.SIX_MONTH]: t('backups:6months'),
+  [Period.YEAR]: t('backups:1year'),
+  [Period.TWO_YEARS]: t('backups:2years'),
+  [Period.THREE_YEARS]: t('backups:3years'),
+  [Period.FOUR_YEARS]: t('backups:4years'),
+  [Period.FIVE_YEARS]: t('backups:5years'),
+  [Period.FOREVER]: t('backups:forever'),
 });
 
 const getNotificationLabels = (t: (key: string) => string) => ({
@@ -79,7 +79,7 @@ const formatGfsRetention = (config: BackupConfig, t: (key: string) => string): s
   if (config.retentionGfsYears > 0)
     parts.push(`${config.retentionGfsYears} ${t('backups:yearly')}`);
 
-  return parts.length > 0 ? parts.join(', ') : t('backups:notConfigured');
+  return parts.length > 0 ? parts.join(', ') : t('common:notConfigured');
 };
 
 export const ShowBackupConfigComponent = ({ database }: Props) => {

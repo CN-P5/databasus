@@ -1,4 +1,5 @@
 import { Button, Input } from 'antd';
+import { useTranslation } from 'react-i18next';
 
 import type { Storage } from '../../../../../entity/storages';
 import type { StorageOauthDto } from '../../../../../entity/storages/models/StorageOauthDto';
@@ -10,6 +11,7 @@ interface Props {
 }
 
 export function EditGoogleDriveStorageComponent({ storage, setStorage, setUnsaved }: Props) {
+  const { t } = useTranslation('storages');
   const goToAuthUrl = () => {
     if (!storage?.googleDriveStorage?.clientId || !storage?.googleDriveStorage?.clientSecret) {
       return;
@@ -38,13 +40,13 @@ export function EditGoogleDriveStorageComponent({ storage, setStorage, setUnsave
 
         <div className="text-xs text-blue-600">
           <a href="https://databasus.com/storages/google-drive" target="_blank" rel="noreferrer">
-            How to connect Google Drive?
+            {t('howToConnectGoogleDrive')}
           </a>
         </div>
       </div>
 
       <div className="mb-1 flex w-full flex-col items-start sm:flex-row sm:items-center">
-        <div className="mb-1 min-w-[110px] sm:mb-0">Client ID</div>
+        <div className="mb-1 min-w-[110px] sm:mb-0">{t('clientId')}</div>
         <Input
           value={storage?.googleDriveStorage?.clientId || ''}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
@@ -67,7 +69,7 @@ export function EditGoogleDriveStorageComponent({ storage, setStorage, setUnsave
       </div>
 
       <div className="mb-1 flex w-full flex-col items-start sm:flex-row sm:items-center">
-        <div className="mb-1 min-w-[110px] sm:mb-0">Client Secret</div>
+        <div className="mb-1 min-w-[110px] sm:mb-0">{t('clientSecret')}</div>
         <Input
           value={storage?.googleDriveStorage?.clientSecret || ''}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
@@ -92,7 +94,7 @@ export function EditGoogleDriveStorageComponent({ storage, setStorage, setUnsave
       {storage?.googleDriveStorage?.tokenJson && (
         <>
           <div className="mb-1 flex w-full flex-col items-start sm:flex-row sm:items-center">
-            <div className="mb-1 min-w-[110px] sm:mb-0">User Token</div>
+            <div className="mb-1 min-w-[110px] sm:mb-0">{t('userToken')}</div>
             <Input
               value={storage?.googleDriveStorage?.tokenJson || ''}
               disabled
@@ -112,7 +114,7 @@ export function EditGoogleDriveStorageComponent({ storage, setStorage, setUnsave
           }
           onClick={goToAuthUrl}
         >
-          Authorize
+          {t('authorize')}
         </Button>
       )}
     </>

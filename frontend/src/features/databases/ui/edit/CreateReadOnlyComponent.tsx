@@ -35,13 +35,13 @@ export const CreateReadOnlyComponent = ({
   const isMariadb = database.type === DatabaseType.MARIADB;
   const isMongodb = database.type === DatabaseType.MONGODB;
   const databaseTypeName = isPostgres
-    ? 'PostgreSQL'
+    ? t('databases:typePostgres')
     : isMysql
-      ? 'MySQL'
+      ? t('databases:typeMysql')
       : isMariadb
-        ? 'MariaDB'
+        ? t('databases:typeMariadb')
         : isMongodb
-          ? 'MongoDB'
+          ? t('databases:typeMongodb')
           : t('databases:database');
 
   const privilegesLabel = isMongodb ? t('databases:roles') : t('databases:privileges');
@@ -134,18 +134,20 @@ export const CreateReadOnlyComponent = ({
   return (
     <div>
       <div className="mb-5">
-        <p className="mb-3 text-lg font-bold">{t('databases:createReadOnlyUserQuestion')}</p>
+        <p className="mb-3 text-lg font-bold">{t('databases:createReadOnlyUserTitle')}</p>
 
-        <p className="mb-2">{t('databases:readOnlyUserDescription', { databaseTypeName })}</p>
+        <p className="mb-2">
+          {t('databases:createReadOnlyUserDescription', { type: databaseTypeName })}
+        </p>
 
         <ul className="mb-2 ml-5 list-disc">
-          <li>{t('databases:readOnlyBenefit1')}</li>
-          <li>{t('databases:readOnlyBenefit2')}</li>
-          <li>{t('databases:readOnlyBenefit3')}</li>
+          <li>{t('databases:createReadOnlyUserReason1')}</li>
+          <li>{t('databases:createReadOnlyUserReason2')}</li>
+          <li>{t('databases:createReadOnlyUserReason3')}</li>
         </ul>
 
         <p className="mb-2">
-          {t('databases:databasusSecurityPrefix')}
+          {t('databases:createReadOnlyUserSecurity')}
           <a
             href="https://databasus.com/security"
             target="_blank"
@@ -154,19 +156,19 @@ export const CreateReadOnlyComponent = ({
           >
             {t('databases:readInDetailsHere')}
           </a>
-          {t('databases:databasusSecuritySuffix')}
+          {t('databases:createReadOnlyUserSecurityEnd')}
         </p>
 
         <p className="mt-3">
-          <b>{t('databases:readOnlyUserAvoidStoringCredentials')}</b>
+          <b>{t('databases:createReadOnlyUserWarning')}</b>
         </p>
 
         <p className="mt-3">
           {privileges.length === 0 ? (
-            <>{t('databases:currentUserNoWritePrivileges', { privilegesLabel })}</>
+            <>{t('databases:currentUserNoWritePrivileges', { privileges: privilegesLabel })}</>
           ) : (
             <>
-              {t('databases:currentUserHasWritePrivileges', { privilegesLabel })}{' '}
+              {t('databases:currentUserHasWritePrivileges', { privileges: privilegesLabel })}{' '}
               <span
                 className={shouldShowExpandToggle() ? 'cursor-pointer hover:opacity-80' : ''}
                 onClick={() =>
@@ -176,7 +178,7 @@ export const CreateReadOnlyComponent = ({
                 {getPrivilegesDisplay()}
                 {shouldShowExpandToggle() && (
                   <span className="ml-1 text-xs text-blue-600 hover:opacity-80">
-                    ({isPrivilegesExpanded ? t('databases:collapse') : t('databases:expand')})
+                    ({isPrivilegesExpanded ? t('common:collapse') : t('common:expand')})
                   </span>
                 )}
               </span>
@@ -192,7 +194,7 @@ export const CreateReadOnlyComponent = ({
 
         {!IS_CLOUD && (
           <Button className="mr-2 ml-auto" danger ghost onClick={handleSkip}>
-            {t('databases:skip')}
+            {t('common:skip')}
           </Button>
         )}
 
@@ -207,7 +209,7 @@ export const CreateReadOnlyComponent = ({
       </div>
 
       <Modal
-        title={t('databases:skipReadOnlyUserCreationTitle')}
+        title={t('databases:skipReadOnlyUserCreation')}
         open={isShowSkipConfirmation}
         onCancel={() => setShowSkipConfirmation(false)}
         footer={null}
@@ -223,11 +225,11 @@ export const CreateReadOnlyComponent = ({
 
         <div className="flex justify-end">
           <Button className="mr-2" danger ghost onClick={handleSkipConfirmed}>
-            {t('databases:yesAcceptRisks')}
+            {t('databases:yesIAcceptRisks')}
           </Button>
 
           <Button type="primary" onClick={() => setShowSkipConfirmation(false)}>
-            {t('databases:continueWithSecureWay')}
+            {t('databases:letsContinueSecure')}
           </Button>
         </div>
       </Modal>

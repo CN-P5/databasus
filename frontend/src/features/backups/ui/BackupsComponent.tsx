@@ -239,7 +239,7 @@ export const BackupsComponent = ({ database, isCanManageDBs, scrollContainerRef 
             onClick={() => setShowingBackupError(record)}
           >
             <ExclamationCircleOutlined className="mr-2" style={{ fontSize: 16 }} />
-            <div>{t('backups:failed')}</div>
+            <div>{t('backups:backupFailed')}</div>
           </div>
         </Tooltip>
       );
@@ -249,7 +249,7 @@ export const BackupsComponent = ({ database, isCanManageDBs, scrollContainerRef 
       return (
         <div className="flex items-center text-green-600">
           <CheckCircleOutlined className="mr-2" style={{ fontSize: 16 }} />
-          <div>{t('backups:successful')}</div>
+          <div>{t('backups:backupCompleted')}</div>
           {record.encryption === BackupEncryption.ENCRYPTED && (
             <Tooltip title={t('backups:encrypted')}>
               <LockOutlined className="ml-1" style={{ fontSize: 14 }} />
@@ -263,7 +263,7 @@ export const BackupsComponent = ({ database, isCanManageDBs, scrollContainerRef 
       return (
         <div className="flex items-center text-gray-600">
           <DeleteOutlined className="mr-2" style={{ fontSize: 16 }} />
-          <div>{t('backups:deleted')}</div>
+          <div>{t('backups:backupDeleted')}</div>
         </div>
       );
     }
@@ -297,7 +297,7 @@ export const BackupsComponent = ({ database, isCanManageDBs, scrollContainerRef 
             {cancellingBackupId === record.id ? (
               <SyncOutlined spin />
             ) : (
-              <Tooltip title="Cancel backup">
+              <Tooltip title={t('backups:cancelBackup')}>
                 <CloseCircleOutlined
                   className="cursor-pointer"
                   onClick={() => {
@@ -318,7 +318,7 @@ export const BackupsComponent = ({ database, isCanManageDBs, scrollContainerRef 
             ) : (
               <>
                 {isCanManageDBs && (
-                  <Tooltip title="Delete backup">
+                  <Tooltip title={t('backups:deleteBackup')}>
                     <DeleteOutlined
                       className="cursor-pointer"
                       onClick={() => {
@@ -330,7 +330,7 @@ export const BackupsComponent = ({ database, isCanManageDBs, scrollContainerRef 
                   </Tooltip>
                 )}
 
-                <Tooltip title="Restore from backup">
+                <Tooltip title={t('backups:restoreBackup')}>
                   <CloudUploadOutlined
                     className="cursor-pointer"
                     onClick={() => {
@@ -345,14 +345,14 @@ export const BackupsComponent = ({ database, isCanManageDBs, scrollContainerRef 
                 <Tooltip
                   title={
                     database.type === DatabaseType.POSTGRES
-                      ? 'Download backup file. It can be restored manually via pg_restore (from custom format)'
+                      ? t('backups:downloadBackupFilePostgres')
                       : database.type === DatabaseType.MYSQL
-                        ? 'Download backup file. It can be restored manually via mysql client (from SQL dump)'
+                        ? t('backups:downloadBackupFileMysql')
                         : database.type === DatabaseType.MARIADB
-                          ? 'Download backup file. It can be restored manually via mariadb client (from SQL dump)'
+                          ? t('backups:downloadBackupFileMariadb')
                           : database.type === DatabaseType.MONGODB
-                            ? 'Download backup file. It can be restored manually via mongorestore (from archive)'
-                            : 'Download backup file'
+                            ? t('backups:downloadBackupFileMongodb')
+                            : t('backups:downloadBackupFile')
                   }
                 >
                   {downloadingBackupId === record.id ? (
@@ -401,7 +401,7 @@ export const BackupsComponent = ({ database, isCanManageDBs, scrollContainerRef 
 
   const columns: ColumnsType<Backup> = [
     {
-      title: 'Created at',
+      title: t('backups:createdAt'),
       dataIndex: 'createdAt',
       key: 'createdAt',
       render: (createdAt: string) => (
@@ -416,30 +416,30 @@ export const BackupsComponent = ({ database, isCanManageDBs, scrollContainerRef 
       defaultSortOrder: 'descend',
     },
     {
-      title: 'Status',
+      title: t('backups:status'),
       dataIndex: 'status',
       key: 'status',
       render: (status: BackupStatus, record: Backup) => renderStatus(status, record),
       filters: [
         {
           value: BackupStatus.IN_PROGRESS,
-          text: 'In progress',
+          text: t('backups:inProgress'),
         },
         {
           value: BackupStatus.FAILED,
-          text: 'Failed',
+          text: t('backups:backupFailed'),
         },
         {
           value: BackupStatus.COMPLETED,
-          text: 'Successful',
+          text: t('backups:backupCompleted'),
         },
         {
           value: BackupStatus.DELETED,
-          text: 'Deleted',
+          text: t('backups:backupDeleted'),
         },
         {
           value: BackupStatus.CANCELED,
-          text: 'Canceled',
+          text: t('backups:canceled'),
         },
       ],
       onFilter: (value, record) => record.status === value,
@@ -447,10 +447,10 @@ export const BackupsComponent = ({ database, isCanManageDBs, scrollContainerRef 
     {
       title: (
         <div className="flex items-center">
-          Size
+          {t('backups:size')}
           <Tooltip
             className="ml-1"
-            title="The file size we actually store in the storage (local, S3, Google Drive, etc.), usually compressed in ~5x times"
+            title={t('backups:fileSizeDescription')}
           >
             <InfoCircleOutlined />
           </Tooltip>
@@ -462,14 +462,14 @@ export const BackupsComponent = ({ database, isCanManageDBs, scrollContainerRef 
       render: (sizeMb: number) => formatSize(sizeMb),
     },
     {
-      title: 'Duration',
+      title: t('backups:duration'),
       dataIndex: 'backupDurationMs',
       key: 'backupDurationMs',
       width: 150,
       render: (durationMs: number) => formatDuration(durationMs),
     },
     {
-      title: 'Actions',
+      title: t('backups:actions'),
       dataIndex: '',
       key: '',
       render: (_, record: Backup) => renderActions(record),
@@ -486,11 +486,11 @@ export const BackupsComponent = ({ database, isCanManageDBs, scrollContainerRef 
 
   return (
     <div className="mt-5 w-full rounded-md bg-white p-3 shadow md:p-5 dark:bg-gray-800">
-      <h2 className="text-lg font-bold md:text-xl dark:text-white">Backups</h2>
+      <h2 className="text-lg font-bold md:text-xl dark:text-white">{t('backups:backups')}</h2>
 
       {!isBackupConfigLoading && !backupConfig?.isBackupsEnabled && (
         <div className="text-sm text-red-600">
-          Scheduled backups are disabled (you can enable it back in the backup configuration)
+          {t('backups:scheduledBackupsDisabled')}
         </div>
       )}
 
@@ -504,8 +504,8 @@ export const BackupsComponent = ({ database, isCanManageDBs, scrollContainerRef 
           disabled={isMakeBackupRequestLoading}
           loading={isMakeBackupRequestLoading}
         >
-          <span className="md:hidden">Backup now</span>
-          <span className="hidden md:inline">Make backup right now</span>
+          <span className="md:hidden">{t('backups:backupNow')}</span>
+          <span className="hidden md:inline">{t('backups:makeBackupRightNow')}</span>
         </Button>
       </div>
 
@@ -526,7 +526,7 @@ export const BackupsComponent = ({ database, isCanManageDBs, scrollContainerRef 
                   <div className="space-y-3">
                     <div className="flex items-start justify-between">
                       <div>
-                        <div className="text-xs text-gray-500 dark:text-gray-400">Created at</div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400">{t('backups:createdAt')}</div>
                         <div className="text-sm font-medium">
                           {dayjs.utc(backup.createdAt).local().format(getUserTimeFormat().format)}
                         </div>
@@ -539,11 +539,11 @@ export const BackupsComponent = ({ database, isCanManageDBs, scrollContainerRef 
 
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <div className="text-xs text-gray-500 dark:text-gray-400">Size</div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400">{t('backups:size')}</div>
                         <div className="text-sm font-medium">{formatSize(backup.backupSizeMb)}</div>
                       </div>
                       <div>
-                        <div className="text-xs text-gray-500 dark:text-gray-400">Duration</div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400">{t('backups:duration')}</div>
                         <div className="text-sm font-medium">
                           {formatDuration(backup.backupDurationMs)}
                         </div>
@@ -566,11 +566,11 @@ export const BackupsComponent = ({ database, isCanManageDBs, scrollContainerRef 
           )}
           {!hasMore && backups.length > 0 && (
             <div className="mt-3 text-center text-sm text-gray-500 dark:text-gray-400">
-              All backups loaded ({totalBackups} total)
+              {t('backups:allBackupsLoaded')} ({totalBackups} {t('backups:total')})
             </div>
           )}
           {!isBackupsLoading && backups.length === 0 && (
-            <div className="py-8 text-center text-gray-500 dark:text-gray-400">No backups yet</div>
+            <div className="py-8 text-center text-gray-500 dark:text-gray-400">{t('backups:noBackupsYet')}</div>
           )}
         </div>
 
@@ -592,7 +592,7 @@ export const BackupsComponent = ({ database, isCanManageDBs, scrollContainerRef 
           )}
           {!hasMore && backups.length > 0 && (
             <div className="mt-2 text-center text-gray-500 dark:text-gray-400">
-              All backups loaded ({totalBackups} total)
+              {t('backups:allBackupsLoaded')} ({totalBackups} {t('backups:total')})
             </div>
           )}
         </div>
@@ -602,9 +602,9 @@ export const BackupsComponent = ({ database, isCanManageDBs, scrollContainerRef 
         <ConfirmationComponent
           onConfirm={deleteBackup}
           onDecline={() => setDeleteConfimationId(undefined)}
-          description="Are you sure you want to delete this backup?"
+          description={t('backups:deleteBackupConfirmation')}
           actionButtonColor="red"
-          actionText="Delete"
+          actionText={t('common:delete')}
         />
       )}
 
@@ -613,7 +613,7 @@ export const BackupsComponent = ({ database, isCanManageDBs, scrollContainerRef 
           width={400}
           open={!!showingRestoresBackupId}
           onCancel={() => setShowingRestoresBackupId(undefined)}
-          title="Restore from backup"
+          title={t('backups:restoreBackup')}
           footer={null}
           maskClosable={false}
         >
@@ -626,7 +626,7 @@ export const BackupsComponent = ({ database, isCanManageDBs, scrollContainerRef 
 
       {showingBackupError && (
         <Modal
-          title="Backup error details"
+          title={t('backups:backupErrorDetails')}
           open={!!showingBackupError}
           onCancel={() => setShowingBackupError(undefined)}
           maskClosable={false}

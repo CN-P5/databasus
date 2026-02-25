@@ -1,6 +1,7 @@
 import { DownOutlined, InfoCircleOutlined, UpOutlined } from '@ant-design/icons';
 import { Input, Radio, Tooltip } from 'antd';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import type { Storage } from '../../../../../entity/storages';
 
@@ -11,6 +12,7 @@ interface Props {
 }
 
 export function EditAzureBlobStorageComponent({ storage, setStorage, setUnsaved }: Props) {
+  const { t } = useTranslation('storages');
   const hasAdvancedValues =
     !!storage?.azureBlobStorage?.prefix || !!storage?.azureBlobStorage?.endpoint;
   const [showAdvanced, setShowAdvanced] = useState(hasAdvancedValues);
@@ -18,7 +20,7 @@ export function EditAzureBlobStorageComponent({ storage, setStorage, setUnsaved 
   return (
     <>
       <div className="mb-1 flex w-full flex-col items-start sm:flex-row sm:items-center">
-        <div className="mb-1 min-w-[110px] sm:mb-0">Auth method</div>
+        <div className="mb-1 min-w-[110px] sm:mb-0">{t('authMethod')}</div>
         <Radio.Group
           value={storage?.azureBlobStorage?.authMethod || 'ACCOUNT_KEY'}
           onChange={(e) => {
@@ -35,14 +37,14 @@ export function EditAzureBlobStorageComponent({ storage, setStorage, setUnsaved 
           }}
           size="small"
         >
-          <Radio value="ACCOUNT_KEY">Account key</Radio>
-          <Radio value="CONNECTION_STRING">Connection string</Radio>
+          <Radio value="ACCOUNT_KEY">{t('accountKey')}</Radio>
+          <Radio value="CONNECTION_STRING">{t('connectionString')}</Radio>
         </Radio.Group>
       </div>
 
       {storage?.azureBlobStorage?.authMethod === 'CONNECTION_STRING' && (
         <div className="mb-1 flex w-full flex-col items-start sm:flex-row sm:items-center">
-          <div className="mb-1 min-w-[110px] sm:mb-0">Connection</div>
+          <div className="mb-1 min-w-[110px] sm:mb-0">{t('connection')}</div>
           <div className="flex items-center">
             <Input.Password
               value={storage?.azureBlobStorage?.connectionString || ''}
@@ -69,7 +71,7 @@ export function EditAzureBlobStorageComponent({ storage, setStorage, setUnsaved 
 
             <Tooltip
               className="cursor-pointer"
-              title="Azure Storage connection string from Azure Portal"
+              title={t('azureStorageConnectionStringFromAzurePortal')}
             >
               <InfoCircleOutlined className="ml-2" style={{ color: 'gray' }} />
             </Tooltip>
@@ -80,7 +82,7 @@ export function EditAzureBlobStorageComponent({ storage, setStorage, setUnsaved 
       {storage?.azureBlobStorage?.authMethod === 'ACCOUNT_KEY' && (
         <>
           <div className="mb-1 flex w-full flex-col items-start sm:flex-row sm:items-center">
-            <div className="mb-1 min-w-[110px] sm:mb-0">Account name</div>
+            <div className="mb-1 min-w-[110px] sm:mb-0">{t('accountName')}</div>
             <Input
               value={storage?.azureBlobStorage?.accountName || ''}
               onChange={(e) => {
@@ -102,7 +104,7 @@ export function EditAzureBlobStorageComponent({ storage, setStorage, setUnsaved 
           </div>
 
           <div className="mb-1 flex w-full flex-col items-start sm:flex-row sm:items-center">
-            <div className="mb-1 min-w-[110px] sm:mb-0">Account key</div>
+            <div className="mb-1 min-w-[110px] sm:mb-0">{t('accountKey')}</div>
             <Input.Password
               value={storage?.azureBlobStorage?.accountKey || ''}
               onChange={(e) => {
@@ -130,7 +132,7 @@ export function EditAzureBlobStorageComponent({ storage, setStorage, setUnsaved 
       )}
 
       <div className="mb-1 flex w-full flex-col items-start sm:flex-row sm:items-center">
-        <div className="mb-1 min-w-[110px] sm:mb-0">Container name</div>
+        <div className="mb-1 min-w-[110px] sm:mb-0">{t('containerName')}</div>
         <Input
           value={storage?.azureBlobStorage?.containerName || ''}
           onChange={(e) => {
@@ -156,7 +158,7 @@ export function EditAzureBlobStorageComponent({ storage, setStorage, setUnsaved 
           className="flex cursor-pointer items-center text-sm text-blue-600 hover:text-blue-800"
           onClick={() => setShowAdvanced(!showAdvanced)}
         >
-          <span className="mr-2">Advanced settings</span>
+          <span className="mr-2">{t('advancedSettings')}</span>
 
           {showAdvanced ? (
             <UpOutlined style={{ fontSize: '12px' }} />
@@ -170,7 +172,7 @@ export function EditAzureBlobStorageComponent({ storage, setStorage, setUnsaved 
         <>
           {storage?.azureBlobStorage?.authMethod === 'ACCOUNT_KEY' && (
             <div className="mb-1 flex w-full flex-col items-start sm:flex-row sm:items-center">
-              <div className="mb-1 min-w-[110px] sm:mb-0">Endpoint</div>
+              <div className="mb-1 min-w-[110px] sm:mb-0">{t('endpoint')}</div>
               <div className="flex items-center">
                 <Input
                   value={storage?.azureBlobStorage?.endpoint || ''}
@@ -193,7 +195,7 @@ export function EditAzureBlobStorageComponent({ storage, setStorage, setUnsaved 
 
                 <Tooltip
                   className="cursor-pointer"
-                  title="Custom endpoint URL (optional, leave empty for standard Azure)"
+                  title={t('customEndpointUrlOptionalLeaveEmptyForStandardAzure')}
                 >
                   <InfoCircleOutlined className="ml-2" style={{ color: 'gray' }} />
                 </Tooltip>
@@ -202,7 +204,7 @@ export function EditAzureBlobStorageComponent({ storage, setStorage, setUnsaved 
           )}
 
           <div className="mb-1 flex w-full flex-col items-start sm:flex-row sm:items-center">
-            <div className="mb-1 min-w-[110px] sm:mb-0">Blob prefix</div>
+            <div className="mb-1 min-w-[110px] sm:mb-0">{t('blobPrefix')}</div>
             <div className="flex items-center">
               <Input
                 value={storage?.azureBlobStorage?.prefix || ''}
@@ -225,7 +227,7 @@ export function EditAzureBlobStorageComponent({ storage, setStorage, setUnsaved 
 
               <Tooltip
                 className="cursor-pointer"
-                title="Optional prefix for all blob names (e.g., 'backups/' or 'my_team/')"
+                title={t('optionalPrefixForAllBlobNames')}
               >
                 <InfoCircleOutlined className="ml-2" style={{ color: 'gray' }} />
               </Tooltip>

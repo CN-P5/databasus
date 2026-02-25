@@ -3,6 +3,7 @@ import { App, Spin, Table } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import dayjs from 'dayjs';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { auditLogApi } from '../../../entity/audit-logs/api/auditLogApi';
 import type { AuditLog } from '../../../entity/audit-logs/model/AuditLog';
@@ -15,6 +16,7 @@ interface Props {
 }
 
 export function AuditLogsComponent({ scrollContainerRef: externalScrollRef }: Props) {
+  const { t } = useTranslation('settings');
   const { message } = App.useApp();
   const isMobile = useIsMobile();
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
@@ -99,14 +101,14 @@ export function AuditLogsComponent({ scrollContainerRef: externalScrollRef }: Pr
 
   const columns: ColumnsType<AuditLog> = [
     {
-      title: 'User',
+      title: t('user'),
       key: 'user',
       width: 300,
       render: (_, record: AuditLog) => {
         if (!record.userEmail && !record.userName) {
           return (
             <span className="inline-block rounded-full bg-gray-100 px-1.5 py-0.5 text-xs font-medium text-gray-600 dark:bg-gray-700 dark:text-gray-300">
-              System
+              {t('system')}
             </span>
           );
         }
@@ -123,7 +125,7 @@ export function AuditLogsComponent({ scrollContainerRef: externalScrollRef }: Pr
       },
     },
     {
-      title: 'Message',
+      title: t('message'),
       dataIndex: 'message',
       key: 'message',
       render: (message: string) => (
@@ -131,7 +133,7 @@ export function AuditLogsComponent({ scrollContainerRef: externalScrollRef }: Pr
       ),
     },
     {
-      title: 'Workspace',
+      title: t('workspace'),
       dataIndex: 'workspaceName',
       key: 'workspaceName',
       width: 200,
@@ -148,7 +150,7 @@ export function AuditLogsComponent({ scrollContainerRef: externalScrollRef }: Pr
       ),
     },
     {
-      title: 'Created',
+      title: t('created'),
       dataIndex: 'createdAt',
       key: 'createdAt',
       width: 250,
@@ -172,7 +174,7 @@ export function AuditLogsComponent({ scrollContainerRef: externalScrollRef }: Pr
       if (!log.userEmail && !log.userName) {
         return (
           <span className="inline-block rounded-full bg-gray-100 px-1.5 py-0.5 text-xs font-medium text-gray-600 dark:bg-gray-700 dark:text-gray-300">
-            System
+            {t('system')}
           </span>
         );
       }
@@ -213,12 +215,12 @@ export function AuditLogsComponent({ scrollContainerRef: externalScrollRef }: Pr
   return (
     <div className="max-w-[1200px]">
       <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-xl font-bold dark:text-white">Audit Logs</h2>
+        <h2 className="text-xl font-bold dark:text-white">{t('auditLogs')}</h2>
         <div className="text-sm text-gray-500 dark:text-gray-400">
           {isLoading ? (
             <Spin indicator={<LoadingOutlined spin />} />
           ) : (
-            `${auditLogs.length} of ${total} logs`
+            `${auditLogs.length} ${t('logsOf')} ${total} ${t('logs')}`
           )}
         </div>
       </div>
@@ -229,7 +231,7 @@ export function AuditLogsComponent({ scrollContainerRef: externalScrollRef }: Pr
         </div>
       ) : auditLogs.length === 0 ? (
         <div className="flex h-32 items-center justify-center text-gray-500 dark:text-gray-400">
-          No audit logs found.
+          {t('noAuditLogsFound')}
         </div>
       ) : (
         <>
@@ -250,14 +252,14 @@ export function AuditLogsComponent({ scrollContainerRef: externalScrollRef }: Pr
             <div className="flex justify-center py-4">
               <Spin indicator={<LoadingOutlined spin />} />
               <span className="ml-2 text-sm text-gray-500 dark:text-gray-400">
-                Loading more logs...
+                {t('loadingMoreLogs')}
               </span>
             </div>
           )}
 
           {!hasMore && auditLogs.length > 0 && (
             <div className="py-4 text-center text-sm text-gray-500 dark:text-gray-400">
-              All logs loaded ({auditLogs.length} total)
+              {t('allLogsLoaded')} ({auditLogs.length} {t('total')})
             </div>
           )}
         </>

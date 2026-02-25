@@ -32,7 +32,7 @@ import { SidebarComponent } from './SidebarComponent';
 import { WorkspaceSelectionComponent } from './WorkspaceSelectionComponent';
 
 export const MainScreenComponent = () => {
-  const { t } = useTranslation(['common', 'sidebar']);
+  const { t } = useTranslation(['common', 'sidebar', 'settings']);
   const { message } = App.useApp();
   const screenHeight = useScreenHeight();
   const isMobile = useIsMobile();
@@ -235,14 +235,14 @@ export const MainScreenComponent = () => {
           </a>
 
           {isUsedMoreThan85Percent && (
-            <Tooltip title="To make backups locally and restore them, you need to have enough space on your disk. For restore, you need to have same amount of space that the backup size.">
+            <Tooltip title={t('common:diskUsageTooltip')}>
               <div
                 className={`cursor-pointer text-center text-xs ${isUsedMoreThan95Percent ? 'text-red-500' : 'text-gray-500 dark:text-gray-400'}`}
               >
-                {(diskUsage.usedSpaceBytes / 1024 ** 3).toFixed(1)} of{' '}
+                {(diskUsage.usedSpaceBytes / 1024 ** 3).toFixed(1)} {t('common:of')}{' '}
                 {(diskUsage.totalSpaceBytes / 1024 ** 3).toFixed(1)} GB
                 <br />
-                ROM used (
+                {t('common:diskUsage')} {t('common:used')} (
                 {((diskUsage.usedSpaceBytes / diskUsage.totalSpaceBytes) * 100).toFixed(1)}%)
               </div>
             </Tooltip>
@@ -318,7 +318,7 @@ export const MainScreenComponent = () => {
                       onClick={handleCreateWorkspace}
                       className="border-blue-600 bg-blue-600 hover:border-blue-700 hover:bg-blue-700"
                     >
-                      Create workspace
+                      {t('common:createWorkspace')}
                     </Button>
                   </div>
                 </div>

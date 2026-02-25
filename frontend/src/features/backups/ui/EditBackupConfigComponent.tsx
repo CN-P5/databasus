@@ -57,22 +57,22 @@ interface Props {
 }
 
 const getWeekdayOptions = (t: (key: string) => string) => [
-  { value: 1, label: t('backups:mondayShort') },
-  { value: 2, label: t('backups:tuesdayShort') },
-  { value: 3, label: t('backups:wednesdayShort') },
-  { value: 4, label: t('backups:thursdayShort') },
-  { value: 5, label: t('backups:fridayShort') },
-  { value: 6, label: t('backups:saturdayShort') },
-  { value: 7, label: t('backups:sundayShort') },
+  { value: 1, label: t('backups:mon') },
+  { value: 2, label: t('backups:tue') },
+  { value: 3, label: t('backups:wed') },
+  { value: 4, label: t('backups:thu') },
+  { value: 5, label: t('backups:fri') },
+  { value: 6, label: t('backups:sat') },
+  { value: 7, label: t('backups:sun') },
 ];
 
 const getRetentionPolicyOptions = (t: (key: string) => string) => [
   {
-    label: t('backups:gfsRetentionPolicy'),
+    label: t('backups:gfs'),
     value: RetentionPolicyType.GFS,
   },
-  { label: t('backups:timePeriodRetentionPolicy'), value: RetentionPolicyType.TimePeriod },
-  { label: t('backups:countRetentionPolicy'), value: RetentionPolicyType.Count },
+  { label: t('backups:timePeriod'), value: RetentionPolicyType.TimePeriod },
+  { label: t('backups:count'), value: RetentionPolicyType.Count },
 ];
 
 export const EditBackupConfigComponent = ({
@@ -158,17 +158,17 @@ export const EditBackupConfigComponent = ({
 
   const availablePeriods = useMemo(() => {
     const allPeriods = [
-      { label: t('backups:period1Day'), value: Period.DAY },
-      { label: t('backups:period1Week'), value: Period.WEEK },
-      { label: t('backups:period1Month'), value: Period.MONTH },
-      { label: t('backups:period3Months'), value: Period.THREE_MONTH },
-      { label: t('backups:period6Months'), value: Period.SIX_MONTH },
-      { label: t('backups:period1Year'), value: Period.YEAR },
-      { label: t('backups:period2Years'), value: Period.TWO_YEARS },
-      { label: t('backups:period3Years'), value: Period.THREE_YEARS },
-      { label: t('backups:period4Years'), value: Period.FOUR_YEARS },
-      { label: t('backups:period5Years'), value: Period.FIVE_YEARS },
-      { label: t('backups:periodForever'), value: Period.FOREVER },
+      { label: t('backups:1day'), value: Period.DAY },
+      { label: t('backups:1week'), value: Period.WEEK },
+      { label: t('backups:1month'), value: Period.MONTH },
+      { label: t('backups:3months'), value: Period.THREE_MONTH },
+      { label: t('backups:6months'), value: Period.SIX_MONTH },
+      { label: t('backups:1year'), value: Period.YEAR },
+      { label: t('backups:2years'), value: Period.TWO_YEARS },
+      { label: t('backups:3years'), value: Period.THREE_YEARS },
+      { label: t('backups:4years'), value: Period.FOUR_YEARS },
+      { label: t('backups:5years'), value: Period.FIVE_YEARS },
+      { label: t('backups:forever'), value: Period.FOREVER },
     ];
 
     if (!databasePlan) {

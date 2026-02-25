@@ -1,6 +1,7 @@
 import { InfoCircleOutlined } from '@ant-design/icons';
 import { Button, Input, Select, Switch, Tooltip } from 'antd';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { IS_CLOUD } from '../../../../constants';
 import {
@@ -42,6 +43,7 @@ export function EditStorageComponent({
   onChanged,
   user,
 }: Props) {
+  const { t } = useTranslation('storages');
   const [storage, setStorage] = useState<Storage | undefined>();
   const [isUnsaved, setIsUnsaved] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -76,8 +78,8 @@ export function EditStorageComponent({
       await storageApi.testStorageConnectionDirect(storage);
       setIsTestConnectionSuccess(true);
       ToastHelper.showToast({
-        title: 'Connection test successful!',
-        description: 'Storage connection tested successfully',
+        title: t('connectionTestSuccessful'),
+        description: t('storageConnectionTestedSuccessfully'),
       });
     } catch (e) {
       const errorMessage = (e as Error).message;
@@ -327,14 +329,14 @@ export function EditStorageComponent({
   if (!storage) return <div />;
 
   const storageTypeOptions = [
-    { label: 'Local storage', value: StorageType.LOCAL },
-    { label: 'S3', value: StorageType.S3 },
-    { label: 'Google Drive', value: StorageType.GOOGLE_DRIVE },
-    { label: 'NAS', value: StorageType.NAS },
-    { label: 'Azure Blob Storage', value: StorageType.AZURE_BLOB },
-    { label: 'FTP', value: StorageType.FTP },
-    { label: 'SFTP', value: StorageType.SFTP },
-    { label: 'Rclone', value: StorageType.RCLONE },
+    { label: t('local'), value: StorageType.LOCAL },
+    { label: t('s3'), value: StorageType.S3 },
+    { label: t('googleDrive'), value: StorageType.GOOGLE_DRIVE },
+    { label: t('nas'), value: StorageType.NAS },
+    { label: t('azureBlob'), value: StorageType.AZURE_BLOB },
+    { label: t('ftp'), value: StorageType.FTP },
+    { label: t('sftp'), value: StorageType.SFTP },
+    { label: t('rclone'), value: StorageType.RCLONE },
   ].filter((option) => {
     if (IS_CLOUD && option.value === StorageType.LOCAL && user.role !== UserRole.ADMIN) {
       return false;
@@ -346,7 +348,7 @@ export function EditStorageComponent({
     <div>
       {isShowName && (
         <div className="mb-1 flex w-full flex-col items-start sm:flex-row sm:items-center">
-          <div className="mb-1 min-w-[110px] sm:mb-0">Name</div>
+          <div className="mb-1 min-w-[110px] sm:mb-0">{t('name')}</div>
 
           <Input
             value={storage?.name || ''}
@@ -362,7 +364,7 @@ export function EditStorageComponent({
       )}
 
       <div className="mb-1 flex w-full flex-col items-start sm:flex-row sm:items-center">
-        <div className="mb-1 min-w-[110px] sm:mb-0">Type</div>
+        <div className="mb-1 min-w-[110px] sm:mb-0">{t('type')}</div>
 
         <div className="flex items-center">
           <Select
@@ -382,7 +384,7 @@ export function EditStorageComponent({
 
       {IS_CLOUD && user.role === UserRole.ADMIN && (
         <div className="mb-1 flex w-full flex-col items-start sm:flex-row sm:items-center">
-          <div className="mb-1 min-w-[110px] sm:mb-0">Is system?</div>
+          <div className="mb-1 min-w-[110px] sm:mb-0">{t('isSystem')}</div>
 
           <div className="flex items-center">
             <Switch
@@ -397,7 +399,7 @@ export function EditStorageComponent({
 
             <Tooltip
               className="cursor-pointer"
-              title="System storage is accessible by all workspaces in this instance. Regular storage is only accessible by the current workspace."
+              title={t('systemStorageTooltip')}
             >
               <InfoCircleOutlined className="ml-2" style={{ color: 'gray' }} />
             </Tooltip>
@@ -497,7 +499,7 @@ export function EditStorageComponent({
             type="primary"
             onClick={testConnection}
           >
-            Test connection
+            {t('testConnection')}
           </Button>
         ) : (
           <div />
@@ -511,7 +513,7 @@ export function EditStorageComponent({
             type="primary"
             onClick={save}
           >
-            Save
+            {t('save')}
           </Button>
         ) : (
           <div />
@@ -526,7 +528,7 @@ export function EditStorageComponent({
             ghost
             onClick={onClose}
           >
-            Cancel
+            {t('common:cancel')}
           </Button>
         ) : (
           <div />

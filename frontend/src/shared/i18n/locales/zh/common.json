@@ -28,6 +28,7 @@
   "and": "和",
   "name": "名称",
   "description": "描述",
+  "notConfigured": "未配置",
   "actions": "操作",
   "status": "状态",
   "createdAt": "创建时间",
@@ -109,5 +110,6 @@
   "saving": "保存中...",
   "saveChanges": "保存更改",
   "reset": "重置",
+  "createWorkspace": "创建工作空间",
   "deleting": "删除中..."
 }
