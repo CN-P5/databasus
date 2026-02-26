@@ -169,7 +169,19 @@ func (s *RestoreService) RestoreBackupWithAuth(
 	}
 
 	// Prepare database cache with credentials from the request
+	var databaseID uuid.UUID
+	if requestDTO.MysqlDatabase != nil && requestDTO.MysqlDatabase.DatabaseID != nil {
+		databaseID = *requestDTO.MysqlDatabase.DatabaseID
+	} else if requestDTO.PostgresqlDatabase != nil && requestDTO.PostgresqlDatabase.DatabaseID != nil {
+		databaseID = *requestDTO.PostgresqlDatabase.DatabaseID
+	} else if requestDTO.MariadbDatabase != nil && requestDTO.MariadbDatabase.DatabaseID != nil {
+		databaseID = *requestDTO.MariadbDatabase.DatabaseID
+	} else if requestDTO.MongodbDatabase != nil && requestDTO.MongodbDatabase.DatabaseID != nil {
+		databaseID = *requestDTO.MongodbDatabase.DatabaseID
+	}
+
 	dbCache := &restoring.RestoreDatabaseCache{
+		DatabaseID:         databaseID,
 		PostgresqlDatabase: requestDTO.PostgresqlDatabase,
 		MysqlDatabase:      requestDTO.MysqlDatabase,
 		MariadbDatabase:    requestDTO.MariadbDatabase,

@@ -12,6 +12,7 @@ import (
 )
 
 type RestoreDatabaseCache struct {
+	DatabaseID         uuid.UUID                      `json:"databaseId,omitempty"`
 	PostgresqlDatabase *postgresql.PostgresqlDatabase `json:"postgresqlDatabase,omitempty"`
 	MysqlDatabase      *mysql.MysqlDatabase           `json:"mysqlDatabase,omitempty"`
 	MariadbDatabase    *mariadb.MariadbDatabase       `json:"mariadbDatabase,omitempty"`
