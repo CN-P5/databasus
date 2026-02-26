@@ -8,6 +8,7 @@ interface Props {
 
 export function ShowAzureBlobStorageComponent({ storage }: Props) {
   const { t } = useTranslation('storages');
+
   return (
     <>
       <div className="mb-1 flex items-center">
@@ -19,7 +20,7 @@ export function ShowAzureBlobStorageComponent({ storage }: Props) {
 
       {storage?.azureBlobStorage?.authMethod === 'CONNECTION_STRING' && (
         <div className="mb-1 flex items-center">
-          <div className="min-w-[110px]">{t('connection')}</div>
+          <div className="min-w-[110px]">{t('connectionString')}</div>
           {'*************'}
         </div>
       )}

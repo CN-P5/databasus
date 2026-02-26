@@ -37,7 +37,7 @@ export const EditDatabaseNotifiersComponent = ({
   isSaveToApi,
   onSaved,
 }: Props) => {
-  const { t } = useTranslation(['databases', 'common']);
+  const { t } = useTranslation(['common', 'databases']);
   const [editingDatabase, setEditingDatabase] = useState<Database>();
   const [isUnsaved, setIsUnsaved] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -97,10 +97,10 @@ export const EditDatabaseNotifiersComponent = ({
   return (
     <div>
       <div className="mb-5 max-w-[275px] text-gray-500 dark:text-gray-400">
-        {t('databases:notifierDescription')}
+        {t('databases:notifierInfo')}
         <br />
         <br />
-        {t('databases:notifierMultipleSelection')}
+        {t('databases:notifierInfo2')}
       </div>
 
       <div className="mb-5 flex w-full items-center">
@@ -171,7 +171,7 @@ export const EditDatabaseNotifiersComponent = ({
           maskClosable={false}
         >
           <div className="my-3 max-w-[275px] text-gray-500 dark:text-gray-400">
-            {t('databases:notifierDescription')}
+            {t('databases:notifierInfo')}
           </div>
 
           <EditNotifierComponent

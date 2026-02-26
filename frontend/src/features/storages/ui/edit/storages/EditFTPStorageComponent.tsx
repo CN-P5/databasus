@@ -139,17 +139,14 @@ export function EditFTPStorageComponent({ storage, setStorage, setUnsaved }: Pro
             placeholder="backups (optional)"
           />
 
-          <Tooltip
-            className="cursor-pointer"
-            title={t('remoteDirectoryPathForStoringBackupsOptional')}
-          >
+          <Tooltip className="cursor-pointer" title={t('remoteDirectoryPathForStoringBackups')}>
             <InfoCircleOutlined className="ml-2" style={{ color: 'gray' }} />
           </Tooltip>
         </div>
       </div>
 
       <div className="mb-1 flex w-full flex-col items-start sm:flex-row sm:items-center">
-        <div className="mb-1 min-w-[110px] sm:mb-0">{t('useSslTls')}</div>
+        <div className="mb-1 min-w-[110px] sm:mb-0">{t('useSsl')}</div>
         <div className="flex items-center">
           <Checkbox
             checked={storage?.ftpStorage?.useSsl || false}
@@ -171,7 +168,7 @@ export function EditFTPStorageComponent({ storage, setStorage, setUnsaved }: Pro
 
           <Tooltip
             className="cursor-pointer"
-            title={t('useExplicitTlsEncryptionFtpsForSecureFileTransfer')}
+            title={t('useExplicitTlsEncryptionForSecureFileTransfer')}
           >
             <InfoCircleOutlined className="ml-2" style={{ color: 'gray' }} />
           </Tooltip>
@@ -217,12 +214,7 @@ export function EditFTPStorageComponent({ storage, setStorage, setUnsaved }: Pro
                   {t('skipCertificateVerification')}
                 </Checkbox>
 
-                <Tooltip
-                  className="cursor-pointer"
-                  title={t(
-                    'skipTlsCertificateVerificationEnableThisIfYourFtpServerUsesASelfSignedCertificateWarningThisReducesSecurity',
-                  )}
-                >
+                <Tooltip className="cursor-pointer" title={t('skipTlsCertificateVerification')}>
                   <InfoCircleOutlined className="ml-2" style={{ color: 'gray' }} />
                 </Tooltip>
               </div>

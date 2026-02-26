@@ -82,7 +82,7 @@ export function WorkspaceAuditLogsComponent({
       setHasMore(response.auditLogs.length === pageSize);
     } catch (error: unknown) {
       const errorMessage =
-        error instanceof Error ? error.message : 'Failed to load workspace audit logs';
+        error instanceof Error ? error.message : t('failedToLoadWorkspaceAuditLogs');
       message.error(errorMessage);
     } finally {
       loadingRef.current = false;

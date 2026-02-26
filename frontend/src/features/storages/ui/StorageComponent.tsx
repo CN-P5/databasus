@@ -299,9 +299,7 @@ export const StorageComponent = ({
                         onClick={() => setIsShowRemoveConfirm(true)}
                         loading={isRemoving}
                         disabled={isRemoving}
-                      >
-                        {t('remove')}
-                      </Button>
+                      />
                     )}
                   </>
                 )}

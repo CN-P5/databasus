@@ -44,7 +44,7 @@ export function EditS3StorageComponent({
       </div>
 
       <div className="mb-1 flex w-full flex-col items-start sm:flex-row sm:items-center">
-        <div className="mb-1 min-w-[110px] sm:mb-0">{t('s3BucketLabel')}</div>
+        <div className="mb-1 min-w-[110px] sm:mb-0">{t('s3Bucket')}</div>
         <Input
           value={storage?.s3Storage?.s3Bucket || ''}
           onChange={(e) => {
@@ -66,7 +66,7 @@ export function EditS3StorageComponent({
       </div>
 
       <div className="mb-1 flex w-full flex-col items-start sm:flex-row sm:items-center">
-        <div className="mb-1 min-w-[110px] sm:mb-0">{t('region')}</div>
+        <div className="mb-1 min-w-[110px] sm:mb-0">{t('s3Region')}</div>
         <Input
           value={storage?.s3Storage?.s3Region || ''}
           onChange={(e) => {
@@ -88,7 +88,7 @@ export function EditS3StorageComponent({
       </div>
 
       <div className="mb-1 flex w-full flex-col items-start sm:flex-row sm:items-center">
-        <div className="mb-1 min-w-[110px] sm:mb-0">{t('accessKey')}</div>
+        <div className="mb-1 min-w-[110px] sm:mb-0">{t('s3AccessKey')}</div>
         <Input.Password
           value={storage?.s3Storage?.s3AccessKey || ''}
           onChange={(e) => {
@@ -114,7 +114,7 @@ export function EditS3StorageComponent({
       </div>
 
       <div className="mb-1 flex w-full flex-col items-start sm:flex-row sm:items-center">
-        <div className="mb-1 min-w-[110px] sm:mb-0">{t('secretKey')}</div>
+        <div className="mb-1 min-w-[110px] sm:mb-0">{t('s3SecretKey')}</div>
         <Input.Password
           value={storage?.s3Storage?.s3SecretKey || ''}
           onChange={(e) => {
@@ -140,7 +140,7 @@ export function EditS3StorageComponent({
       </div>
 
       <div className="mb-1 flex w-full flex-col items-start sm:flex-row sm:items-center">
-        <div className="mb-1 min-w-[110px] sm:mb-0">{t('endpoint')}</div>
+        <div className="mb-1 min-w-[110px] sm:mb-0">{t('s3Endpoint')}</div>
         <div className="flex items-center">
           <Input
             value={storage?.s3Storage?.s3Endpoint || ''}
@@ -219,7 +219,7 @@ export function EditS3StorageComponent({
           </div>
 
           <div className="mb-1 flex w-full flex-col items-start sm:flex-row sm:items-center">
-            <div className="mb-1 min-w-[110px] sm:mb-0">{t('virtualHost')}</div>
+            <div className="mb-1 min-w-[110px] sm:mb-0">{t('s3VirtualHost')}</div>
             <div className="flex items-center">
               <Checkbox
                 checked={storage?.s3Storage?.s3UseVirtualHostedStyle || false}
@@ -246,7 +246,7 @@ export function EditS3StorageComponent({
           </div>
 
           <div className="mb-1 flex w-full flex-col items-start sm:flex-row sm:items-center">
-            <div className="mb-1 min-w-[110px] sm:mb-0">{t('skipTLS')}</div>
+            <div className="mb-1 min-w-[110px] sm:mb-0">{t('s3SkipTlsVerify')}</div>
             <div className="flex items-center">
               <Checkbox
                 checked={storage?.s3Storage?.skipTLSVerify || false}
@@ -263,7 +263,7 @@ export function EditS3StorageComponent({
                   setUnsaved();
                 }}
               >
-                {t('skipTlsVerify')}
+                {t('skipTLS')}
               </Checkbox>
 
               <Tooltip className="cursor-pointer" title={t('skipTLSCertificateVerification')}>

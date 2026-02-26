@@ -3,13 +3,10 @@ import { App, Button, Input } from 'antd';
 import { type JSX, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { useCloudflareTurnstile } from '../../../shared/hooks/useCloudflareTurnstile';
-
 import { GITHUB_CLIENT_ID, GOOGLE_CLIENT_ID } from '../../../constants';
 import { userApi } from '../../../entity/users';
 import { StringUtils } from '../../../shared/lib';
 import { FormValidator } from '../../../shared/lib/FormValidator';
-import { CloudflareTurnstileWidget } from '../../../shared/ui/CloudflareTurnstileWidget';
 import { GithubOAuthComponent } from './oauth/GithubOAuthComponent';
 import { GoogleOAuthComponent } from './oauth/GoogleOAuthComponent';
 
@@ -35,8 +32,6 @@ export function SignUpComponent({ onSwitchToSignIn }: SignUpComponentProps): JSX
   const [confirmPasswordError, setConfirmPasswordError] = useState(false);
 
   const [signUpError, setSignUpError] = useState('');
-
-  const { token, containerRef, resetCloudflareTurnstile } = useCloudflareTurnstile();
 
   const validateFieldsForSignUp = (): boolean => {
     if (!name || name.trim() === '') {
@@ -92,11 +87,10 @@ export function SignUpComponent({ onSwitchToSignIn }: SignUpComponentProps): JSX
           email,
           password,
           name,
-          cloudflareTurnstileToken: token,
         });
+        await userApi.signIn({ email, password });
       } catch (e) {
         setSignUpError(StringUtils.capitalizeFirstLetter((e as Error).message));
-        resetCloudflareTurnstile();
       }
     }
 
@@ -121,15 +115,15 @@ export function SignUpComponent({ onSwitchToSignIn }: SignUpComponentProps): JSX
           </div>
           <div className="relative flex justify-center text-sm">
             <span className="bg-white px-2 text-gray-500 dark:bg-gray-900 dark:text-gray-400">
-              {t('continueWithEmail')}
+              {t('orContinue')}
             </span>
           </div>
         </div>
       )}
 
-      <div className="my-1 text-xs font-semibold">{t('fullName')}</div>
+      <div className="my-1 text-xs font-semibold">{t('yourName')}</div>
       <Input
-        placeholder={t('fullNamePlaceholder')}
+        placeholder="John Doe"
         value={name}
         onChange={(e) => {
           setNameError(false);
@@ -140,7 +134,7 @@ export function SignUpComponent({ onSwitchToSignIn }: SignUpComponentProps): JSX
 
       <div className="my-1 text-xs font-semibold">{t('yourEmail')}</div>
       <Input
-        placeholder={t('emailPlaceholder')}
+        placeholder="your@email.com"
         value={email}
         onChange={(e) => {
           setEmailError(false);
@@ -150,9 +144,9 @@ export function SignUpComponent({ onSwitchToSignIn }: SignUpComponentProps): JSX
         type="email"
       />
 
-      <div className="my-1 text-xs font-semibold">{t('password')}</div>
+      <div className="my-1 text-xs font-semibold">{t('newPassword')}</div>
       <Input.Password
-        placeholder={t('passwordPlaceholder')}
+        placeholder="********"
         value={password}
         onChange={(e) => {
           setPasswordError(false);
@@ -165,7 +159,7 @@ export function SignUpComponent({ onSwitchToSignIn }: SignUpComponentProps): JSX
 
       <div className="my-1 text-xs font-semibold">{t('confirmPassword')}</div>
       <Input.Password
-        placeholder={t('passwordPlaceholder')}
+        placeholder="********"
         value={confirmPassword}
         status={confirmPasswordError ? 'error' : undefined}
         onChange={(e) => {
@@ -180,8 +174,6 @@ export function SignUpComponent({ onSwitchToSignIn }: SignUpComponentProps): JSX
       />
 
       <div className="mt-3" />
-
-      <CloudflareTurnstileWidget containerRef={containerRef} />
 
       <Button
         disabled={isLoading}
@@ -203,7 +195,7 @@ export function SignUpComponent({ onSwitchToSignIn }: SignUpComponentProps): JSX
 
       {onSwitchToSignIn && (
         <div className="mt-4 text-center text-sm text-gray-600 dark:text-gray-400">
-          {t('alreadyHaveAccount')}{' '}
+          {t('alreadyHaveAnAccount')}{' '}
           <button
             type="button"
             onClick={onSwitchToSignIn}

@@ -16,7 +16,7 @@ import {
 import { useScreenHeight } from '../shared/hooks';
 
 export function AuthPageComponent() {
-  const { t } = useTranslation('users');
+  const { t } = useTranslation('common');
   const [isAdminHasPassword, setIsAdminHasPassword] = useState(false);
   const [authMode, setAuthMode] = useState<'signIn' | 'signUp' | 'requestReset' | 'resetPassword'>(
     'signUp',
@@ -35,13 +35,13 @@ export function AuthPageComponent() {
         setLoading(false);
       })
       .catch((e) => {
-        alert(t('failedToCheckAdminPasswordStatus') + ': ' + (e as Error).message);
+        alert(t('failedToCheckAdminPasswordStatus') + ' ' + (e as Error).message);
       });
   };
 
   useEffect(() => {
     checkAdminPasswordStatus();
-  }, []);
+  }, [t]);
 
   return (
     <div className="h-full dark:bg-gray-900" style={{ height: screenHeight }}>

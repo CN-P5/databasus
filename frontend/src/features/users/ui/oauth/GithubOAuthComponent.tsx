@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { GITHUB_CLIENT_ID, getOAuthRedirectUri } from '../../../../constants';
 
 export function GithubOAuthComponent() {
-  const { t } = useTranslation('users');
+  const { t } = useTranslation('playground');
 
   if (!GITHUB_CLIENT_ID) {
     return null;
@@ -35,7 +35,7 @@ export function GithubOAuthComponent() {
 
   return (
     <Button icon={<GithubOutlined />} onClick={handleGitHubLogin} className="w-full" size="large">
-      {t('continueWithGithub')}
+      {t('continueWithGitHub')}
     </Button>
   );
 }

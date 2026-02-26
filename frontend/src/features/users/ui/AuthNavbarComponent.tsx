@@ -1,11 +1,11 @@
 import { useTranslation } from 'react-i18next';
 
-import { LanguageSwitcher } from '../../../shared/i18n';
+import { LanguageSwitcher } from '../../../shared/ui/LanguageSwitcherComponent';
 import { StarButtonComponent } from '../../../shared/ui/StarButtonComponent';
 import { ThemeToggleComponent } from '../../../shared/ui/ThemeToggleComponent';
 
 export function AuthNavbarComponent() {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation('users');
 
   return (
     <div className="flex h-[65px] items-center justify-center px-5 pt-5 sm:justify-start">
@@ -38,9 +38,7 @@ export function AuthNavbarComponent() {
 
         <div className="flex items-center gap-2">
           <StarButtonComponent />
-
           <LanguageSwitcher />
-
           <ThemeToggleComponent />
         </div>
       </div>

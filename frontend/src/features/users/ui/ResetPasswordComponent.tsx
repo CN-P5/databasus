@@ -98,7 +98,7 @@ export function ResetPasswordComponent({
           newPassword,
         });
 
-        message.success(t('passwordResetSuccessfully'));
+        message.success(t('passwordResetSuccessfullyRedirectingToSignIn'));
 
         // Redirect to sign in after successful reset
         setTimeout(() => {
@@ -116,10 +116,10 @@ export function ResetPasswordComponent({
 
   return (
     <div className="w-full max-w-[300px]">
-      <div className="mb-5 text-center text-2xl font-bold">{t('resetPassword')}</div>
+      <div className="mb-5 text-center text-2xl font-bold">{t('resetPasswordTitle')}</div>
 
       <div className="mb-4 text-center text-sm text-gray-600 dark:text-gray-400">
-        {t('resetPasswordEnterCodeDescription')}
+        {t('enterTheCodeSentToYourEmailAndYourNewPassword')}
       </div>
 
       <div className="my-1 text-xs font-semibold">{t('yourEmail')}</div>
@@ -197,7 +197,7 @@ export function ResetPasswordComponent({
       <div className="mt-4 text-center text-sm text-gray-600 dark:text-gray-400">
         {onSwitchToRequestCode && (
           <>
-            {t('didntReceiveCode')}{' '}
+            {t('didntReceiveACode')}{' '}
             <button
               type="button"
               onClick={onSwitchToRequestCode}

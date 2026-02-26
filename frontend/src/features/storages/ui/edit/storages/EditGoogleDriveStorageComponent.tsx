@@ -12,6 +12,7 @@ interface Props {
 
 export function EditGoogleDriveStorageComponent({ storage, setStorage, setUnsaved }: Props) {
   const { t } = useTranslation('storages');
+
   const goToAuthUrl = () => {
     if (!storage?.googleDriveStorage?.clientId || !storage?.googleDriveStorage?.clientSecret) {
       return;

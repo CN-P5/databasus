@@ -58,9 +58,6 @@
   "hasSendError": "有发送错误",
   "testNotificationSent": "测试通知已发送！",
   "notifierIsUsedBySomeDatabasesRemoveFirst": "通知方式被某些数据库使用。请先从数据库中移除通知方式。",
-  "notifierIsUsedByDatabases": "通知方式被某些数据库使用。请先从数据库中移除通知方式。",
-  "sendTestNotificationHint": "通过下方按钮发送测试通知（即使您已更新设置）",
-  "waitNextNotification": "等待下次通知发送且无错误",
   "enterName": "输入名称...",
   "sendError": "发送错误",
   "theError": "错误：",
@@ -74,8 +71,6 @@
   "searchNotifier": "搜索通知方式",
   "noNotifiersFoundMatching": "未找到匹配 \"{{searchQuery}}\" 的通知方式",
   "notifierIsAPlaceWhereNotificationsWillBeSent": "通知 - 通知发送位置（邮件、Slack、Telegram 等）",
-  "notifierDescription": "通知方式 - 是发送通知的地方（邮件、Slack、Telegram 等）",
-  "noNotifiersFound": "未找到匹配 \"{{query}}\" 的通知方式",
   "backToNotifiers": "← 返回通知方式",
   "name": "名称",
   "type": "类型",
@@ -139,8 +134,5 @@
   "hidden": "（隐藏）",
   "powerAutomateUrlWithColon": "Power Automate URL：",
   "hide": "隐藏",
-  "show": "显示",
-  "howToConnectSlack": "如何连接 Slack（如何获取机器人令牌和聊天 ID）？",
-  "notificationTitle": "通知标题",
-  "notificationMessage": "通知消息"
+  "show": "显示"
 }

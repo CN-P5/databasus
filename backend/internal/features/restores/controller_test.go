@@ -32,6 +32,7 @@ import (
 	tasks_cancellation "databasus-backend/internal/features/tasks/cancellation"
 	users_dto "databasus-backend/internal/features/users/dto"
 	users_enums "databasus-backend/internal/features/users/enums"
+	users_services "databasus-backend/internal/features/users/services"
 	users_testing "databasus-backend/internal/features/users/testing"
 	workspaces_models "databasus-backend/internal/features/workspaces/models"
 	workspaces_testing "databasus-backend/internal/features/workspaces/testing"
@@ -261,7 +262,7 @@ func Test_RestoreBackup_AuditLogWritten(t *testing.T) {
 
 	found := false
 	for _, log := range auditLogs.AuditLogs {
-		if strings.Contains(log.Message, "Database restored for database") &&
+		if strings.Contains(log.Message, "Database restored from backup") &&
 			strings.Contains(log.Message, database.Name) {
 			found = true
 			break
@@ -357,7 +358,7 @@ func Test_RestoreBackup_DiskSpaceValidation(t *testing.T) {
 				_, err = configService.SaveBackupConfig(config)
 				assert.NoError(t, err)
 
-				backup = createTestBackup(mysqlDB, storage)
+				backup = createTestBackup(mysqlDB, owner)
 
 				request = restores_core.RestoreBackupRequest{
 					MysqlDatabase: &mysql.MysqlDatabase{
@@ -609,7 +610,7 @@ func createTestDatabaseWithBackupForRestore(
 		panic(err)
 	}
 
-	backup := createTestBackup(database, storage)
+	backup := createTestBackup(database, owner)
 
 	return database, backup
 }
@@ -726,14 +727,24 @@ func createTestStorage(workspaceID uuid.UUID) *storages.Storage {
 
 func createTestBackup(
 	database *databases.Database,
-	storage *storages.Storage,
+	owner *users_dto.SignInResponseDTO,
 ) *backups_core.Backup {
 	fieldEncryptor := util_encryption.GetFieldEncryptor()
+	userService := users_services.GetUserService()
+	user, err := userService.GetUserFromToken(owner.Token)
+	if err != nil {
+		panic(err)
+	}
+
+	storages, err := storages.GetStorageService().GetStorages(user, *database.WorkspaceID)
+	if err != nil || len(storages) == 0 {
+		panic("No storage found for workspace")
+	}
 
 	backup := &backups_core.Backup{
 		ID:               uuid.New(),
 		DatabaseID:       database.ID,
-		StorageID:        storage.ID,
+		StorageID:        storages[0].ID,
 		Status:           backups_core.BackupStatusCompleted,
 		BackupSizeMb:     10.5,
 		BackupDurationMs: 1000,
@@ -748,11 +759,11 @@ func createTestBackup(
 	dummyContent := []byte("dummy backup content for testing")
 	reader := strings.NewReader(string(dummyContent))
 	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
-	if err := storage.SaveFile(
+	if err := storages[0].SaveFile(
 		context.Background(),
 		fieldEncryptor,
 		logger,
-		backup.ID.String(),
+		backup.ID,
 		reader,
 	); err != nil {
 		panic(fmt.Sprintf("Failed to create test backup file: %v", err))

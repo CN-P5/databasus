@@ -12,8 +12,6 @@ interface Props {
 
 export function EditNASStorageComponent({ storage, setStorage, setUnsaved }: Props) {
   const { t } = useTranslation('storages');
-  const shareHasSlash =
-    storage?.nasStorage?.share?.includes('/') || storage?.nasStorage?.share?.includes('\\');
 
   return (
     <>
@@ -65,32 +63,24 @@ export function EditNASStorageComponent({ storage, setStorage, setUnsaved }: Pro
 
       <div className="mb-1 flex w-full flex-col items-start sm:flex-row sm:items-center">
         <div className="mb-1 min-w-[110px] sm:mb-0">{t('share')}</div>
-        <div className="flex flex-col">
-          <Input
-            value={storage?.nasStorage?.share || ''}
-            onChange={(e) => {
-              if (!storage?.nasStorage) return;
+        <Input
+          value={storage?.nasStorage?.share || ''}
+          onChange={(e) => {
+            if (!storage?.nasStorage) return;
 
-              setStorage({
-                ...storage,
-                nasStorage: {
-                  ...storage.nasStorage,
-                  share: e.target.value.trim(),
-                },
-              });
-              setUnsaved();
-            }}
-            size="small"
-            className="w-full max-w-[250px]"
-            placeholder="shared_folder"
-            status={shareHasSlash ? 'warning' : undefined}
-          />
-          {shareHasSlash && (
-            <div className="mt-1 max-w-[250px] text-xs text-yellow-600">
-              {t('shareMustBeASingleShareName')}
-            </div>
-          )}
-        </div>
+            setStorage({
+              ...storage,
+              nasStorage: {
+                ...storage.nasStorage,
+                share: e.target.value.trim(),
+              },
+            });
+            setUnsaved();
+          }}
+          size="small"
+          className="w-full max-w-[250px]"
+          placeholder="shared_folder"
+        />
       </div>
 
       <div className="mb-1 flex w-full flex-col items-start sm:flex-row sm:items-center">
@@ -192,10 +182,7 @@ export function EditNASStorageComponent({ storage, setStorage, setUnsaved }: Pro
             placeholder="WORKGROUP (optional)"
           />
 
-          <Tooltip
-            className="cursor-pointer"
-            title={t('windowsDomainNameOptionalLeaveEmptyIfNotUsingDomainAuthentication')}
-          >
+          <Tooltip className="cursor-pointer" title={t('windowsDomainNameOptional')}>
             <InfoCircleOutlined className="ml-2" style={{ color: 'gray' }} />
           </Tooltip>
         </div>
@@ -210,7 +197,6 @@ export function EditNASStorageComponent({ storage, setStorage, setUnsaved }: Pro
               if (!storage?.nasStorage) return;
 
               let pathValue = e.target.value.trim();
-              // Remove leading slash if present
               if (pathValue.startsWith('/')) {
                 pathValue = pathValue.substring(1);
               }
@@ -229,7 +215,7 @@ export function EditNASStorageComponent({ storage, setStorage, setUnsaved }: Pro
             placeholder="backups (optional, no leading slash)"
           />
 
-          <Tooltip className="cursor-pointer" title={t('subdirectoryPathWithinTheShareOptional')}>
+          <Tooltip className="cursor-pointer" title={t('subdirectoryPathWithinTheShare')}>
             <InfoCircleOutlined className="ml-2" style={{ color: 'gray' }} />
           </Tooltip>
         </div>

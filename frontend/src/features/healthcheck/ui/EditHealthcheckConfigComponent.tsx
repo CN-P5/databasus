@@ -12,7 +12,9 @@ interface Props {
 }
 
 export const EditHealthcheckConfigComponent = ({ databaseId, onClose }: Props) => {
-  const { t } = useTranslation(['healthcheck', 'common']);
+  const { t } = useTranslation('databases');
+  const { t: tCommon } = useTranslation('common');
+
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isUnsaved, setIsUnsaved] = useState(false);
@@ -62,7 +64,7 @@ export const EditHealthcheckConfigComponent = ({ databaseId, onClose }: Props) =
   return (
     <div className="space-y-4">
       <div className="mb-1 flex items-center">
-        <div className="min-w-[180px]">{t('healthcheck:enableHealthcheck')}</div>
+        <div className="min-w-[180px]">{t('enableHealthcheck')}</div>
         <Switch
           checked={healthcheckConfig.isHealthcheckEnabled}
           onChange={(checked) => {
@@ -75,7 +77,7 @@ export const EditHealthcheckConfigComponent = ({ databaseId, onClose }: Props) =
           size="small"
         />
 
-        <Tooltip className="cursor-pointer" title={t('healthcheck:enableHealthcheckTooltip')}>
+        <Tooltip className="cursor-pointer" title={t('enableHealthcheckTooltip')}>
           <InfoCircleOutlined className="ml-2" style={{ color: 'gray' }} />
         </Tooltip>
       </div>
@@ -83,7 +85,7 @@ export const EditHealthcheckConfigComponent = ({ databaseId, onClose }: Props) =
       {healthcheckConfig.isHealthcheckEnabled && (
         <>
           <div className="mb-1 flex items-center">
-            <div className="min-w-[180px]">{t('healthcheck:notifyWhenUnavailable')}</div>
+            <div className="min-w-[180px]">{t('notifyWhenUnavailable')}</div>
 
             <Switch
               checked={healthcheckConfig.isSentNotificationWhenUnavailable}
@@ -97,16 +99,13 @@ export const EditHealthcheckConfigComponent = ({ databaseId, onClose }: Props) =
               size="small"
             />
 
-            <Tooltip
-              className="cursor-pointer"
-              title={t('healthcheck:notifyWhenUnavailableTooltip')}
-            >
+            <Tooltip className="cursor-pointer" title={t('notifyWhenUnavailableTooltip')}>
               <InfoCircleOutlined className="ml-2" style={{ color: 'gray' }} />
             </Tooltip>
           </div>
 
           <div className="mb-1 flex items-center">
-            <div className="min-w-[180px]">{t('healthcheck:checkIntervalMinutes')}</div>
+            <div className="min-w-[180px]">{t('checkIntervalMinutes')}</div>
 
             <Input
               type="number"
@@ -127,16 +126,13 @@ export const EditHealthcheckConfigComponent = ({ databaseId, onClose }: Props) =
               min={1}
             />
 
-            <Tooltip
-              className="cursor-pointer"
-              title={t('healthcheck:checkIntervalMinutesTooltip')}
-            >
+            <Tooltip className="cursor-pointer" title={t('checkIntervalMinutesTooltip')}>
               <InfoCircleOutlined className="ml-2" style={{ color: 'gray' }} />
             </Tooltip>
           </div>
 
           <div className="mb-1 flex items-center">
-            <div className="min-w-[180px]">{t('healthcheck:attemptsBeforeDown')}</div>
+            <div className="min-w-[180px]">{t('attemptsBeforeDown')}</div>
 
             <Input
               type="number"
@@ -157,13 +153,13 @@ export const EditHealthcheckConfigComponent = ({ databaseId, onClose }: Props) =
               min={1}
             />
 
-            <Tooltip className="cursor-pointer" title={t('healthcheck:attemptsBeforeDownTooltip')}>
+            <Tooltip className="cursor-pointer" title={t('attemptsBeforeDownTooltip')}>
               <InfoCircleOutlined className="ml-2" style={{ color: 'gray' }} />
             </Tooltip>
           </div>
 
           <div className="mb-1 flex items-center">
-            <div className="min-w-[180px]">{t('healthcheck:storeAttemptsDays')}</div>
+            <div className="min-w-[180px]">{t('storeAttemptsDays')}</div>
 
             <Input
               type="number"
@@ -184,7 +180,7 @@ export const EditHealthcheckConfigComponent = ({ databaseId, onClose }: Props) =
               min={1}
             />
 
-            <Tooltip className="cursor-pointer" title={t('healthcheck:storeAttemptsDaysTooltip')}>
+            <Tooltip className="cursor-pointer" title={t('storeAttemptsDaysTooltip')}>
               <InfoCircleOutlined className="ml-2" style={{ color: 'gray' }} />
             </Tooltip>
           </div>
@@ -193,11 +189,11 @@ export const EditHealthcheckConfigComponent = ({ databaseId, onClose }: Props) =
 
       <div className="mt-6 flex justify-end space-x-2">
         <Button onClick={onClose} disabled={isSaving}>
-          {t('common:cancel')}
+          {tCommon('cancel')}
         </Button>
 
         <Button type="primary" onClick={handleSave} loading={isSaving} disabled={!isUnsaved}>
-          {t('common:save')}
+          {tCommon('save')}
         </Button>
       </div>
     </div>

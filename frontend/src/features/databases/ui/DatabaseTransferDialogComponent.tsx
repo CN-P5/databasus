@@ -36,7 +36,7 @@ export const DatabaseTransferDialogComponent = ({
   onClose,
   onTransferred,
 }: Props) => {
-  const { t } = useTranslation(['databases', 'common']);
+  const { t } = useTranslation(['common', 'databases']);
   const [isLoading, setIsLoading] = useState(true);
   const [workspaces, setWorkspaces] = useState<WorkspaceResponse[]>([]);
   const [selectedWorkspaceId, setSelectedWorkspaceId] = useState<string | undefined>();
@@ -145,8 +145,8 @@ export const DatabaseTransferDialogComponent = ({
     try {
       await backupConfigApi.transferDatabase(database.id, request);
       ToastHelper.showToast({
-        title: t('databases:transferSuccessTitle'),
-        description: t('databases:transferSuccessDescription', { name: database.name }),
+        title: t('databases:databaseTransferredSuccessfully'),
+        description: t('databases:databaseTransferredDescription', { name: database.name }),
       });
       onTransferred();
     } catch (e) {
@@ -354,7 +354,7 @@ export const DatabaseTransferDialogComponent = ({
                           {notifiersCanTransfer.length === 0 &&
                             notifiersBlockingTransfer.length > 0 && (
                               <div className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                                {t('databases:noNotifiersWillBeTransferred')}
+                                {t('databases:noNotifiersTransferred')}
                               </div>
                             )}
                         </div>
@@ -401,7 +401,7 @@ export const DatabaseTransferDialogComponent = ({
               loading={isTransferring}
               disabled={!isFormValid || isTransferring}
             >
-              {t('databases:transfer')}
+              {t('databases:transferDatabase')}
             </Button>
           </div>
         </div>

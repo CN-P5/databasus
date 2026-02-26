@@ -44,7 +44,7 @@ export function ShowSFTPStorageComponent({ storage }: Props) {
 
       {storage?.sftpStorage?.skipHostKeyVerify && (
         <div className="mb-1 flex items-center">
-          <div className="min-w-[110px]">{t('skipHostKey')}</div>
+          <div className="min-w-[110px]">{t('skipHostKeyLabel')}</div>
           {t('enabled')}
         </div>
       )}

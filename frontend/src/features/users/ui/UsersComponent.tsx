@@ -30,7 +30,7 @@ const getRoleColor = (role: UserRole): string => {
 };
 
 export function UsersComponent({ contentHeight }: Props) {
-  const { t } = useTranslation(['users', 'common']);
+  const { t } = useTranslation('users');
   const { message } = App.useApp();
   const isMobile = useIsMobile();
   const [users, setUsers] = useState<UserProfile[]>([]);
@@ -125,7 +125,7 @@ export function UsersComponent({ contentHeight }: Props) {
       setTotal(response.total);
       setHasMore(response.users.length === pageSize);
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : t('users:failedToLoadUsers');
+      const errorMessage = error instanceof Error ? error.message : t('failedToLoadUsers');
       message.error(errorMessage);
     } finally {
       loadingRef.current = false;
@@ -144,13 +144,13 @@ export function UsersComponent({ contentHeight }: Props) {
     try {
       if (isActive) {
         await userManagementApi.deactivateUser(userId);
-        message.success(t('users:userDeactivatedSuccessfully'));
+        message.success(t('userDeactivatedSuccessfully'));
       } else {
         await userManagementApi.activateUser(userId);
-        message.success(t('users:userActivatedSuccessfully'));
+        message.success(t('userActivatedSuccessfully'));
       }
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : t('users:operationFailed');
+      const errorMessage = error instanceof Error ? error.message : t('operationFailed');
       message.error(errorMessage);
 
       setUsers((prev) =>
@@ -178,10 +178,9 @@ export function UsersComponent({ contentHeight }: Props) {
     try {
       const request: ChangeUserRoleRequest = { role: newRole };
       await userManagementApi.changeUserRole(userId, request);
-      message.success(t('users:userRoleChangedSuccessfully'));
+      message.success(t('userRoleChangedSuccessfully'));
     } catch (error: unknown) {
-      const errorMessage =
-        error instanceof Error ? error.message : t('users:failedToChangeUserRole');
+      const errorMessage = error instanceof Error ? error.message : t('failedToChangeUserRole');
       message.error(errorMessage);
 
       if (originalRole) {
@@ -210,7 +209,7 @@ export function UsersComponent({ contentHeight }: Props) {
 
   const columns: ColumnsType<UserProfile> = [
     {
-      title: t('users:user'),
+      title: t('user'),
       key: 'user',
       width: 350,
       render: (_, record: UserProfile) => (
@@ -220,7 +219,7 @@ export function UsersComponent({ contentHeight }: Props) {
       ),
     },
     {
-      title: t('users:systemRole'),
+      title: t('systemRole'),
       dataIndex: 'role',
       key: 'role',
       width: 200,
@@ -237,15 +236,11 @@ export function UsersComponent({ contentHeight }: Props) {
           }}
           options={[
             {
-              label: (
-                <span style={{ color: getRoleColor(UserRole.ADMIN) }}>{t('users:admin')}</span>
-              ),
+              label: <span style={{ color: getRoleColor(UserRole.ADMIN) }}>{t('admin')}</span>,
               value: UserRole.ADMIN,
             },
             {
-              label: (
-                <span style={{ color: getRoleColor(UserRole.MEMBER) }}>{t('users:member')}</span>
-              ),
+              label: <span style={{ color: getRoleColor(UserRole.MEMBER) }}>{t('member')}</span>,
               value: UserRole.MEMBER,
             },
           ]}
@@ -253,7 +248,7 @@ export function UsersComponent({ contentHeight }: Props) {
       ),
     },
     {
-      title: t('users:isActive'),
+      title: t('isActive'),
       dataIndex: 'isActive',
       key: 'isActive',
       width: 200,
@@ -271,7 +266,7 @@ export function UsersComponent({ contentHeight }: Props) {
       ),
     },
     {
-      title: t('users:created'),
+      title: t('timestamp'),
       dataIndex: 'createdAt',
       key: 'createdAt',
       width: 300,
@@ -292,7 +287,7 @@ export function UsersComponent({ contentHeight }: Props) {
       render: (_, record: UserProfile) => (
         <div>
           <Button type="primary" ghost size="small" onClick={() => handleRowClick(record)}>
-            {t('users:viewAuditLogs')}
+            {t('viewAuditLogs')}
           </Button>
         </div>
       ),
@@ -321,7 +316,7 @@ export function UsersComponent({ contentHeight }: Props) {
 
         <div className="mb-3 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="text-sm text-gray-600 dark:text-gray-400">{t('users:role')}:</span>
+            <span className="text-sm text-gray-600 dark:text-gray-400">{t('role')}:</span>
             <Select
               value={user.role}
               onChange={(value) => handleRoleChange(user.id, value)}
@@ -334,16 +329,12 @@ export function UsersComponent({ contentHeight }: Props) {
               }}
               options={[
                 {
-                  label: (
-                    <span style={{ color: getRoleColor(UserRole.ADMIN) }}>{t('users:admin')}</span>
-                  ),
+                  label: <span style={{ color: getRoleColor(UserRole.ADMIN) }}>{t('admin')}</span>,
                   value: UserRole.ADMIN,
                 },
                 {
                   label: (
-                    <span style={{ color: getRoleColor(UserRole.MEMBER) }}>
-                      {t('users:member')}
-                    </span>
+                    <span style={{ color: getRoleColor(UserRole.MEMBER) }}>{t('member')}</span>
                   ),
                   value: UserRole.MEMBER,
                 },
@@ -351,7 +342,7 @@ export function UsersComponent({ contentHeight }: Props) {
             />
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-sm text-gray-600 dark:text-gray-400">{t('users:active')}:</span>
+            <span className="text-sm text-gray-600 dark:text-gray-400">{t('active')}:</span>
             <Switch
               checked={user.isActive}
               onChange={() => handleActivationToggle(user.id, user.isActive)}
@@ -372,7 +363,7 @@ export function UsersComponent({ contentHeight }: Props) {
           onClick={() => handleRowClick(user)}
           className="w-full"
         >
-          {t('users:viewAuditLogs')}
+          {t('viewAuditLogs')}
         </Button>
       </div>
     );
@@ -387,17 +378,15 @@ export function UsersComponent({ contentHeight }: Props) {
           style={{ height: contentHeight }}
         >
           <div className="mb-4 flex items-center justify-between">
-            <h1 className="text-2xl font-bold dark:text-white">{t('users:databasusUsers')}</h1>
+            <h1 className="text-2xl font-bold dark:text-white">{t('databasusUsers')}</h1>
             <div className="text-sm text-gray-500 dark:text-gray-400">
-              {isLoading
-                ? t('common:loading')
-                : t('users:usersCount', { current: users.length, total })}
+              {isLoading ? t('loading') : `${users.length} ${t('of')} ${total} ${t('users')}`}
             </div>
           </div>
 
           <div className="mb-4">
             <Input
-              placeholder={t('users:searchByEmailOrName')}
+              placeholder={t('searchByEmailOrName')}
               allowClear
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
@@ -411,7 +400,7 @@ export function UsersComponent({ contentHeight }: Props) {
             </div>
           ) : users.length === 0 ? (
             <div className="flex h-32 items-center justify-center text-gray-500 dark:text-gray-400">
-              {t('users:noUsersFound')}
+              {t('noUsersFound')}
             </div>
           ) : (
             <>
@@ -436,7 +425,7 @@ export function UsersComponent({ contentHeight }: Props) {
 
               {!hasMore && users.length > 0 && (
                 <div className="py-4 text-center text-sm text-gray-500 dark:text-gray-400">
-                  {t('users:allUsersLoaded', { total })}
+                  {t('allUsersLoaded')} ({total} {t('total')})
                 </div>
               )}
             </>
@@ -449,7 +438,7 @@ export function UsersComponent({ contentHeight }: Props) {
         title={
           <div>
             <div className="text-lg font-semibold text-gray-900 dark:text-white">
-              {t('users:userAuditLogs')}
+              {t('userAuditLogs')}
             </div>
             <div className="text-sm text-gray-600 dark:text-gray-400">{selectedUser?.email}</div>
           </div>

@@ -16,7 +16,6 @@ import (
 
 	"databasus-backend/internal/config"
 	common "databasus-backend/internal/features/backups/backups/common"
-	backups_core "databasus-backend/internal/features/backups/backups/core"
 	backup_encryption "databasus-backend/internal/features/backups/backups/encryption"
 	backups_config "databasus-backend/internal/features/backups/config"
 	"databasus-backend/internal/features/databases"
@@ -24,6 +23,7 @@ import (
 	encryption_secrets "databasus-backend/internal/features/encryption/secrets"
 	"databasus-backend/internal/features/storages"
 	"databasus-backend/internal/util/encryption"
+	"databasus-backend/internal/util/ssh"
 	"databasus-backend/internal/util/tools"
 
 	"github.com/google/uuid"
@@ -54,7 +54,7 @@ type writeResult struct {
 
 func (uc *CreatePostgresqlBackupUsecase) Execute(
 	ctx context.Context,
-	backup *backups_core.Backup,
+	backupID uuid.UUID,
 	backupConfig *backups_config.BackupConfig,
 	db *databases.Database,
 	storage *storages.Storage,
@@ -80,16 +80,41 @@ func (uc *CreatePostgresqlBackupUsecase) Execute(
 		return nil, fmt.Errorf("database name is required for pg_dump backups")
 	}
 
-	args := uc.buildPgDumpArgs(pg)
-
 	decryptedPassword, err := uc.fieldEncryptor.Decrypt(db.ID, pg.Password)
 	if err != nil {
 		return nil, fmt.Errorf("failed to decrypt database password: %w", err)
 	}
 
+	host := pg.Host
+	port := pg.Port
+	var tunnel *ssh.Tunnel
+
+	if db.SSHTunnel != nil && db.SSHTunnel.Enabled {
+		sshConfig, err := db.SSHTunnel.ToSSHConfigWithDecrypt(uc.fieldEncryptor, db.ID)
+		if err != nil {
+			return nil, fmt.Errorf("failed to prepare SSH tunnel config: %w", err)
+		}
+
+		tunnel = ssh.NewTunnel(sshConfig)
+		if err := tunnel.Start(ctx, pg.Host, pg.Port); err != nil {
+			return nil, fmt.Errorf("failed to start SSH tunnel: %w", err)
+		}
+		defer func() { _ = tunnel.Stop() }()
+
+		host = "127.0.0.1"
+		port = tunnel.GetLocalPort()
+
+		uc.logger.Info("SSH tunnel established for PostgreSQL backup",
+			"originalHost", pg.Host,
+			"localPort", port,
+		)
+	}
+
+	args := uc.buildPgDumpArgsWithHostPort(pg, host, port)
+
 	return uc.streamToStorage(
 		ctx,
-		backup,
+		backupID,
 		backupConfig,
 		tools.GetPostgresqlExecutable(
 			pg.Version,
@@ -101,6 +126,8 @@ func (uc *CreatePostgresqlBackupUsecase) Execute(
 		decryptedPassword,
 		storage,
 		db,
+		host,
+		port,
 		backupProgressListener,
 	)
 }
@@ -108,13 +135,15 @@ func (uc *CreatePostgresqlBackupUsecase) Execute(
 // streamToStorage streams pg_dump output directly to storage
 func (uc *CreatePostgresqlBackupUsecase) streamToStorage(
 	parentCtx context.Context,
-	backup *backups_core.Backup,
+	backupID uuid.UUID,
 	backupConfig *backups_config.BackupConfig,
 	pgBin string,
 	args []string,
 	password string,
 	storage *storages.Storage,
 	db *databases.Database,
+	host string,
+	port int,
 	backupProgressListener func(completedMBs float64),
 ) (*common.BackupMetadata, error) {
 	uc.logger.Info("Streaming PostgreSQL backup to storage", "pgBin", pgBin, "args", args)
@@ -122,7 +151,7 @@ func (uc *CreatePostgresqlBackupUsecase) streamToStorage(
 	ctx, cancel := uc.createBackupContext(parentCtx)
 	defer cancel()
 
-	pgpassFile, err := uc.setupPgpassFile(db.Postgresql, password)
+	pgpassFile, err := uc.setupPgpassFile(db.Postgresql, password, host, port)
 	if err != nil {
 		return nil, err
 	}
@@ -167,7 +196,7 @@ func (uc *CreatePostgresqlBackupUsecase) streamToStorage(
 	storageReader, storageWriter := io.Pipe()
 
 	finalWriter, encryptionWriter, backupMetadata, err := uc.setupBackupEncryption(
-		backup.ID,
+		backupID,
 		backupConfig,
 		storageWriter,
 	)
@@ -182,13 +211,7 @@ func (uc *CreatePostgresqlBackupUsecase) streamToStorage(
 	// Start streaming into storage in its own goroutine
 	saveErrCh := make(chan error, 1)
 	go func() {
-		saveErr := storage.SaveFile(
-			ctx,
-			uc.fieldEncryptor,
-			uc.logger,
-			backup.FileName,
-			storageReader,
-		)
+		saveErr := storage.SaveFile(ctx, uc.fieldEncryptor, uc.logger, backupID, storageReader)
 		saveErrCh <- saveErr
 	}()
 
@@ -334,12 +357,16 @@ func (uc *CreatePostgresqlBackupUsecase) copyWithShutdownCheck(
 	return totalBytesWritten, nil
 }
 
-func (uc *CreatePostgresqlBackupUsecase) buildPgDumpArgs(pg *pgtypes.PostgresqlDatabase) []string {
+func (uc *CreatePostgresqlBackupUsecase) buildPgDumpArgsWithHostPort(
+	pg *pgtypes.PostgresqlDatabase,
+	host string,
+	port int,
+) []string {
 	args := []string{
 		"-Fc",
 		"--no-password",
-		"-h", pg.Host,
-		"-p", strconv.Itoa(pg.Port),
+		"-h", host,
+		"-p", strconv.Itoa(port),
 		"-U", pg.Username,
 		"-d", *pg.Database,
 		"--verbose",
@@ -405,8 +432,10 @@ func (uc *CreatePostgresqlBackupUsecase) createBackupContext(
 func (uc *CreatePostgresqlBackupUsecase) setupPgpassFile(
 	pgConfig *pgtypes.PostgresqlDatabase,
 	password string,
+	host string,
+	port int,
 ) (string, error) {
-	pgpassFile, err := uc.createTempPgpassFile(pgConfig, password)
+	pgpassFile, err := uc.createTempPgpassFile(pgConfig, password, host, port)
 	if err != nil {
 		return "", fmt.Errorf("failed to create temporary .pgpass file: %w", err)
 	}
@@ -482,9 +511,7 @@ func (uc *CreatePostgresqlBackupUsecase) setupBackupEncryption(
 	backupConfig *backups_config.BackupConfig,
 	storageWriter io.WriteCloser,
 ) (io.Writer, *backup_encryption.EncryptionWriter, common.BackupMetadata, error) {
-	metadata := common.BackupMetadata{
-		BackupID: backupID,
-	}
+	metadata := common.BackupMetadata{}
 
 	if backupConfig.Encryption != backups_config.BackupEncryptionEncrypted {
 		metadata.Encryption = backups_config.BackupEncryptionNone
@@ -750,20 +777,39 @@ func (uc *CreatePostgresqlBackupUsecase) handleConnectionErrors(
 func (uc *CreatePostgresqlBackupUsecase) createTempPgpassFile(
 	pgConfig *pgtypes.PostgresqlDatabase,
 	password string,
+	host string,
+	port int,
 ) (string, error) {
-	if pgConfig == nil || password == "" {
-		return "", nil
+	if pgConfig == nil {
+		return "", fmt.Errorf("pgConfig is nil")
+	}
+	if password == "" {
+		return "", fmt.Errorf("password is empty")
 	}
 
-	escapedHost := tools.EscapePgpassField(pgConfig.Host)
+	escapedHost := tools.EscapePgpassField(host)
 	escapedUsername := tools.EscapePgpassField(pgConfig.Username)
 	escapedPassword := tools.EscapePgpassField(password)
 
+	uc.logger.Info("Creating pgpass file",
+		"host", host,
+		"port", port,
+		"username", pgConfig.Username,
+		"passwordLength", len(password),
+	)
+
 	pgpassContent := fmt.Sprintf("%s:%d:*:%s:%s",
 		escapedHost,
-		pgConfig.Port,
+		port,
 		escapedUsername,
 		escapedPassword,
+	)
+
+	uc.logger.Info("pgpass content (without password)",
+		"hostField", escapedHost,
+		"portField", port,
+		"usernameField", escapedUsername,
+		"contentLength", len(pgpassContent),
 	)
 
 	tempFolder := config.GetEnv().TempFolder
@@ -785,11 +831,13 @@ func (uc *CreatePostgresqlBackupUsecase) createTempPgpassFile(
 	}
 
 	pgpassFile := filepath.Join(tempDir, ".pgpass")
-	err = os.WriteFile(pgpassFile, []byte(pgpassContent), 0600)
+	err = os.WriteFile(pgpassFile, []byte(pgpassContent+"\n"), 0600)
 	if err != nil {
 		_ = os.RemoveAll(tempDir)
 		return "", fmt.Errorf("failed to write temporary .pgpass file: %w", err)
 	}
+
+	uc.logger.Info("pgpass file written", "path", pgpassFile, "contentLength", len(pgpassContent))
 
 	return pgpassFile, nil
 }

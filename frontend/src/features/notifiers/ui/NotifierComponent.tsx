@@ -34,6 +34,8 @@ export const NotifierComponent = ({
   isCanManageNotifiers,
 }: Props) => {
   const { t } = useTranslation('notifiers');
+  const { t: tCommon } = useTranslation('common');
+
   const [notifier, setNotifier] = useState<Notifier | undefined>();
 
   const [isEditName, setIsEditName] = useState(false);
@@ -83,7 +85,7 @@ export const NotifierComponent = ({
     try {
       const isNotifierUsing = await databaseApi.isNotifierUsing(notifier.id);
       if (isNotifierUsing) {
-        alert(t('notifierIsUsedByDatabases'));
+        alert(t('notifierIsUsedBySomeDatabasesRemoveFirst'));
         setIsShowRemoveConfirm(false);
       } else {
         await notifierApi.deleteNotifier(notifier.id);
@@ -162,7 +164,7 @@ export const NotifierComponent = ({
                       setEditNotifier({ ...editNotifier, name: e.target.value });
                       setIsNameUnsaved(true);
                     }}
-                    placeholder="Enter name..."
+                    placeholder={t('enterName')}
                     size="large"
                   />
 
@@ -189,7 +191,7 @@ export const NotifierComponent = ({
                     loading={isSaving}
                     disabled={!editNotifier?.name}
                   >
-                    {t('common:save')}
+                    {tCommon('save')}
                   </Button>
                 )}
               </div>
@@ -209,10 +211,10 @@ export const NotifierComponent = ({
                 </div>
 
                 <div className="mt-3 text-sm break-words whitespace-pre-wrap text-gray-500 dark:text-gray-400">
-                  {t('toCleanError')}
+                  {t('toCleanThisErrorChooseAny')}
                   <ul>
-                    <li>- {t('sendTestNotificationHint')}</li>
-                    <li>- {t('waitNextNotification')}</li>
+                    <li>{t('sendTestNotificationViaButtonBelow')}</li>
+                    <li>{t('waitUntilNextNotificationSentWithoutErrors')}</li>
                   </ul>
                 </div>
               </div>
@@ -291,8 +293,8 @@ export const NotifierComponent = ({
           <ConfirmationComponent
             onConfirm={remove}
             onDecline={() => setIsShowRemoveConfirm(false)}
-            description={t('removeNotifierConfirmation')}
-            actionText={t('common:remove')}
+            description={t('areYouSureToRemoveThisNotifier')}
+            actionText={t('remove')}
             actionButtonColor="red"
           />
         )}

@@ -13,7 +13,7 @@ interface Props {
 }
 
 export const StorageTransferDialogComponent = ({ storage, onClose, onTransferred }: Props) => {
-  const { t } = useTranslation(['storages', 'common']);
+  const { t } = useTranslation('storages');
   const [isLoading, setIsLoading] = useState(true);
   const [isStorageInUse, setIsStorageInUse] = useState(false);
   const [workspaces, setWorkspaces] = useState<WorkspaceResponse[]>([]);
@@ -100,7 +100,7 @@ export const StorageTransferDialogComponent = ({ storage, onClose, onTransferred
 
           <div className="flex gap-2">
             <Button type="default" onClick={onClose}>
-              {t('cancel', { ns: 'common' })}
+              {t('cancel')}
             </Button>
 
             <Button

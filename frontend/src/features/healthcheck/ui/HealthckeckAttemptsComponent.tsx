@@ -41,7 +41,8 @@ const getAfterDateByPeriod = (period: 'today' | '7d' | '30d' | 'all'): Date => {
 };
 
 export const HealthckeckAttemptsComponent = ({ database }: Props) => {
-  const { t } = useTranslation('healthcheck');
+  const { t } = useTranslation('databases');
+
   const [isHealthcheckConfigLoading, setIsHealthcheckConfigLoading] = useState(false);
   const [isShowHealthcheckConfig, setIsShowHealthcheckConfig] = useState(false);
 

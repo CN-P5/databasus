@@ -3,13 +3,10 @@ import { Button, Input } from 'antd';
 import { type JSX, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { useCloudflareTurnstile } from '../../../shared/hooks/useCloudflareTurnstile';
-
 import { GITHUB_CLIENT_ID, GOOGLE_CLIENT_ID, IS_EMAIL_CONFIGURED } from '../../../constants';
 import { userApi } from '../../../entity/users';
 import { StringUtils } from '../../../shared/lib';
 import { FormValidator } from '../../../shared/lib/FormValidator';
-import { CloudflareTurnstileWidget } from '../../../shared/ui/CloudflareTurnstileWidget';
 import { GithubOAuthComponent } from './oauth/GithubOAuthComponent';
 import { GoogleOAuthComponent } from './oauth/GoogleOAuthComponent';
 
@@ -23,7 +20,6 @@ export function SignInComponent({
   onSwitchToResetPassword,
 }: SignInComponentProps): JSX.Element {
   const { t } = useTranslation('users');
-
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [passwordVisible, setPasswordVisible] = useState(false);
@@ -34,8 +30,6 @@ export function SignInComponent({
   const [passwordError, setPasswordError] = useState(false);
 
   const [signInError, setSignInError] = useState('');
-
-  const { token, containerRef, resetCloudflareTurnstile } = useCloudflareTurnstile();
 
   const validateFieldsForSignIn = (): boolean => {
     if (!email) {
@@ -67,11 +61,9 @@ export function SignInComponent({
         await userApi.signIn({
           email,
           password,
-          cloudflareTurnstileToken: token,
         });
       } catch (e) {
         setSignInError(StringUtils.capitalizeFirstLetter((e as Error).message));
-        resetCloudflareTurnstile();
       }
 
       setLoading(false);
@@ -96,7 +88,7 @@ export function SignInComponent({
           </div>
           <div className="relative flex justify-center text-sm">
             <span className="bg-white px-2 text-gray-500 dark:bg-gray-900 dark:text-gray-400">
-              {t('continueWithEmail')}
+              {t('orContinue')}
             </span>
           </div>
         </div>
@@ -104,7 +96,7 @@ export function SignInComponent({
 
       <div className="my-1 text-xs font-semibold">{t('yourEmail')}</div>
       <Input
-        placeholder={t('emailPlaceholder')}
+        placeholder="your@email.com"
         value={email}
         onChange={(e) => {
           setEmailError(false);
@@ -114,7 +106,7 @@ export function SignInComponent({
         type="email"
       />
 
-      <div className="my-1 text-xs font-semibold">{t('password')}</div>
+      <div className="my-1 text-xs font-semibold">{t('newPassword')}</div>
       <Input.Password
         placeholder="********"
         value={password}
@@ -128,8 +120,6 @@ export function SignInComponent({
       />
 
       <div className="mt-3" />
-
-      <CloudflareTurnstileWidget containerRef={containerRef} />
 
       <Button
         disabled={isLoading}
@@ -150,7 +140,7 @@ export function SignInComponent({
       )}
 
       <div className="mt-4 text-center text-sm text-gray-600 dark:text-gray-400">
-        {t('dontHaveAccount')}{' '}
+        {t('dontHaveAnAccount')}{' '}
         <button
           type="button"
           onClick={onSwitchToSignUp}

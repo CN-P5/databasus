@@ -19,6 +19,7 @@ interface Props {
 
 export function ShowStorageComponent({ storage, user }: Props) {
   const { t } = useTranslation('storages');
+
   if (!storage) return null;
 
   if (storage?.isSystem && user.role !== UserRole.ADMIN) return <div />;

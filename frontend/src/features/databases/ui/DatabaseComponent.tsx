@@ -26,7 +26,7 @@ export const DatabaseComponent = ({
   onDatabaseDeleted,
   isCanManageDBs,
 }: Props) => {
-  const { t } = useTranslation('databases');
+  const { t } = useTranslation(['common', 'databases']);
   const [currentTab, setCurrentTab] = useState<'config' | 'backups' | 'metrics'>('backups');
 
   const [database, setDatabase] = useState<Database | undefined>();
@@ -59,14 +59,14 @@ export const DatabaseComponent = ({
           className={`mr-2 cursor-pointer rounded-tl-md rounded-tr-md px-6 py-2 ${currentTab === 'config' ? 'bg-white dark:bg-gray-800' : 'bg-gray-200 dark:bg-gray-700'}`}
           onClick={() => setCurrentTab('config')}
         >
-          {t('config')}
+          {t('common:config')}
         </div>
 
         <div
           className={`mr-2 cursor-pointer rounded-tl-md rounded-tr-md px-6 py-2 ${currentTab === 'backups' ? 'bg-white dark:bg-gray-800' : 'bg-gray-200 dark:bg-gray-700'}`}
           onClick={() => setCurrentTab('backups')}
         >
-          {t('backups')}
+          {t('common:backups')}
         </div>
       </div>
 

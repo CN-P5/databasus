@@ -168,11 +168,5 @@
   "virtualHost": "虚拟主机",
   "credentials": "凭据",
   "skipHostKeyLabel": "跳过主机密钥",
-  "useSslTls": "使用 SSL/TLS",
-  "googleDriveStorageConfigNotFound": "未找到 Google Drive 存储配置",
-  "googleDriveStorageConfigNotFoundInDto": "DTO 中未找到 Google Drive 存储配置",
-  "failedToExchangeOAuthCode": "交换 OAuth 代码失败",
-  "unsupportedStorageTypeForOAuth": "不支持的 OAuth 存储类型",
-  "oauthStateParameterInvalid": "OAuth 状态参数无效",
-  "oauthParamNotFound": "未找到 OAuth 参数。请确保重定向 URL 配置正确。"
+  "useSslTls": "使用 SSL/TLS"
 }

@@ -13,7 +13,7 @@ interface Props {
 }
 
 export function SettingsComponent({ contentHeight }: Props) {
-  const { t } = useTranslation(['common', 'settings']);
+  const { t } = useTranslation('settings');
   const { message } = App.useApp();
   const [settings, setSettings] = useState<UsersSettings | undefined>(undefined);
   const [isLoading, setIsLoading] = useState(true);
@@ -43,8 +43,7 @@ export function SettingsComponent({ contentHeight }: Props) {
       setFormSettings(currentSettings);
       setHasChanges(false);
     } catch (error: unknown) {
-      const errorMessage =
-        error instanceof Error ? error.message : t('settings:failedToLoadSettings');
+      const errorMessage = error instanceof Error ? error.message : t('failedToLoadSettings');
       message.error(errorMessage);
     } finally {
       setIsLoading(false);
@@ -75,10 +74,9 @@ export function SettingsComponent({ contentHeight }: Props) {
       setSettings(updatedSettings);
       setFormSettings(updatedSettings);
       setHasChanges(false);
-      message.success(t('settings:settingsUpdated'));
+      message.success(t('settingsUpdatedSuccessfully'));
     } catch (error: unknown) {
-      const errorMessage =
-        error instanceof Error ? error.message : t('settings:failedToUpdateSettings');
+      const errorMessage = error instanceof Error ? error.message : t('failedToUpdateSettings');
       message.error(errorMessage);
     } finally {
       setIsSaving(false);
@@ -102,7 +100,7 @@ export function SettingsComponent({ contentHeight }: Props) {
           className="grow overflow-y-auto rounded bg-white p-5 shadow dark:bg-gray-800"
           style={{ height: contentHeight }}
         >
-          <h1 className="text-2xl font-bold dark:text-white">{t('settings:settings')}</h1>
+          <h1 className="text-2xl font-bold dark:text-white">{t('databasusSettings')}</h1>
 
           <div className="mt-6">
             {isLoading ? (
@@ -116,10 +114,10 @@ export function SettingsComponent({ contentHeight }: Props) {
                   <div className="flex items-start justify-between border-b border-gray-200 pb-4 dark:border-gray-700">
                     <div className="flex-1 pr-20">
                       <div className="font-medium text-gray-900 dark:text-white">
-                        {t('settings:allowExternalRegistrations')}
+                        {t('allowExternalRegistrations')}
                       </div>
                       <div className="mt-1 text-gray-500 dark:text-gray-400">
-                        {t('settings:allowExternalRegistrationsDescription')}
+                        {t('allowExternalRegistrationsDescription')}
                       </div>
                     </div>
 
@@ -143,11 +141,11 @@ export function SettingsComponent({ contentHeight }: Props) {
                     <div className="flex items-start justify-between border-b border-gray-200 pb-4 dark:border-gray-700">
                       <div className="flex-1 pr-20">
                         <div className="font-medium text-gray-900 dark:text-white">
-                          {t('settings:allowMemberInvitations')}
+                          {t('allowMemberInvitations')}
                         </div>
 
                         <div className="mt-1 text-gray-500 dark:text-gray-400">
-                          {t('settings:allowMemberInvitationsDescription')}
+                          {t('allowMemberInvitationsDescription')}
                         </div>
                       </div>
 
@@ -171,11 +169,11 @@ export function SettingsComponent({ contentHeight }: Props) {
                   <div className="flex items-start justify-between border-b border-gray-200 pb-4 dark:border-gray-700">
                     <div className="flex-1 pr-20">
                       <div className="font-medium text-gray-900 dark:text-white">
-                        {t('settings:membersCanCreateWorkspaces')}
+                        {t('membersCanCreateWorkspaces')}
                       </div>
 
                       <div className="mt-1 text-gray-500 dark:text-gray-400">
-                        {t('settings:membersCanCreateWorkspacesDescription')}
+                        {t('membersCanCreateWorkspacesDescription')}
                       </div>
                     </div>
                     <div className="ml-4">
@@ -204,11 +202,11 @@ export function SettingsComponent({ contentHeight }: Props) {
                       disabled={isSaving}
                       className="border-blue-600 bg-blue-600 hover:border-blue-700 hover:bg-blue-700"
                     >
-                      {isSaving ? t('common:saving') : t('common:saveChanges')}
+                      {isSaving ? t('saving') : t('saveChanges')}
                     </Button>
 
                     <Button type="default" onClick={handleReset} disabled={isSaving}>
-                      {t('common:reset')}
+                      {t('reset')}
                     </Button>
                   </div>
                 )}
@@ -217,20 +215,20 @@ export function SettingsComponent({ contentHeight }: Props) {
           </div>
 
           <div className="mt-3 text-sm text-gray-500 dark:text-gray-400">
-            {t('settings:readMoreAboutSettings')}{' '}
+            {t('readMoreAboutSettings')}{' '}
             <a
               href="https://databasus.com/access-management#global-settings"
               target="_blank"
               rel="noreferrer"
               className="!text-blue-600"
             >
-              {t('settings:here')}
+              {t('here')}
             </a>
           </div>
 
           {/* Health-check Information */}
           <div className="my-8 max-w-2xl">
-            <h2 className="mb-3 text-xl font-bold dark:text-white">{t('settings:healthCheck')}</h2>
+            <h2 className="mb-3 text-xl font-bold dark:text-white">{t('healthcheck')}</h2>
 
             <div className="group relative">
               <div className="flex items-center rounded-md border border-gray-300 bg-gray-50 px-3 py-2 !font-mono text-sm text-gray-700 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200">
@@ -239,7 +237,7 @@ export function SettingsComponent({ contentHeight }: Props) {
                   onClick={() => {
                     window.open(`${getApplicationServer()}/api/v1/system/health`, '_blank');
                   }}
-                  title={t('settings:clickToOpenInNewTab')}
+                  title={t('clickToOpenInNewTab')}
                 >
                   {getApplicationServer()}/api/v1/system/health
                 </code>
@@ -249,14 +247,14 @@ export function SettingsComponent({ contentHeight }: Props) {
                   className="ml-2 opacity-0 transition-opacity group-hover:opacity-100"
                   onClick={() => {
                     navigator.clipboard.writeText(`${getApplicationServer()}/api/v1/system/health`);
-                    message.success(t('settings:healthCheckEndpointCopied'));
+                    message.success(t('healthcheckEndpointCopied'));
                   }}
                 >
                   📋
                 </Button>
               </div>
               <div className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                {t('settings:useThisEndpointToMonitor')}
+                {t('useThisEndpoint')}
               </div>
             </div>
           </div>

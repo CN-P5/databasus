@@ -103,15 +103,20 @@ func (d *Database) IsUserReadOnly(
 	logger *slog.Logger,
 	encryptor encryption.FieldEncryptor,
 ) (bool, []string, error) {
+	var sshConfig *ssh.Config
+	if d.SSHTunnel != nil && d.SSHTunnel.Enabled {
+		sshConfig = d.SSHTunnel.ToSSHConfig()
+	}
+
 	switch d.Type {
 	case DatabaseTypePostgres:
-		return d.Postgresql.IsUserReadOnly(ctx, logger, encryptor, d.ID)
+		return d.Postgresql.IsUserReadOnly(ctx, logger, encryptor, d.ID, sshConfig)
 	case DatabaseTypeMysql:
-		return d.Mysql.IsUserReadOnly(ctx, logger, encryptor, d.ID)
+		return d.Mysql.IsUserReadOnly(ctx, logger, encryptor, d.ID, sshConfig)
 	case DatabaseTypeMariadb:
-		return d.Mariadb.IsUserReadOnly(ctx, logger, encryptor, d.ID)
+		return d.Mariadb.IsUserReadOnly(ctx, logger, encryptor, d.ID, sshConfig)
 	case DatabaseTypeMongodb:
-		return d.Mongodb.IsUserReadOnly(ctx, logger, encryptor, d.ID)
+		return d.Mongodb.IsUserReadOnly(ctx, logger, encryptor, d.ID, sshConfig)
 	default:
 		return false, nil, errors.New("read-only check not supported for this database type")
 	}
@@ -125,30 +130,23 @@ func (d *Database) HideSensitiveData() {
 }
 
 func (d *Database) EncryptSensitiveFields(encryptor encryption.FieldEncryptor) error {
-	if d.Postgresql != nil {
-		if err := d.Postgresql.EncryptSensitiveFields(d.ID, encryptor); err != nil {
-			return err
-		}
-	}
-	if d.Mysql != nil {
-		if err := d.Mysql.EncryptSensitiveFields(d.ID, encryptor); err != nil {
-			return err
-		}
-	}
-	if d.Mariadb != nil {
-		if err := d.Mariadb.EncryptSensitiveFields(d.ID, encryptor); err != nil {
-			return err
-		}
-	}
-	if d.Mongodb != nil {
-		if err := d.Mongodb.EncryptSensitiveFields(d.ID, encryptor); err != nil {
-			return err
-		}
-	}
 	if d.SSHTunnel != nil {
 		if err := d.SSHTunnel.EncryptSensitiveFields(d.ID, encryptor); err != nil {
 			return err
 		}
+	}
+
+	if d.Postgresql != nil {
+		return d.Postgresql.EncryptSensitiveFields(d.ID, encryptor)
+	}
+	if d.Mysql != nil {
+		return d.Mysql.EncryptSensitiveFields(d.ID, encryptor)
+	}
+	if d.Mariadb != nil {
+		return d.Mariadb.EncryptSensitiveFields(d.ID, encryptor)
+	}
+	if d.Mongodb != nil {
+		return d.Mongodb.EncryptSensitiveFields(d.ID, encryptor)
 	}
 	return nil
 }
@@ -181,7 +179,14 @@ func (d *Database) Update(incoming *Database) {
 	d.Name = incoming.Name
 	d.Type = incoming.Type
 	d.Notifiers = incoming.Notifiers
-	d.SSHTunnel = incoming.SSHTunnel
+
+	if d.SSHTunnel != nil && incoming.SSHTunnel != nil {
+		d.SSHTunnel.Update(incoming.SSHTunnel)
+	} else if incoming.SSHTunnel != nil {
+		d.SSHTunnel = incoming.SSHTunnel
+	} else {
+		d.SSHTunnel = nil
+	}
 
 	switch d.Type {
 	case DatabaseTypePostgres:

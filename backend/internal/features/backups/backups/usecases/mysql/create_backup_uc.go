@@ -19,7 +19,6 @@ import (
 
 	"databasus-backend/internal/config"
 	common "databasus-backend/internal/features/backups/backups/common"
-	backups_core "databasus-backend/internal/features/backups/backups/core"
 	backup_encryption "databasus-backend/internal/features/backups/backups/encryption"
 	backups_config "databasus-backend/internal/features/backups/config"
 	"databasus-backend/internal/features/databases"
@@ -27,6 +26,7 @@ import (
 	encryption_secrets "databasus-backend/internal/features/encryption/secrets"
 	"databasus-backend/internal/features/storages"
 	"databasus-backend/internal/util/encryption"
+	"databasus-backend/internal/util/ssh"
 	"databasus-backend/internal/util/tools"
 )
 
@@ -53,7 +53,7 @@ type writeResult struct {
 
 func (uc *CreateMysqlBackupUsecase) Execute(
 	ctx context.Context,
-	backup *backups_core.Backup,
+	backupID uuid.UUID,
 	backupConfig *backups_config.BackupConfig,
 	db *databases.Database,
 	storage *storages.Storage,
@@ -79,11 +79,36 @@ func (uc *CreateMysqlBackupUsecase) Execute(
 		return nil, fmt.Errorf("failed to decrypt database password: %w", err)
 	}
 
-	args := uc.buildMysqldumpArgs(my)
+	host := my.Host
+	port := my.Port
+	var tunnel *ssh.Tunnel
+
+	if db.SSHTunnel != nil && db.SSHTunnel.Enabled {
+		sshConfig, err := db.SSHTunnel.ToSSHConfigWithDecrypt(uc.fieldEncryptor, db.ID)
+		if err != nil {
+			return nil, fmt.Errorf("failed to prepare SSH tunnel config: %w", err)
+		}
+
+		tunnel = ssh.NewTunnel(sshConfig)
+		if err := tunnel.Start(ctx, my.Host, my.Port); err != nil {
+			return nil, fmt.Errorf("failed to start SSH tunnel: %w", err)
+		}
+		defer func() { _ = tunnel.Stop() }()
+
+		host = "127.0.0.1"
+		port = tunnel.GetLocalPort()
+
+		uc.logger.Info("SSH tunnel established for MySQL backup",
+			"originalHost", my.Host,
+			"localPort", port,
+		)
+	}
+
+	args := uc.buildMysqldumpArgsWithHostPort(my, host, port)
 
 	return uc.streamToStorage(
 		ctx,
-		backup,
+		backupID,
 		backupConfig,
 		tools.GetMysqlExecutable(
 			my.Version,
@@ -96,19 +121,24 @@ func (uc *CreateMysqlBackupUsecase) Execute(
 		storage,
 		backupProgressListener,
 		my,
+		host,
+		port,
 	)
 }
 
-func (uc *CreateMysqlBackupUsecase) buildMysqldumpArgs(my *mysqltypes.MysqlDatabase) []string {
+func (uc *CreateMysqlBackupUsecase) buildMysqldumpArgsWithHostPort(
+	my *mysqltypes.MysqlDatabase,
+	host string,
+	port int,
+) []string {
 	args := []string{
-		"--host=" + my.Host,
-		"--port=" + strconv.Itoa(my.Port),
+		"--host=" + host,
+		"--port=" + strconv.Itoa(port),
 		"--user=" + my.Username,
 		"--single-transaction",
 		"--routines",
 		"--set-gtid-purged=OFF",
 		"--quick",
-		"--skip-extended-insert",
 		"--verbose",
 	}
 
@@ -150,7 +180,7 @@ func (uc *CreateMysqlBackupUsecase) getNetworkCompressionArgs(version tools.Mysq
 
 func (uc *CreateMysqlBackupUsecase) streamToStorage(
 	parentCtx context.Context,
-	backup *backups_core.Backup,
+	backupID uuid.UUID,
 	backupConfig *backups_config.BackupConfig,
 	mysqlBin string,
 	args []string,
@@ -158,13 +188,15 @@ func (uc *CreateMysqlBackupUsecase) streamToStorage(
 	storage *storages.Storage,
 	backupProgressListener func(completedMBs float64),
 	myConfig *mysqltypes.MysqlDatabase,
+	host string,
+	port int,
 ) (*common.BackupMetadata, error) {
 	uc.logger.Info("Streaming MySQL backup to storage", "mysqlBin", mysqlBin)
 
 	ctx, cancel := uc.createBackupContext(parentCtx)
 	defer cancel()
 
-	myCnfFile, err := uc.createTempMyCnfFile(myConfig, password)
+	myCnfFile, err := uc.createTempMyCnfFile(myConfig, password, host, port)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create .my.cnf: %w", err)
 	}
@@ -201,7 +233,7 @@ func (uc *CreateMysqlBackupUsecase) streamToStorage(
 	storageReader, storageWriter := io.Pipe()
 
 	finalWriter, encryptionWriter, backupMetadata, err := uc.setupBackupEncryption(
-		backup.ID,
+		backupID,
 		backupConfig,
 		storageWriter,
 	)
@@ -218,13 +250,7 @@ func (uc *CreateMysqlBackupUsecase) streamToStorage(
 
 	saveErrCh := make(chan error, 1)
 	go func() {
-		saveErr := storage.SaveFile(
-			ctx,
-			uc.fieldEncryptor,
-			uc.logger,
-			backup.FileName,
-			storageReader,
-		)
+		saveErr := storage.SaveFile(ctx, uc.fieldEncryptor, uc.logger, backupID, storageReader)
 		saveErrCh <- saveErr
 	}()
 
@@ -287,6 +313,8 @@ func (uc *CreateMysqlBackupUsecase) streamToStorage(
 func (uc *CreateMysqlBackupUsecase) createTempMyCnfFile(
 	myConfig *mysqltypes.MysqlDatabase,
 	password string,
+	host string,
+	port int,
 ) (string, error) {
 	tempFolder := config.GetEnv().TempFolder
 	if err := os.MkdirAll(tempFolder, 0700); err != nil {
@@ -313,7 +341,7 @@ user=%s
 password="%s"
 host=%s
 port=%d
-`, myConfig.Username, tools.EscapeMysqlPassword(password), myConfig.Host, myConfig.Port)
+`, myConfig.Username, tools.EscapeMysqlPassword(password), host, port)
 
 	if myConfig.IsHttps {
 		content += "ssl-mode=REQUIRED\n"
@@ -438,9 +466,7 @@ func (uc *CreateMysqlBackupUsecase) setupBackupEncryption(
 	backupConfig *backups_config.BackupConfig,
 	storageWriter io.WriteCloser,
 ) (io.Writer, *backup_encryption.EncryptionWriter, common.BackupMetadata, error) {
-	metadata := common.BackupMetadata{
-		BackupID: backupID,
-	}
+	metadata := common.BackupMetadata{}
 
 	if backupConfig.Encryption != backups_config.BackupEncryptionEncrypted {
 		metadata.Encryption = backups_config.BackupEncryptionNone

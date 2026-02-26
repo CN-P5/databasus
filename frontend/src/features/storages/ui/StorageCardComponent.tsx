@@ -17,6 +17,7 @@ export const StorageCardComponent = ({
   setSelectedStorageId,
 }: Props) => {
   const { t } = useTranslation('storages');
+
   return (
     <div
       className={`mb-3 cursor-pointer rounded p-3 shadow ${selectedStorageId === storage.id ? 'bg-blue-100 dark:bg-blue-800' : 'bg-white dark:bg-gray-800'}`}

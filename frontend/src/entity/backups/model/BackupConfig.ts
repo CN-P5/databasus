@@ -3,22 +3,12 @@ import type { Interval } from '../../intervals';
 import type { Storage } from '../../storages';
 import { BackupEncryption } from './BackupEncryption';
 import type { BackupNotificationType } from './BackupNotificationType';
-import type { RetentionPolicyType } from './RetentionPolicyType';
 
 export interface BackupConfig {
   databaseId: string;
 
   isBackupsEnabled: boolean;
-
-  retentionPolicyType: RetentionPolicyType;
-  retentionTimePeriod: Period;
-  retentionCount: number;
-  retentionGfsHours: number;
-  retentionGfsDays: number;
-  retentionGfsWeeks: number;
-  retentionGfsMonths: number;
-  retentionGfsYears: number;
-
+  storePeriod: Period;
   backupInterval?: Interval;
   storage?: Storage;
   sendNotificationsOn: BackupNotificationType[];

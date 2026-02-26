@@ -43,7 +43,8 @@ export function EditStorageComponent({
   onChanged,
   user,
 }: Props) {
-  const { t } = useTranslation('storages');
+  const { t: tStorages } = useTranslation('storages');
+  const { t: tCommon } = useTranslation('common');
   const [storage, setStorage] = useState<Storage | undefined>();
   const [isUnsaved, setIsUnsaved] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -78,8 +79,8 @@ export function EditStorageComponent({
       await storageApi.testStorageConnectionDirect(storage);
       setIsTestConnectionSuccess(true);
       ToastHelper.showToast({
-        title: t('connectionTestSuccessful'),
-        description: t('storageConnectionTestedSuccessfully'),
+        title: tStorages('connectionTestSuccessful'),
+        description: tStorages('storageConnectionTestedSuccessfully'),
       });
     } catch (e) {
       const errorMessage = (e as Error).message;
@@ -329,14 +330,14 @@ export function EditStorageComponent({
   if (!storage) return <div />;
 
   const storageTypeOptions = [
-    { label: t('local'), value: StorageType.LOCAL },
-    { label: t('s3'), value: StorageType.S3 },
-    { label: t('googleDrive'), value: StorageType.GOOGLE_DRIVE },
-    { label: t('nas'), value: StorageType.NAS },
-    { label: t('azureBlob'), value: StorageType.AZURE_BLOB },
-    { label: t('ftp'), value: StorageType.FTP },
-    { label: t('sftp'), value: StorageType.SFTP },
-    { label: t('rclone'), value: StorageType.RCLONE },
+    { label: tStorages('local'), value: StorageType.LOCAL },
+    { label: tStorages('s3'), value: StorageType.S3 },
+    { label: tStorages('googleDrive'), value: StorageType.GOOGLE_DRIVE },
+    { label: tStorages('nas'), value: StorageType.NAS },
+    { label: tStorages('azureBlob'), value: StorageType.AZURE_BLOB },
+    { label: tStorages('ftp'), value: StorageType.FTP },
+    { label: tStorages('sftp'), value: StorageType.SFTP },
+    { label: tStorages('rclone'), value: StorageType.RCLONE },
   ].filter((option) => {
     if (IS_CLOUD && option.value === StorageType.LOCAL && user.role !== UserRole.ADMIN) {
       return false;
@@ -348,7 +349,7 @@ export function EditStorageComponent({
     <div>
       {isShowName && (
         <div className="mb-1 flex w-full flex-col items-start sm:flex-row sm:items-center">
-          <div className="mb-1 min-w-[110px] sm:mb-0">{t('name')}</div>
+          <div className="mb-1 min-w-[110px] sm:mb-0">{tStorages('storageName')}</div>
 
           <Input
             value={storage?.name || ''}
@@ -358,13 +359,13 @@ export function EditStorageComponent({
             }}
             size="small"
             className="w-full max-w-[250px]"
-            placeholder="My Storage"
+            placeholder={tStorages('storageNamePlaceholder')}
           />
         </div>
       )}
 
       <div className="mb-1 flex w-full flex-col items-start sm:flex-row sm:items-center">
-        <div className="mb-1 min-w-[110px] sm:mb-0">{t('type')}</div>
+        <div className="mb-1 min-w-[110px] sm:mb-0">{tStorages('storageType')}</div>
 
         <div className="flex items-center">
           <Select
@@ -384,7 +385,7 @@ export function EditStorageComponent({
 
       {IS_CLOUD && user.role === UserRole.ADMIN && (
         <div className="mb-1 flex w-full flex-col items-start sm:flex-row sm:items-center">
-          <div className="mb-1 min-w-[110px] sm:mb-0">{t('isSystem')}</div>
+          <div className="mb-1 min-w-[110px] sm:mb-0">{tStorages('isSystem')}</div>
 
           <div className="flex items-center">
             <Switch
@@ -397,7 +398,7 @@ export function EditStorageComponent({
               size="small"
             />
 
-            <Tooltip className="cursor-pointer" title={t('systemStorageTooltip')}>
+            <Tooltip className="cursor-pointer" title={tStorages('systemStorageTooltip')}>
               <InfoCircleOutlined className="ml-2" style={{ color: 'gray' }} />
             </Tooltip>
           </div>
@@ -496,7 +497,7 @@ export function EditStorageComponent({
             type="primary"
             onClick={testConnection}
           >
-            {t('testConnection')}
+            {tStorages('testConnection')}
           </Button>
         ) : (
           <div />
@@ -510,7 +511,7 @@ export function EditStorageComponent({
             type="primary"
             onClick={save}
           >
-            {t('save')}
+            {tCommon('save')}
           </Button>
         ) : (
           <div />
@@ -525,7 +526,7 @@ export function EditStorageComponent({
             ghost
             onClick={onClose}
           >
-            {t('common:cancel')}
+            {tCommon('cancel')}
           </Button>
         ) : (
           <div />

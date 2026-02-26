@@ -168,11 +168,5 @@
   "virtualHost": "Virtual Host",
   "credentials": "Credentials",
   "skipHostKeyLabel": "Skip host key",
-  "useSslTls": "Use SSL/TLS",
-  "googleDriveStorageConfigNotFound": "Google Drive storage configuration not found",
-  "googleDriveStorageConfigNotFoundInDto": "Google Drive storage configuration not found in DTO",
-  "failedToExchangeOAuthCode": "Failed to exchange OAuth code",
-  "unsupportedStorageTypeForOAuth": "Unsupported storage type for OAuth",
-  "oauthStateParameterInvalid": "OAuth state parameter is invalid",
-  "oauthParamNotFound": "OAuth param not found. Ensure the redirect URL is configured correctly."
+  "useSslTls": "Use SSL/TLS"
 }

@@ -8,6 +8,7 @@ interface Props {
 
 export function ShowGoogleDriveStorageComponent({ storage }: Props) {
   const { t } = useTranslation('storages');
+
   return (
     <>
       <div className="mb-1 flex items-center">

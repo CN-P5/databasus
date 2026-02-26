@@ -154,7 +154,7 @@ func (uc *RestoreMongodbBackupUsecase) restoreFromStorage(
 
 	// Stream backup directly from storage
 	fieldEncryptor := util_encryption.GetFieldEncryptor()
-	rawReader, err := storage.GetFile(fieldEncryptor, backup.FileName)
+	rawReader, err := storage.GetFile(fieldEncryptor, backup.ID)
 	if err != nil {
 		return fmt.Errorf("failed to get backup file from storage: %w", err)
 	}

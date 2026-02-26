@@ -112,7 +112,7 @@ export const DatabasesComponent = ({ contentHeight, workspace, user, isCanManage
 
                 <div className="mb-2">
                   <input
-                    placeholder={t('searchDatabase')}
+                    placeholder={t('searchDatabases')}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="w-full border-b border-gray-300 p-1 text-gray-500 outline-none dark:text-gray-400"
@@ -132,14 +132,14 @@ export const DatabasesComponent = ({ contentHeight, workspace, user, isCanManage
                 ))
               : searchQuery && (
                   <div className="mb-4 text-center text-sm text-gray-500 dark:text-gray-400">
-                    {t('noDatabasesFound', { query: searchQuery })}
+                    {t('noDatabases')}
                   </div>
                 )}
 
             {databases.length < 5 && isCanManageDBs && addDatabaseButton}
 
             <div className="mx-3 text-center text-xs text-gray-500 dark:text-gray-400">
-              {t('databaseDescription')}
+              {t('noDatabases')}
             </div>
           </div>
         )}
@@ -153,7 +153,7 @@ export const DatabasesComponent = ({ contentHeight, workspace, user, isCanManage
                   onClick={() => updateSelectedDatabaseId(undefined)}
                   className="w-full"
                 >
-                  ← {t('backToDatabases')}
+                  ← {t('back')}
                 </Button>
               </div>
             )}
@@ -180,7 +180,7 @@ export const DatabasesComponent = ({ contentHeight, workspace, user, isCanManage
 
       {isShowAddDatabase && (
         <Modal
-          title={t('addDatabaseForBackup')}
+          title={t('addDatabase')}
           footer={<div />}
           open={isShowAddDatabase}
           onCancel={() => setIsShowAddDatabase(false)}

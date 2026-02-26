@@ -8,6 +8,7 @@ interface Props {
 
 export function ShowS3StorageComponent({ storage }: Props) {
   const { t } = useTranslation('storages');
+
   return (
     <>
       <div className="mb-1 flex items-center">
@@ -37,7 +38,7 @@ export function ShowS3StorageComponent({ storage }: Props) {
 
       {storage?.s3Storage?.s3Prefix && (
         <div className="mb-1 flex items-center">
-          <div className="min-w-[110px]">{t('folderPrefix')}</div>
+          <div className="min-w-[110px]">{t('s3Prefix')}</div>
           {storage.s3Storage.s3Prefix}
         </div>
       )}

@@ -46,7 +46,7 @@ func (n *NASStorage) SaveFile(
 	ctx context.Context,
 	encryptor encryption.FieldEncryptor,
 	logger *slog.Logger,
-	fileName string,
+	fileID uuid.UUID,
 	file io.Reader,
 ) error {
 	select {
@@ -55,19 +55,19 @@ func (n *NASStorage) SaveFile(
 	default:
 	}
 
-	logger.Info("Starting to save file to NAS storage", "fileName", fileName, "host", n.Host)
+	logger.Info("Starting to save file to NAS storage", "fileId", fileID.String(), "host", n.Host)
 
 	session, err := n.createSessionWithContext(ctx, encryptor)
 	if err != nil {
-		logger.Error("Failed to create NAS session", "fileName", fileName, "error", err)
+		logger.Error("Failed to create NAS session", "fileId", fileID.String(), "error", err)
 		return fmt.Errorf("failed to create NAS session: %w", err)
 	}
 	defer func() {
 		if logoffErr := session.Logoff(); logoffErr != nil {
 			logger.Error(
 				"Failed to logoff NAS session",
-				"fileName",
-				fileName,
+				"fileId",
+				fileID.String(),
 				"error",
 				logoffErr,
 			)
@@ -78,8 +78,8 @@ func (n *NASStorage) SaveFile(
 	if err != nil {
 		logger.Error(
 			"Failed to mount NAS share",
-			"fileName",
-			fileName,
+			"fileId",
+			fileID.String(),
 			"share",
 			n.Share,
 			"error",
@@ -91,8 +91,8 @@ func (n *NASStorage) SaveFile(
 		if umountErr := fs.Umount(); umountErr != nil {
 			logger.Error(
 				"Failed to unmount NAS share",
-				"fileName",
-				fileName,
+				"fileId",
+				fileID.String(),
 				"error",
 				umountErr,
 			)
@@ -104,8 +104,8 @@ func (n *NASStorage) SaveFile(
 		if err := n.ensureDirectory(fs, n.Path); err != nil {
 			logger.Error(
 				"Failed to ensure directory",
-				"fileName",
-				fileName,
+				"fileId",
+				fileID.String(),
 				"path",
 				n.Path,
 				"error",
@@ -115,15 +115,15 @@ func (n *NASStorage) SaveFile(
 		}
 	}
 
-	filePath := n.getFilePath(fileName)
-	logger.Debug("Creating file on NAS", "fileName", fileName, "filePath", filePath)
+	filePath := n.getFilePath(fileID.String())
+	logger.Debug("Creating file on NAS", "fileId", fileID.String(), "filePath", filePath)
 
 	nasFile, err := fs.Create(filePath)
 	if err != nil {
 		logger.Error(
 			"Failed to create file on NAS",
-			"fileName",
-			fileName,
+			"fileId",
+			fileID.String(),
 			"filePath",
 			filePath,
 			"error",
@@ -133,21 +133,21 @@ func (n *NASStorage) SaveFile(
 	}
 	defer func() {
 		if closeErr := nasFile.Close(); closeErr != nil {
-			logger.Error("Failed to close NAS file", "fileName", fileName, "error", closeErr)
+			logger.Error("Failed to close NAS file", "fileId", fileID.String(), "error", closeErr)
 		}
 	}()
 
-	logger.Debug("Copying file data to NAS", "fileName", fileName)
+	logger.Debug("Copying file data to NAS", "fileId", fileID.String())
 	_, err = copyWithContext(ctx, nasFile, file)
 	if err != nil {
-		logger.Error("Failed to write file to NAS", "fileName", fileName, "error", err)
+		logger.Error("Failed to write file to NAS", "fileId", fileID.String(), "error", err)
 		return fmt.Errorf("failed to write file to NAS: %w", err)
 	}
 
 	logger.Info(
 		"Successfully saved file to NAS storage",
-		"fileName",
-		fileName,
+		"fileId",
+		fileID.String(),
 		"filePath",
 		filePath,
 	)
@@ -156,7 +156,7 @@ func (n *NASStorage) SaveFile(
 
 func (n *NASStorage) GetFile(
 	encryptor encryption.FieldEncryptor,
-	fileName string,
+	fileID uuid.UUID,
 ) (io.ReadCloser, error) {
 	session, err := n.createSession(encryptor)
 	if err != nil {
@@ -169,14 +169,14 @@ func (n *NASStorage) GetFile(
 		return nil, fmt.Errorf("failed to mount share '%s': %w", n.Share, err)
 	}
 
-	filePath := n.getFilePath(fileName)
+	filePath := n.getFilePath(fileID.String())
 
 	// Check if file exists
 	_, err = fs.Stat(filePath)
 	if err != nil {
 		_ = fs.Umount()
 		_ = session.Logoff()
-		return nil, fmt.Errorf("file not found: %s", fileName)
+		return nil, fmt.Errorf("file not found: %s", fileID.String())
 	}
 
 	nasFile, err := fs.Open(filePath)
@@ -194,7 +194,7 @@ func (n *NASStorage) GetFile(
 	}, nil
 }
 
-func (n *NASStorage) DeleteFile(encryptor encryption.FieldEncryptor, fileName string) error {
+func (n *NASStorage) DeleteFile(encryptor encryption.FieldEncryptor, fileID uuid.UUID) error {
 	ctx, cancel := context.WithTimeout(context.Background(), nasDeleteTimeout)
 	defer cancel()
 
@@ -214,7 +214,7 @@ func (n *NASStorage) DeleteFile(encryptor encryption.FieldEncryptor, fileName st
 		_ = fs.Umount()
 	}()
 
-	filePath := n.getFilePath(fileName)
+	filePath := n.getFilePath(fileID.String())
 
 	_, err = fs.Stat(filePath)
 	if err != nil {

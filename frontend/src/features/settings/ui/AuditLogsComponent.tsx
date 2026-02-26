@@ -90,7 +90,7 @@ export function AuditLogsComponent({ scrollContainerRef: externalScrollRef }: Pr
       setTotal(response.total);
       setHasMore(response.auditLogs.length === pageSize);
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to load audit logs';
+      const errorMessage = error instanceof Error ? error.message : t('failedToLoadAuditLogs');
       message.error(errorMessage);
     } finally {
       loadingRef.current = false;

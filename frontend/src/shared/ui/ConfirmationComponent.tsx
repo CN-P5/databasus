@@ -1,6 +1,5 @@
 import { Button, Modal } from 'antd';
 import type { JSX } from 'react';
-import { useTranslation } from 'react-i18next';
 
 interface Props {
   onConfirm(): void;
@@ -23,11 +22,9 @@ export function ConfirmationComponent({
   cancelText,
   hideCancelButton = false,
 }: Props): JSX.Element {
-  const { t } = useTranslation('common');
-
   return (
     <Modal
-      title={t('confirmation')}
+      title="Confirmation"
       open
       onClose={() => onDecline()}
       onCancel={() => onDecline()}
@@ -43,7 +40,7 @@ export function ConfirmationComponent({
             danger={actionButtonColor !== 'red'}
             type="primary"
           >
-            {cancelText || t('cancel')}
+            {cancelText || 'Cancel'}
           </Button>
         )}
 

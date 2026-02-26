@@ -84,13 +84,13 @@ export function AdminPasswordComponent({
       <div className="mb-5 text-center text-2xl font-bold">{t('signUpAdmin')}</div>
 
       <div className="mx-auto mb-4 max-w-[250px] text-center text-sm text-gray-600 dark:text-gray-400">
-        {t('adminSignUpDescription')}
+        {t('thenYouWillBeAbleToSignInWithAdminAndPassword')}
       </div>
 
-      <div className="my-1 text-xs font-semibold">{t('email')}</div>
+      <div className="my-1 text-xs font-semibold">{t('yourEmail')}</div>
       <Input value="admin" disabled />
 
-      <div className="my-1 text-xs font-semibold">{t('password')}</div>
+      <div className="my-1 text-xs font-semibold">{t('newPassword')}</div>
       <Input.Password
         placeholder="********"
         value={password}

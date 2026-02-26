@@ -16,7 +16,7 @@ interface Props {
 }
 
 export function UserAuditLogsSidebarComponent({ user }: Props) {
-  const { t } = useTranslation(['users', 'common']);
+  const { t } = useTranslation('users');
   const { message } = App.useApp();
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -88,8 +88,7 @@ export function UserAuditLogsSidebarComponent({ user }: Props) {
       setTotal(response.total);
       setHasMore(response.auditLogs.length === pageSize);
     } catch (error: unknown) {
-      const errorMessage =
-        error instanceof Error ? error.message : t('users:failedToLoadAuditLogs');
+      const errorMessage = error instanceof Error ? error.message : t('failedToLoadUsers');
       message.error(errorMessage);
     } finally {
       loadingRef.current = false;
@@ -100,7 +99,7 @@ export function UserAuditLogsSidebarComponent({ user }: Props) {
 
   const columns: ColumnsType<AuditLog> = [
     {
-      title: t('users:message'),
+      title: t('message'),
       dataIndex: 'message',
       key: 'message',
       width: 350,
@@ -109,7 +108,7 @@ export function UserAuditLogsSidebarComponent({ user }: Props) {
       ),
     },
     {
-      title: t('users:workspace'),
+      title: t('workspace'),
       dataIndex: 'workspaceName',
       key: 'workspaceName',
       width: 200,
@@ -126,7 +125,7 @@ export function UserAuditLogsSidebarComponent({ user }: Props) {
       ),
     },
     {
-      title: t('users:created'),
+      title: t('timestamp'),
       dataIndex: 'createdAt',
       key: 'createdAt',
       width: 200,
@@ -150,7 +149,7 @@ export function UserAuditLogsSidebarComponent({ user }: Props) {
             {isLoading ? (
               <Spin indicator={<LoadingOutlined spin />} />
             ) : (
-              t('users:auditLogsCount', { current: auditLogs.length, total })
+              `${auditLogs.length} ${t('of')} ${total} ${t('auditLogs')}`
             )}
           </div>
         </div>
@@ -174,20 +173,20 @@ export function UserAuditLogsSidebarComponent({ user }: Props) {
               <div className="flex justify-center py-4">
                 <Spin indicator={<LoadingOutlined spin />} />
                 <span className="ml-2 text-sm text-gray-500 dark:text-gray-400">
-                  {t('users:loadingMoreLogs')}
+                  {t('loadingMoreLogs')}
                 </span>
               </div>
             )}
 
             {!hasMore && auditLogs.length > 0 && (
               <div className="py-4 text-center text-sm text-gray-500 dark:text-gray-400">
-                {t('users:allLogsLoaded', { total })}
+                {t('allUsersLoaded')} ({total} {t('total')})
               </div>
             )}
 
             {!isLoading && auditLogs.length === 0 && (
               <div className="py-8 text-center text-sm text-gray-500 dark:text-gray-400">
-                {t('users:noAuditLogsFound')}
+                {t('noAuditLogsFoundForThisUser')}
               </div>
             )}
           </>

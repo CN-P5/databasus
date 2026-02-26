@@ -10,7 +10,8 @@ interface Props {
 }
 
 export const ShowHealthcheckConfigComponent = ({ databaseId }: Props) => {
-  const { t } = useTranslation('healthcheck');
+  const { t } = useTranslation('databases');
+
   const [isLoading, setIsLoading] = useState(false);
   const [healthcheckConfig, setHealthcheckConfig] = useState<HealthcheckConfig | undefined>(
     undefined,

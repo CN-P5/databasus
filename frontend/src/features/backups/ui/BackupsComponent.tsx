@@ -37,7 +37,7 @@ interface Props {
 }
 
 export const BackupsComponent = ({ database, isCanManageDBs, scrollContainerRef }: Props) => {
-  const { t } = useTranslation(['backups', 'common']);
+  const { t } = useTranslation('backups');
   const [isBackupsLoading, setIsBackupsLoading] = useState(false);
   const [backups, setBackups] = useState<Backup[]>([]);
 
@@ -58,8 +58,8 @@ export const BackupsComponent = ({ database, isCanManageDBs, scrollContainerRef 
 
   const [showingRestoresBackupId, setShowingRestoresBackupId] = useState<string | undefined>();
 
-  const lastRequestTimeRef = useRef<number>(0);
-  const isBackupsRequestInFlightRef = useRef(false);
+  const isReloadInProgress = useRef(false);
+  const isLazyLoadInProgress = useRef(false);
 
   const [downloadingBackupId, setDownloadingBackupId] = useState<string | undefined>();
   const [cancellingBackupId, setCancellingBackupId] = useState<string | undefined>();
@@ -75,59 +75,85 @@ export const BackupsComponent = ({ database, isCanManageDBs, scrollContainerRef 
   };
 
   const loadBackups = async (limit?: number) => {
-    if (isBackupsRequestInFlightRef.current) return;
-    isBackupsRequestInFlightRef.current = true;
-
-    const requestTime = Date.now();
-    lastRequestTimeRef.current = requestTime;
-
-    const loadLimit = limit ?? currentLimit;
-
-    try {
-      const response = await backupsApi.getBackups(database.id, loadLimit, 0);
-
-      if (lastRequestTimeRef.current !== requestTime) return;
-
-      setBackups(response.backups);
-      setTotalBackups(response.total);
-      setHasMore(response.backups.length < response.total);
-    } catch (e) {
-      if (lastRequestTimeRef.current === requestTime) {
-        alert((e as Error).message);
-      }
-    } finally {
-      isBackupsRequestInFlightRef.current = false;
-    }
-  };
-
-  const loadMoreBackups = async () => {
-    if (isLoadingMore || !hasMore) {
+    if (isReloadInProgress.current || isLazyLoadInProgress.current) {
       return;
     }
 
-    setIsLoadingMore(true);
-
-    const newLimit = currentLimit + BACKUPS_PAGE_SIZE;
-    setCurrentLimit(newLimit);
-
-    const requestTime = Date.now();
-    lastRequestTimeRef.current = requestTime;
+    isReloadInProgress.current = true;
 
     try {
-      const response = await backupsApi.getBackups(database.id, newLimit, 0);
-
-      if (lastRequestTimeRef.current !== requestTime) return;
+      const loadLimit = limit || currentLimit;
+      const response = await backupsApi.getBackups(database.id, loadLimit, 0);
 
       setBackups(response.backups);
       setTotalBackups(response.total);
       setHasMore(response.backups.length < response.total);
     } catch (e) {
-      if (lastRequestTimeRef.current === requestTime) {
-        alert((e as Error).message);
-      }
+      alert((e as Error).message);
+    }
+
+    isReloadInProgress.current = false;
+  };
+
+  const reloadInProgressBackups = async () => {
+    if (isReloadInProgress.current || isLazyLoadInProgress.current) {
+      return;
+    }
+
+    isReloadInProgress.current = true;
+
+    try {
+      // Fetch only the recent backups that could be in progress
+      // We fetch a small number (20) to capture recent backups that might be in progress
+      const response = await backupsApi.getBackups(database.id, 20, 0);
+
+      // Update only the backups that exist in both lists
+      setBackups((prevBackups) => {
+        const updatedBackups = [...prevBackups];
+
+        response.backups.forEach((newBackup) => {
+          const index = updatedBackups.findIndex((b) => b.id === newBackup.id);
+          if (index !== -1) {
+            updatedBackups[index] = newBackup;
+          } else if (index === -1 && updatedBackups.length < currentLimit) {
+            // New backup that doesn't exist yet (e.g., just created)
+            updatedBackups.unshift(newBackup);
+          }
+        });
+
+        return updatedBackups;
+      });
+
+      setTotalBackups(response.total);
+    } catch (e) {
+      alert((e as Error).message);
+    }
+
+    isReloadInProgress.current = false;
+  };
+
+  const loadMoreBackups = async () => {
+    if (isLoadingMore || !hasMore || isLazyLoadInProgress.current) {
+      return;
+    }
+
+    isLazyLoadInProgress.current = true;
+    setIsLoadingMore(true);
+
+    try {
+      const newLimit = currentLimit + BACKUPS_PAGE_SIZE;
+      const response = await backupsApi.getBackups(database.id, newLimit, 0);
+
+      setBackups(response.backups);
+      setCurrentLimit(newLimit);
+      setTotalBackups(response.total);
+      setHasMore(response.backups.length < response.total);
+    } catch (e) {
+      alert((e as Error).message);
     }
 
     setIsLoadingMore(false);
+    isLazyLoadInProgress.current = false;
   };
 
   const makeBackup = async () => {
@@ -172,7 +198,7 @@ export const BackupsComponent = ({ database, isCanManageDBs, scrollContainerRef 
 
     try {
       await backupsApi.cancelBackup(backupId);
-      await loadBackups();
+      await reloadInProgressBackups();
     } catch (e) {
       alert((e as Error).message);
     }
@@ -196,13 +222,22 @@ export const BackupsComponent = ({ database, isCanManageDBs, scrollContainerRef 
     return () => {};
   }, [database]);
 
+  // Reload backups that are in progress to update their state
   useEffect(() => {
-    const intervalId = setInterval(() => {
-      loadBackups();
+    const hasInProgressBackups = backups.some(
+      (backup) => backup.status === BackupStatus.IN_PROGRESS,
+    );
+
+    if (!hasInProgressBackups) {
+      return;
+    }
+
+    const timeoutId = setTimeout(async () => {
+      await reloadInProgressBackups();
     }, 1_000);
 
-    return () => clearInterval(intervalId);
-  }, [currentLimit]);
+    return () => clearTimeout(timeoutId);
+  }, [backups]);
 
   useEffect(() => {
     if (downloadingBackupId) {
@@ -233,13 +268,13 @@ export const BackupsComponent = ({ database, isCanManageDBs, scrollContainerRef 
   const renderStatus = (status: BackupStatus, record: Backup) => {
     if (status === BackupStatus.FAILED) {
       return (
-        <Tooltip title={t('backups:clickToSeeErrorDetails')}>
+        <Tooltip title={t('clickToSeeErrorDetails')}>
           <div
             className="flex cursor-pointer items-center text-red-600 underline"
             onClick={() => setShowingBackupError(record)}
           >
             <ExclamationCircleOutlined className="mr-2" style={{ fontSize: 16 }} />
-            <div>{t('backups:backupFailed')}</div>
+            <div>{t('backupFailed')}</div>
           </div>
         </Tooltip>
       );
@@ -249,9 +284,9 @@ export const BackupsComponent = ({ database, isCanManageDBs, scrollContainerRef 
       return (
         <div className="flex items-center text-green-600">
           <CheckCircleOutlined className="mr-2" style={{ fontSize: 16 }} />
-          <div>{t('backups:backupCompleted')}</div>
+          <div>{t('backupCompleted')}</div>
           {record.encryption === BackupEncryption.ENCRYPTED && (
-            <Tooltip title={t('backups:encrypted')}>
+            <Tooltip title={t('encrypted')}>
               <LockOutlined className="ml-1" style={{ fontSize: 14 }} />
             </Tooltip>
           )}
@@ -263,7 +298,7 @@ export const BackupsComponent = ({ database, isCanManageDBs, scrollContainerRef 
       return (
         <div className="flex items-center text-gray-600">
           <DeleteOutlined className="mr-2" style={{ fontSize: 16 }} />
-          <div>{t('backups:backupDeleted')}</div>
+          <div>{t('backupDeleted')}</div>
         </div>
       );
     }
@@ -272,7 +307,7 @@ export const BackupsComponent = ({ database, isCanManageDBs, scrollContainerRef 
       return (
         <div className="flex items-center font-bold text-blue-600">
           <SyncOutlined spin />
-          <span className="ml-2">{t('backups:inProgress')}</span>
+          <span className="ml-2">{t('inProgress')}</span>
         </div>
       );
     }
@@ -281,7 +316,7 @@ export const BackupsComponent = ({ database, isCanManageDBs, scrollContainerRef 
       return (
         <div className="flex items-center text-gray-600">
           <CloseCircleOutlined className="mr-2" style={{ fontSize: 16 }} />
-          <div>{t('backups:canceled')}</div>
+          <div>{t('canceled')}</div>
         </div>
       );
     }
@@ -297,7 +332,7 @@ export const BackupsComponent = ({ database, isCanManageDBs, scrollContainerRef 
             {cancellingBackupId === record.id ? (
               <SyncOutlined spin />
             ) : (
-              <Tooltip title={t('backups:cancelBackup')}>
+              <Tooltip title={t('cancelBackup')}>
                 <CloseCircleOutlined
                   className="cursor-pointer"
                   onClick={() => {
@@ -318,7 +353,7 @@ export const BackupsComponent = ({ database, isCanManageDBs, scrollContainerRef 
             ) : (
               <>
                 {isCanManageDBs && (
-                  <Tooltip title={t('backups:deleteBackup')}>
+                  <Tooltip title={t('deleteBackup')}>
                     <DeleteOutlined
                       className="cursor-pointer"
                       onClick={() => {
@@ -330,7 +365,7 @@ export const BackupsComponent = ({ database, isCanManageDBs, scrollContainerRef 
                   </Tooltip>
                 )}
 
-                <Tooltip title={t('backups:restoreBackup')}>
+                <Tooltip title={t('restoreFromBackup')}>
                   <CloudUploadOutlined
                     className="cursor-pointer"
                     onClick={() => {
@@ -345,14 +380,14 @@ export const BackupsComponent = ({ database, isCanManageDBs, scrollContainerRef 
                 <Tooltip
                   title={
                     database.type === DatabaseType.POSTGRES
-                      ? t('backups:downloadBackupFilePostgres')
+                      ? t('downloadBackupFilePostgres')
                       : database.type === DatabaseType.MYSQL
-                        ? t('backups:downloadBackupFileMysql')
+                        ? t('downloadBackupFileMysql')
                         : database.type === DatabaseType.MARIADB
-                          ? t('backups:downloadBackupFileMariadb')
+                          ? t('downloadBackupFileMariadb')
                           : database.type === DatabaseType.MONGODB
-                            ? t('backups:downloadBackupFileMongodb')
-                            : t('backups:downloadBackupFile')
+                            ? t('downloadBackupFileMongodb')
+                            : t('downloadBackupFile')
                   }
                 >
                   {downloadingBackupId === record.id ? (
@@ -401,7 +436,7 @@ export const BackupsComponent = ({ database, isCanManageDBs, scrollContainerRef 
 
   const columns: ColumnsType<Backup> = [
     {
-      title: t('backups:createdAt'),
+      title: t('createdAt'),
       dataIndex: 'createdAt',
       key: 'createdAt',
       render: (createdAt: string) => (
@@ -416,30 +451,30 @@ export const BackupsComponent = ({ database, isCanManageDBs, scrollContainerRef 
       defaultSortOrder: 'descend',
     },
     {
-      title: t('backups:status'),
+      title: t('status'),
       dataIndex: 'status',
       key: 'status',
       render: (status: BackupStatus, record: Backup) => renderStatus(status, record),
       filters: [
         {
           value: BackupStatus.IN_PROGRESS,
-          text: t('backups:inProgress'),
+          text: t('inProgress'),
         },
         {
           value: BackupStatus.FAILED,
-          text: t('backups:backupFailed'),
+          text: t('backupFailed'),
         },
         {
           value: BackupStatus.COMPLETED,
-          text: t('backups:backupCompleted'),
+          text: t('backupCompleted'),
         },
         {
           value: BackupStatus.DELETED,
-          text: t('backups:backupDeleted'),
+          text: t('backupDeleted'),
         },
         {
           value: BackupStatus.CANCELED,
-          text: t('backups:canceled'),
+          text: t('canceled'),
         },
       ],
       onFilter: (value, record) => record.status === value,
@@ -447,8 +482,8 @@ export const BackupsComponent = ({ database, isCanManageDBs, scrollContainerRef 
     {
       title: (
         <div className="flex items-center">
-          {t('backups:size')}
-          <Tooltip className="ml-1" title={t('backups:fileSizeDescription')}>
+          {t('size')}
+          <Tooltip className="ml-1" title={t('fileSizeDescription')}>
             <InfoCircleOutlined />
           </Tooltip>
         </div>
@@ -459,14 +494,14 @@ export const BackupsComponent = ({ database, isCanManageDBs, scrollContainerRef 
       render: (sizeMb: number) => formatSize(sizeMb),
     },
     {
-      title: t('backups:duration'),
+      title: t('duration'),
       dataIndex: 'backupDurationMs',
       key: 'backupDurationMs',
       width: 150,
       render: (durationMs: number) => formatDuration(durationMs),
     },
     {
-      title: t('backups:actions'),
+      title: t('actions'),
       dataIndex: '',
       key: '',
       render: (_, record: Backup) => renderActions(record),
@@ -483,10 +518,10 @@ export const BackupsComponent = ({ database, isCanManageDBs, scrollContainerRef 
 
   return (
     <div className="mt-5 w-full rounded-md bg-white p-3 shadow md:p-5 dark:bg-gray-800">
-      <h2 className="text-lg font-bold md:text-xl dark:text-white">{t('backups:backups')}</h2>
+      <h2 className="text-lg font-bold md:text-xl dark:text-white">{t('backups')}</h2>
 
       {!isBackupConfigLoading && !backupConfig?.isBackupsEnabled && (
-        <div className="text-sm text-red-600">{t('backups:scheduledBackupsDisabled')}</div>
+        <div className="text-sm text-red-600">{t('scheduledBackupsDisabled')}</div>
       )}
 
       <div className="mt-5" />
@@ -499,8 +534,8 @@ export const BackupsComponent = ({ database, isCanManageDBs, scrollContainerRef 
           disabled={isMakeBackupRequestLoading}
           loading={isMakeBackupRequestLoading}
         >
-          <span className="md:hidden">{t('backups:backupNow')}</span>
-          <span className="hidden md:inline">{t('backups:makeBackupRightNow')}</span>
+          <span className="md:hidden">{t('backupNow')}</span>
+          <span className="hidden md:inline">{t('makeBackupRightNow')}</span>
         </Button>
       </div>
 
@@ -522,7 +557,7 @@ export const BackupsComponent = ({ database, isCanManageDBs, scrollContainerRef 
                     <div className="flex items-start justify-between">
                       <div>
                         <div className="text-xs text-gray-500 dark:text-gray-400">
-                          {t('backups:createdAt')}
+                          {t('createdAt')}
                         </div>
                         <div className="text-sm font-medium">
                           {dayjs.utc(backup.createdAt).local().format(getUserTimeFormat().format)}
@@ -536,14 +571,12 @@ export const BackupsComponent = ({ database, isCanManageDBs, scrollContainerRef 
 
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <div className="text-xs text-gray-500 dark:text-gray-400">
-                          {t('backups:size')}
-                        </div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400">{t('size')}</div>
                         <div className="text-sm font-medium">{formatSize(backup.backupSizeMb)}</div>
                       </div>
                       <div>
                         <div className="text-xs text-gray-500 dark:text-gray-400">
-                          {t('backups:duration')}
+                          {t('duration')}
                         </div>
                         <div className="text-sm font-medium">
                           {formatDuration(backup.backupDurationMs)}
@@ -567,12 +600,12 @@ export const BackupsComponent = ({ database, isCanManageDBs, scrollContainerRef 
           )}
           {!hasMore && backups.length > 0 && (
             <div className="mt-3 text-center text-sm text-gray-500 dark:text-gray-400">
-              {t('backups:allBackupsLoaded')} ({totalBackups} {t('backups:total')})
+              {t('allBackupsLoaded')} ({totalBackups} {t('total')})
             </div>
           )}
           {!isBackupsLoading && backups.length === 0 && (
             <div className="py-8 text-center text-gray-500 dark:text-gray-400">
-              {t('backups:noBackupsYet')}
+              {t('noBackupsYet')}
             </div>
           )}
         </div>
@@ -595,7 +628,7 @@ export const BackupsComponent = ({ database, isCanManageDBs, scrollContainerRef 
           )}
           {!hasMore && backups.length > 0 && (
             <div className="mt-2 text-center text-gray-500 dark:text-gray-400">
-              {t('backups:allBackupsLoaded')} ({totalBackups} {t('backups:total')})
+              {t('allBackupsLoaded')} ({totalBackups} {t('total')})
             </div>
           )}
         </div>
@@ -605,9 +638,9 @@ export const BackupsComponent = ({ database, isCanManageDBs, scrollContainerRef 
         <ConfirmationComponent
           onConfirm={deleteBackup}
           onDecline={() => setDeleteConfimationId(undefined)}
-          description={t('backups:deleteBackupConfirmation')}
+          description={t('deleteBackupConfirmation')}
           actionButtonColor="red"
-          actionText={t('common:delete')}
+          actionText={t('deleteBackup')}
         />
       )}
 
@@ -616,7 +649,7 @@ export const BackupsComponent = ({ database, isCanManageDBs, scrollContainerRef 
           width={400}
           open={!!showingRestoresBackupId}
           onCancel={() => setShowingRestoresBackupId(undefined)}
-          title={t('backups:restoreBackup')}
+          title="Restore from backup"
           footer={null}
           maskClosable={false}
         >
@@ -629,7 +662,7 @@ export const BackupsComponent = ({ database, isCanManageDBs, scrollContainerRef 
 
       {showingBackupError && (
         <Modal
-          title={t('backups:backupErrorDetails')}
+          title="Backup error details"
           open={!!showingBackupError}
           onCancel={() => setShowingBackupError(undefined)}
           maskClosable={false}

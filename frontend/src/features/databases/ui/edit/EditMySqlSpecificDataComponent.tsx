@@ -40,7 +40,7 @@ export const EditMySqlSpecificDataComponent = ({
   onSaved,
   isShowDbName = true,
 }: Props) => {
-  const { t } = useTranslation('databases');
+  const { t } = useTranslation(['common', 'databases']);
   const { message } = App.useApp();
 
   const [editingDatabase, setEditingDatabase] = useState<Database>();
@@ -56,7 +56,7 @@ export const EditMySqlSpecificDataComponent = ({
       const trimmedText = text.trim();
 
       if (!trimmedText) {
-        message.error(t('clipboardIsEmpty'));
+        message.error(t('databases:clipboardIsEmpty'));
         return;
       }
 
@@ -84,9 +84,9 @@ export const EditMySqlSpecificDataComponent = ({
 
       setEditingDatabase(updatedDatabase);
       setIsConnectionTested(false);
-      message.success(t('connectionStringParsedSuccessfully'));
+      message.success(t('databases:connectionStringParsedSuccessfully'));
     } catch {
-      message.error(t('failedToReadClipboard'));
+      message.error(t('databases:failedToReadClipboard'));
     }
   };
 
@@ -107,8 +107,8 @@ export const EditMySqlSpecificDataComponent = ({
       await databaseApi.testDatabaseConnectionDirect(trimmedDatabase);
       setIsConnectionTested(true);
       ToastHelper.showToast({
-        title: t('connectionTestPassed'),
-        description: t('youCanContinueWithNextStep'),
+        title: t('databases:connectionTestPassed'),
+        description: t('databases:youCanContinueWithNextStep'),
       });
     } catch (e) {
       setIsConnectionFailed(true);
@@ -175,12 +175,12 @@ export const EditMySqlSpecificDataComponent = ({
           onClick={parseFromClipboard}
         >
           <CopyOutlined className="mr-1" />
-          {t('parseFromClipboard')}
+          {t('databases:parseFromClipboard')}
         </div>
       </div>
 
       <div className="mb-1 flex w-full items-center">
-        <div className="min-w-[150px]">{t('host')}</div>
+        <div className="min-w-[150px]">{t('databases:host')}</div>
         <Input
           value={editingDatabase.mysql?.host}
           onChange={(e) => {
@@ -197,7 +197,7 @@ export const EditMySqlSpecificDataComponent = ({
           }}
           size="small"
           className="max-w-[200px] grow"
-          placeholder={t('enterMysqlHost')}
+          placeholder={t('databases:hostPlaceholder')}
         />
       </div>
 
@@ -205,22 +205,22 @@ export const EditMySqlSpecificDataComponent = ({
         <div className="mb-1 flex">
           <div className="min-w-[150px]" />
           <div className="max-w-[200px] text-xs text-gray-500 dark:text-gray-400">
-            {t('please')}{' '}
+            {t('databases:please')}{' '}
             <a
               href="https://databasus.com/faq/localhost"
               target="_blank"
               rel="noreferrer"
               className="!text-blue-600 dark:!text-blue-400"
             >
-              {t('readThisDocument')}
+              {t('databases:readThisDocument')}
             </a>{' '}
-            {t('toStudyHowToBackupLocalDatabase')}
+            {t('databases:toStudyHowToBackupLocalDatabase')}
           </div>
         </div>
       )}
 
       <div className="mb-1 flex w-full items-center">
-        <div className="min-w-[150px]">{t('port')}</div>
+        <div className="min-w-[150px]">{t('databases:port')}</div>
         <InputNumber
           type="number"
           value={editingDatabase.mysql?.port}
@@ -235,12 +235,12 @@ export const EditMySqlSpecificDataComponent = ({
           }}
           size="small"
           className="max-w-[200px] grow"
-          placeholder={t('enterMysqlPort')}
+          placeholder={t('databases:portPlaceholder')}
         />
       </div>
 
       <div className="mb-1 flex w-full items-center">
-        <div className="min-w-[150px]">{t('username')}</div>
+        <div className="min-w-[150px]">{t('databases:username')}</div>
         <Input
           value={editingDatabase.mysql?.username}
           onChange={(e) => {
@@ -254,12 +254,12 @@ export const EditMySqlSpecificDataComponent = ({
           }}
           size="small"
           className="max-w-[200px] grow"
-          placeholder={t('enterMysqlUsername')}
+          placeholder={t('databases:usernamePlaceholder')}
         />
       </div>
 
       <div className="mb-1 flex w-full items-center">
-        <div className="min-w-[150px]">{t('password')}</div>
+        <div className="min-w-[150px]">{t('databases:databasePassword')}</div>
         <Input.Password
           value={editingDatabase.mysql?.password}
           onChange={(e) => {
@@ -273,7 +273,7 @@ export const EditMySqlSpecificDataComponent = ({
           }}
           size="small"
           className="max-w-[200px] grow"
-          placeholder={t('enterMysqlPassword')}
+          placeholder={t('databases:databasePasswordPlaceholder')}
           autoComplete="off"
           data-1p-ignore
           data-lpignore="true"
@@ -283,7 +283,7 @@ export const EditMySqlSpecificDataComponent = ({
 
       {isShowDbName && (
         <div className="mb-1 flex w-full items-center">
-          <div className="min-w-[150px]">{t('dbName')}</div>
+          <div className="min-w-[150px]">{t('databases:databaseName')}</div>
           <Input
             value={editingDatabase.mysql?.database}
             onChange={(e) => {
@@ -297,13 +297,13 @@ export const EditMySqlSpecificDataComponent = ({
             }}
             size="small"
             className="max-w-[200px] grow"
-            placeholder={t('enterMysqlDatabaseName')}
+            placeholder={t('databases:databaseNamePlaceholder')}
           />
         </div>
       )}
 
       <div className="mb-3 flex w-full items-center">
-        <div className="min-w-[150px]">{t('useHttps')}</div>
+        <div className="min-w-[150px]">{t('databases:useHttps')}</div>
         <Switch
           checked={editingDatabase.mysql?.isHttps}
           onChange={(checked) => {
@@ -351,7 +351,7 @@ export const EditMySqlSpecificDataComponent = ({
             disabled={!isAllFieldsFilled}
             className="mr-5"
           >
-            {t('testConnection')}
+            {t('databases:testConnection')}
           </Button>
         )}
 
@@ -370,7 +370,7 @@ export const EditMySqlSpecificDataComponent = ({
 
       {isConnectionFailed && !IS_CLOUD && (
         <div className="mt-3 text-sm text-gray-500 dark:text-gray-400">
-          {t('ifYourDatabaseUsesIpWhitelist')}
+          {t('databases:ifYourDatabaseUsesIpWhitelist')}
         </div>
       )}
     </div>

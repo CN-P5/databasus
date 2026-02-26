@@ -128,7 +128,7 @@ export const StoragesComponent = ({
                   onClick={() => updateSelectedStorageId(undefined)}
                   className="w-full"
                 >
-                  ← {t('backToStorages')}
+                  {t('backToStorages')}
                 </Button>
               </div>
             )}

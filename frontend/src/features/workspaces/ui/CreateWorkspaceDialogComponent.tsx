@@ -25,19 +25,17 @@ export const CreateWorkspaceDialogComponent = ({
   onWorkspaceCreated,
   workspacesCount,
 }: Props) => {
-  const { t } = useTranslation(['common', 'workspaces']);
+  const { t } = useTranslation('workspaces');
   const { message } = App.useApp();
   const [isCreating, setIsCreating] = useState(false);
-  const [workspaceName, setWorkspaceName] = useState(
-    workspacesCount === 0 ? t('workspaces:defaultWorkspaceName') : '',
-  );
+  const [workspaceName, setWorkspaceName] = useState(workspacesCount === 0 ? 'My workspace' : '');
 
   const isAllowedToCreateWorkspaces =
     globalSettings.isMemberAllowedToCreateWorkspaces || user.role === UserRole.ADMIN;
 
   const handleCreateWorkspace = async () => {
     if (!workspaceName.trim()) {
-      message.error(t('workspaces:pleaseEnterAWorkspaceName'));
+      message.error(t('pleaseEnterAWorkspaceName'));
       return;
     }
 
@@ -48,11 +46,11 @@ export const CreateWorkspaceDialogComponent = ({
         name: workspaceName.trim(),
       });
 
-      message.success(t('workspaces:workspaceCreatedSuccessfully'));
+      message.success(t('workspaceCreatedSuccessfully'));
       onWorkspaceCreated(newWorkspace);
       onClose();
     } catch (error) {
-      message.error((error as Error).message || t('workspaces:failedToCreateWorkspace'));
+      message.error((error as Error).message || t('failedToCreateWorkspace'));
     } finally {
       setIsCreating(false);
     }
@@ -61,28 +59,28 @@ export const CreateWorkspaceDialogComponent = ({
   if (!isAllowedToCreateWorkspaces) {
     return (
       <Modal
-        title={t('workspaces:permissionDenied')}
+        title={t('permissionDenied')}
         open
         onCancel={onClose}
         footer={[
           <Button key="ok" type="primary" onClick={onClose}>
-            {t('workspaces:ok')}
+            {t('ok')}
           </Button>,
         ]}
       >
-        <p>{t('workspaces:youDontHavePermissionToCreateWorkspaces')}</p>
+        <p dangerouslySetInnerHTML={{ __html: t('youDontHavePermissionToCreateWorkspaces') }} />
       </Modal>
     );
   }
 
   return (
     <Modal
-      title={t('workspaces:createWorkspace')}
+      title={t('createWorkspace')}
       open
       onCancel={onClose}
       footer={[
         <Button key="cancel" onClick={onClose} disabled={isCreating}>
-          {t('common:cancel')}
+          {t('cancel')}
         </Button>,
 
         <Button
@@ -95,21 +93,24 @@ export const CreateWorkspaceDialogComponent = ({
           {isCreating ? (
             <Spin indicator={<LoadingOutlined spin />} size="small" />
           ) : (
-            t('workspaces:createWorkspace')
+            t('createWorkspace')
           )}
         </Button>,
       ]}
     >
       <div className="mb-4">
-        <div className="dark:text-gray-300">{t('workspaces:workspaceDescription')}</div>
+        <div
+          className="dark:text-gray-300"
+          dangerouslySetInnerHTML={{ __html: t('workspaceDescription') }}
+        />
 
         <label className="mt-5 mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-          {t('workspaces:workspaceNameLabel')}
+          {t('workspaceNameLabel')}
         </label>
         <Input
           value={workspaceName}
           onChange={(e) => setWorkspaceName(e.target.value)}
-          placeholder={t('workspaces:enterWorkspaceNamePlaceholder')}
+          placeholder={t('enterWorkspaceNamePlaceholder')}
           disabled={isCreating}
           onPressEnter={handleCreateWorkspace}
           autoFocus

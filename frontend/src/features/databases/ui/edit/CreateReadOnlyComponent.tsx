@@ -23,7 +23,7 @@ export const CreateReadOnlyComponent = ({
   onSkipped,
   onAlreadyExists,
 }: Props) => {
-  const { t } = useTranslation(['databases', 'common']);
+  const { t } = useTranslation(['common', 'databases']);
   const [isCheckingReadOnlyUser, setIsCheckingReadOnlyUser] = useState(false);
   const [isCreatingReadOnlyUser, setIsCreatingReadOnlyUser] = useState(false);
   const [isShowSkipConfirmation, setShowSkipConfirmation] = useState(false);
@@ -42,7 +42,7 @@ export const CreateReadOnlyComponent = ({
         ? t('databases:typeMariadb')
         : isMongodb
           ? t('databases:typeMongodb')
-          : t('databases:database');
+          : 'database';
 
   const privilegesLabel = isMongodb ? t('databases:roles') : t('databases:privileges');
 

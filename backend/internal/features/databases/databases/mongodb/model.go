@@ -26,16 +26,14 @@ type MongodbDatabase struct {
 
 	Version tools.MongodbVersion `json:"version" gorm:"type:text;not null"`
 
-	Host               string `json:"host"               gorm:"type:text;not null"`
-	Port               *int   `json:"port"               gorm:"type:int"`
-	Username           string `json:"username"           gorm:"type:text;not null"`
-	Password           string `json:"password"           gorm:"type:text;not null"`
-	Database           string `json:"database"           gorm:"type:text;not null"`
-	AuthDatabase       string `json:"authDatabase"       gorm:"type:text;not null;default:'admin'"`
-	IsHttps            bool   `json:"isHttps"            gorm:"type:boolean;default:false"`
-	IsSrv              bool   `json:"isSrv"              gorm:"column:is_srv;type:boolean;not null;default:false"`
-	IsDirectConnection bool   `json:"isDirectConnection" gorm:"column:is_direct_connection;type:boolean;not null;default:false"`
-	CpuCount           int    `json:"cpuCount"           gorm:"column:cpu_count;type:int;not null;default:1"`
+	Host         string `json:"host"         gorm:"type:text;not null"`
+	Port         int    `json:"port"         gorm:"type:int;not null"`
+	Username     string `json:"username"     gorm:"type:text;not null"`
+	Password     string `json:"password"     gorm:"type:text;not null"`
+	Database     string `json:"database"     gorm:"type:text;not null"`
+	AuthDatabase string `json:"authDatabase" gorm:"type:text;not null;default:'admin'"`
+	IsHttps      bool   `json:"isHttps"      gorm:"type:boolean;default:false"`
+	CpuCount     int    `json:"cpuCount"     gorm:"column:cpu_count;type:int;not null;default:1"`
 }
 
 func (m *MongodbDatabase) TableName() string {
@@ -46,13 +44,9 @@ func (m *MongodbDatabase) Validate() error {
 	if m.Host == "" {
 		return errors.New("host is required")
 	}
-
-	if !m.IsSrv {
-		if m.Port == nil || *m.Port == 0 {
-			return errors.New("port is required for standard connections")
-		}
+	if m.Port == 0 {
+		return errors.New("port is required")
 	}
-
 	if m.Username == "" {
 		return errors.New("username is required")
 	}
@@ -65,7 +59,6 @@ func (m *MongodbDatabase) Validate() error {
 	if m.CpuCount <= 0 {
 		return errors.New("cpu count must be greater than 0")
 	}
-
 	return nil
 }
 
@@ -73,7 +66,7 @@ func (m *MongodbDatabase) TestConnection(
 	logger *slog.Logger,
 	encryptor encryption.FieldEncryptor,
 	databaseID uuid.UUID,
-	sshConfig *ssh.Config,
+	sshTunnel *ssh.Config,
 ) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
@@ -83,38 +76,18 @@ func (m *MongodbDatabase) TestConnection(
 		return fmt.Errorf("failed to decrypt password: %w", err)
 	}
 
-	// Start SSH tunnel if configured
-	var tunnel *ssh.Tunnel
-	var localPort int
-	if sshConfig != nil {
-		tunnel = ssh.NewTunnel(sshConfig)
-		port := 27017
-		if m.Port != nil {
-			port = *m.Port
-		}
-		if err := tunnel.Start(ctx, m.Host, port); err != nil {
-			return fmt.Errorf("failed to start SSH tunnel: %w", err)
-		}
-		defer func() {
-			if stopErr := tunnel.Stop(); stopErr != nil {
-				logger.Warn("failed to stop SSH tunnel", "error", stopErr)
-			}
-		}()
-		localPort = tunnel.GetLocalPort()
-	}
-
-	uri := m.buildConnectionURIWithPort(password, localPort)
-
-	clientOptions := options.Client().ApplyURI(uri)
-	client, err := mongo.Connect(ctx, clientOptions)
+	client, cleanup, err := connectWithSSHTunnelMongoDB(
+		ctx,
+		m,
+		password,
+		sshTunnel,
+		encryptor,
+		databaseID,
+	)
 	if err != nil {
 		return fmt.Errorf("failed to connect to MongoDB: %w", err)
 	}
-	defer func() {
-		if disconnectErr := client.Disconnect(ctx); disconnectErr != nil {
-			logger.Error("Failed to disconnect from MongoDB", "error", disconnectErr)
-		}
-	}()
+	defer cleanup()
 
 	if err := client.Ping(ctx, nil); err != nil {
 		return fmt.Errorf("failed to ping MongoDB database '%s': %w", m.Database, err)
@@ -154,8 +127,6 @@ func (m *MongodbDatabase) Update(incoming *MongodbDatabase) {
 	m.Database = incoming.Database
 	m.AuthDatabase = incoming.AuthDatabase
 	m.IsHttps = incoming.IsHttps
-	m.IsSrv = incoming.IsSrv
-	m.IsDirectConnection = incoming.IsDirectConnection
 	m.CpuCount = incoming.CpuCount
 
 	if incoming.Password != "" {
@@ -181,16 +152,16 @@ func (m *MongodbDatabase) PopulateDbData(
 	logger *slog.Logger,
 	encryptor encryption.FieldEncryptor,
 	databaseID uuid.UUID,
-	sshConfig *ssh.Config,
+	sshTunnel *ssh.Config,
 ) error {
-	return m.PopulateVersion(logger, encryptor, databaseID, sshConfig)
+	return m.PopulateVersion(logger, encryptor, databaseID, sshTunnel)
 }
 
 func (m *MongodbDatabase) PopulateVersion(
 	logger *slog.Logger,
 	encryptor encryption.FieldEncryptor,
 	databaseID uuid.UUID,
-	sshConfig *ssh.Config,
+	sshTunnel *ssh.Config,
 ) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
@@ -200,38 +171,18 @@ func (m *MongodbDatabase) PopulateVersion(
 		return fmt.Errorf("failed to decrypt password: %w", err)
 	}
 
-	// Start SSH tunnel if configured
-	var tunnel *ssh.Tunnel
-	var localPort int
-	if sshConfig != nil {
-		tunnel = ssh.NewTunnel(sshConfig)
-		port := 27017
-		if m.Port != nil {
-			port = *m.Port
-		}
-		if err := tunnel.Start(ctx, m.Host, port); err != nil {
-			return fmt.Errorf("failed to start SSH tunnel: %w", err)
-		}
-		defer func() {
-			if stopErr := tunnel.Stop(); stopErr != nil {
-				logger.Warn("failed to stop SSH tunnel", "error", stopErr)
-			}
-		}()
-		localPort = tunnel.GetLocalPort()
-	}
-
-	uri := m.buildConnectionURIWithPort(password, localPort)
-
-	clientOptions := options.Client().ApplyURI(uri)
-	client, err := mongo.Connect(ctx, clientOptions)
+	client, cleanup, err := connectWithSSHTunnelMongoDB(
+		ctx,
+		m,
+		password,
+		sshTunnel,
+		encryptor,
+		databaseID,
+	)
 	if err != nil {
 		return fmt.Errorf("failed to connect to database: %w", err)
 	}
-	defer func() {
-		if disconnectErr := client.Disconnect(ctx); disconnectErr != nil {
-			logger.Error("Failed to disconnect", "error", disconnectErr)
-		}
-	}()
+	defer cleanup()
 
 	detectedVersion, err := detectMongodbVersion(ctx, client)
 	if err != nil {
@@ -247,24 +198,25 @@ func (m *MongodbDatabase) IsUserReadOnly(
 	logger *slog.Logger,
 	encryptor encryption.FieldEncryptor,
 	databaseID uuid.UUID,
+	sshTunnel *ssh.Config,
 ) (bool, []string, error) {
 	password, err := decryptPasswordIfNeeded(m.Password, encryptor, databaseID)
 	if err != nil {
 		return false, nil, fmt.Errorf("failed to decrypt password: %w", err)
 	}
 
-	uri := m.buildConnectionURI(password)
-
-	clientOptions := options.Client().ApplyURI(uri)
-	client, err := mongo.Connect(ctx, clientOptions)
+	client, cleanup, err := connectWithSSHTunnelMongoDB(
+		ctx,
+		m,
+		password,
+		sshTunnel,
+		encryptor,
+		databaseID,
+	)
 	if err != nil {
 		return false, nil, fmt.Errorf("failed to connect to database: %w", err)
 	}
-	defer func() {
-		if disconnectErr := client.Disconnect(ctx); disconnectErr != nil {
-			logger.Error("Failed to disconnect", "error", disconnectErr)
-		}
-	}()
+	defer cleanup()
 
 	authDB := m.AuthDatabase
 	if authDB == "" {
@@ -299,8 +251,6 @@ func (m *MongodbDatabase) IsUserReadOnly(
 		"__system":             true,
 	}
 
-	// Roles that are read-only for our backup purposes
-	// The "backup" role has insert/update on mms.backup collection but is needed for mongodump
 	readOnlyRoles := map[string]bool{
 		"read":   true,
 		"backup": true,
@@ -351,7 +301,6 @@ func (m *MongodbDatabase) IsUserReadOnly(
 		return true, detectedRoles, nil
 	}
 
-	// Collect all role names and check for write roles
 	for _, roleDoc := range roles {
 		role, ok := roleDoc.(bson.M)
 		if !ok {
@@ -363,14 +312,12 @@ func (m *MongodbDatabase) IsUserReadOnly(
 		}
 	}
 
-	// Check if any detected role is a write role
 	for _, roleName := range detectedRoles {
 		if writeRoles[roleName] {
 			return false, detectedRoles, nil
 		}
 	}
 
-	// If all roles are known read-only roles (read, backup), skip inherited privilege check
 	allRolesReadOnly := true
 	for _, roleName := range detectedRoles {
 		if !readOnlyRoles[roleName] {
@@ -382,7 +329,6 @@ func (m *MongodbDatabase) IsUserReadOnly(
 		return true, detectedRoles, nil
 	}
 
-	// Check inherited privileges for custom roles
 	var privResult bson.M
 	err = adminDB.RunCommand(ctx, bson.D{
 		{Key: "usersInfo", Value: bson.D{
@@ -405,7 +351,6 @@ func (m *MongodbDatabase) IsUserReadOnly(
 		return true, detectedRoles, nil
 	}
 
-	// Check inheritedPrivileges for write actions
 	inheritedPrivileges, ok := privUser["inheritedPrivileges"].(bson.A)
 	if ok {
 		for _, privDoc := range inheritedPrivileges {
@@ -434,24 +379,25 @@ func (m *MongodbDatabase) CreateReadOnlyUser(
 	logger *slog.Logger,
 	encryptor encryption.FieldEncryptor,
 	databaseID uuid.UUID,
+	sshTunnel *ssh.Config,
 ) (string, string, error) {
 	password, err := decryptPasswordIfNeeded(m.Password, encryptor, databaseID)
 	if err != nil {
 		return "", "", fmt.Errorf("failed to decrypt password: %w", err)
 	}
 
-	uri := m.buildConnectionURI(password)
-
-	clientOptions := options.Client().ApplyURI(uri)
-	client, err := mongo.Connect(ctx, clientOptions)
+	client, cleanup, err := connectWithSSHTunnelMongoDB(
+		ctx,
+		m,
+		password,
+		sshTunnel,
+		encryptor,
+		databaseID,
+	)
 	if err != nil {
 		return "", "", fmt.Errorf("failed to connect to database: %w", err)
 	}
-	defer func() {
-		if disconnectErr := client.Disconnect(ctx); disconnectErr != nil {
-			logger.Error("Failed to disconnect", "error", disconnectErr)
-		}
-	}()
+	defer cleanup()
 
 	authDB := m.AuthDatabase
 	if authDB == "" {
@@ -496,62 +442,6 @@ func (m *MongodbDatabase) CreateReadOnlyUser(
 	return "", "", errors.New("failed to generate unique username after 3 attempts")
 }
 
-// buildConnectionURI builds a MongoDB connection URI
-func (m *MongodbDatabase) buildConnectionURI(password string) string {
-	return m.buildConnectionURIWithPort(password, 0)
-}
-
-// buildConnectionURIWithPort builds a MongoDB connection URI with optional local port (for SSH tunnel)
-func (m *MongodbDatabase) buildConnectionURIWithPort(password string, localPort int) string {
-	authDB := m.AuthDatabase
-	if authDB == "" {
-		authDB = "admin"
-	}
-
-	extraParams := ""
-	if m.IsHttps {
-		extraParams += "&tls=true&tlsInsecure=true"
-	}
-	if m.IsDirectConnection {
-		extraParams += "&directConnection=true"
-	}
-
-	host := m.Host
-	port := 27017
-	if m.Port != nil {
-		port = *m.Port
-	}
-
-	// Use localhost and local port if SSH tunnel is active
-	if localPort > 0 {
-		host = "localhost"
-		port = localPort
-	}
-
-	if m.IsSrv && localPort == 0 {
-		return fmt.Sprintf(
-			"mongodb+srv://%s:%s@%s/%s?authSource=%s&connectTimeoutMS=15000%s",
-			url.QueryEscape(m.Username),
-			url.QueryEscape(password),
-			host,
-			m.Database,
-			authDB,
-			extraParams,
-		)
-	}
-
-	return fmt.Sprintf(
-		"mongodb://%s:%s@%s:%d/%s?authSource=%s&connectTimeoutMS=15000%s",
-		url.QueryEscape(m.Username),
-		url.QueryEscape(password),
-		host,
-		port,
-		m.Database,
-		authDB,
-		extraParams,
-	)
-}
-
 // BuildMongodumpURI builds a URI suitable for mongodump (without database in path)
 func (m *MongodbDatabase) BuildMongodumpURI(password string) string {
 	authDB := m.AuthDatabase
@@ -559,28 +449,9 @@ func (m *MongodbDatabase) BuildMongodumpURI(password string) string {
 		authDB = "admin"
 	}
 
-	extraParams := ""
+	tlsParams := ""
 	if m.IsHttps {
-		extraParams += "&tls=true&tlsInsecure=true"
-	}
-	if m.IsDirectConnection {
-		extraParams += "&directConnection=true"
-	}
-
-	if m.IsSrv {
-		return fmt.Sprintf(
-			"mongodb+srv://%s:%s@%s/?authSource=%s&connectTimeoutMS=15000%s",
-			url.QueryEscape(m.Username),
-			url.QueryEscape(password),
-			m.Host,
-			authDB,
-			extraParams,
-		)
-	}
-
-	port := 27017
-	if m.Port != nil {
-		port = *m.Port
+		tlsParams = "&tls=true&tlsInsecure=true"
 	}
 
 	return fmt.Sprintf(
@@ -588,9 +459,35 @@ func (m *MongodbDatabase) BuildMongodumpURI(password string) string {
 		url.QueryEscape(m.Username),
 		url.QueryEscape(password),
 		m.Host,
+		m.Port,
+		authDB,
+		tlsParams,
+	)
+}
+
+func (m *MongodbDatabase) BuildMongodumpURIWithHostPort(
+	password string,
+	host string,
+	port int,
+) string {
+	authDB := m.AuthDatabase
+	if authDB == "" {
+		authDB = "admin"
+	}
+
+	tlsParams := ""
+	if m.IsHttps {
+		tlsParams = "&tls=true&tlsInsecure=true"
+	}
+
+	return fmt.Sprintf(
+		"mongodb://%s:%s@%s:%d/?authSource=%s&connectTimeoutMS=15000%s",
+		url.QueryEscape(m.Username),
+		url.QueryEscape(password),
+		host,
 		port,
 		authDB,
-		extraParams,
+		tlsParams,
 	)
 }
 
@@ -766,4 +663,120 @@ func decryptPasswordIfNeeded(
 		return password, nil
 	}
 	return encryptor.Decrypt(databaseID, password)
+}
+
+func decryptSSHTunnelCredentials(
+	sshConfig *ssh.Config,
+	encryptor encryption.FieldEncryptor,
+	databaseID uuid.UUID,
+) error {
+	if sshConfig == nil || encryptor == nil {
+		return nil
+	}
+
+	if sshConfig.Password != "" {
+		decrypted, err := encryptor.Decrypt(databaseID, sshConfig.Password)
+		if err != nil {
+			return fmt.Errorf("failed to decrypt SSH password: %w", err)
+		}
+		sshConfig.Password = decrypted
+	}
+
+	if sshConfig.PrivateKey != "" {
+		decrypted, err := encryptor.Decrypt(databaseID, sshConfig.PrivateKey)
+		if err != nil {
+			return fmt.Errorf("failed to decrypt SSH private key: %w", err)
+		}
+		sshConfig.PrivateKey = decrypted
+	}
+
+	if sshConfig.Passphrase != "" {
+		decrypted, err := encryptor.Decrypt(databaseID, sshConfig.Passphrase)
+		if err != nil {
+			return fmt.Errorf("failed to decrypt SSH passphrase: %w", err)
+		}
+		sshConfig.Passphrase = decrypted
+	}
+
+	return nil
+}
+
+func connectWithSSHTunnelMongoDB(
+	ctx context.Context,
+	m *MongodbDatabase,
+	password string,
+	sshConfig *ssh.Config,
+	encryptor encryption.FieldEncryptor,
+	databaseID uuid.UUID,
+) (*mongo.Client, func(), error) {
+	host := m.Host
+	port := m.Port
+
+	var tunnel *ssh.Tunnel
+	cleanup := func() {}
+
+	if sshConfig != nil && sshConfig.HasAuth() {
+		if err := decryptSSHTunnelCredentials(sshConfig, encryptor, databaseID); err != nil {
+			return nil, cleanup, err
+		}
+
+		tunnel = ssh.NewTunnel(sshConfig)
+
+		if err := tunnel.Start(ctx, m.Host, m.Port); err != nil {
+			return nil, cleanup, fmt.Errorf("failed to start SSH tunnel: %w", err)
+		}
+
+		host = "127.0.0.1"
+		port = tunnel.GetLocalPort()
+
+		cleanup = func() {
+			_ = tunnel.Stop()
+		}
+	}
+
+	uri := m.buildConnectionURIWithHostPort(password, host, port)
+
+	clientOptions := options.Client().ApplyURI(uri)
+	client, err := mongo.Connect(ctx, clientOptions)
+	if err != nil {
+		if tunnel != nil {
+			_ = tunnel.Stop()
+		}
+		return nil, func() {}, err
+	}
+
+	originalCleanup := cleanup
+	cleanup = func() {
+		_ = client.Disconnect(ctx)
+		originalCleanup()
+	}
+
+	return client, cleanup, nil
+}
+
+func (m *MongodbDatabase) buildConnectionURIWithHostPort(
+	password string,
+	host string,
+	port int,
+) string {
+	authDB := m.AuthDatabase
+	if authDB == "" {
+		authDB = "admin"
+	}
+
+	tlsParams := ""
+	if m.IsHttps {
+		tlsParams = "&tls=true&tlsInsecure=true"
+	}
+
+	return fmt.Sprintf(
+		"mongodb://%s:%s@%s:%d/%s?authSource=%s&connectTimeoutMS=15000%s",
+		url.QueryEscape(m.Username),
+		url.QueryEscape(password),
+		host,
+		port,
+		m.Database,
+		authDB,
+		tlsParams,
+	)
 }

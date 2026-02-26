@@ -17,7 +17,7 @@ type DatabaseConnector interface {
 		logger *slog.Logger,
 		encryptor encryption.FieldEncryptor,
 		databaseID uuid.UUID,
-		sshConfig *ssh.Config,
+		sshTunnel *ssh.Config,
 	) error
 
 	HideSensitiveData()

@@ -12,6 +12,7 @@ interface Props {
 
 export function EditRcloneStorageComponent({ storage, setStorage, setUnsaved }: Props) {
   const { t } = useTranslation('storages');
+
   return (
     <>
       <div className="mb-1 flex w-full flex-col items-start sm:flex-row sm:items-start">
@@ -43,12 +44,7 @@ region = us-east-1`}
               style={{ resize: 'vertical' }}
             />
 
-            <Tooltip
-              className="cursor-pointer"
-              title={t(
-                'pasteYourRcloneConfContentHereYouCanGetItByRunningRcloneConfigFileAndCopyingTheContentsThisConfigSupports70CloudStorageProviders',
-              )}
-            >
+            <Tooltip className="cursor-pointer" title={t('pasteYourRcloneConfContentHere')}>
               <InfoCircleOutlined className="mt-2 ml-2" style={{ color: 'gray' }} />
             </Tooltip>
           </div>
@@ -60,9 +56,7 @@ region = us-east-1`}
           <div className="hidden min-w-[110px] sm:block" />
 
           <div className="max-w-[300px] text-xs text-gray-400">
-            {t(
-              'contentIsHiddenToNotExposeSensitiveDataIfYouWantToUpdateExistingConfigPutANewOneHere',
-            )}
+            {t('contentIsHiddenToNotExposeSensitiveData')}
           </div>
         </div>
       )}
@@ -101,7 +95,7 @@ region = us-east-1`}
 
           <Tooltip
             className="cursor-pointer"
-            title={t('optionalPathPrefixOnTheRemoteWhereBackupsWillBeStored')}
+            title={t('optionalPathPrefixOnRemoteWhereBackupsWillBeStored')}
           >
             <InfoCircleOutlined className="ml-2" style={{ color: 'gray' }} />
           </Tooltip>

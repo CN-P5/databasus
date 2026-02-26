@@ -152,7 +152,7 @@ func (uc *RestorePostgresqlBackupUsecase) restoreViaStdin(
 		"--no-acl",
 	}
 
-	ctx, cancel := context.WithTimeout(parentCtx, 23*time.Hour)
+	ctx, cancel := context.WithTimeout(parentCtx, 60*time.Minute)
 	defer cancel()
 
 	// Monitor for shutdown and parent cancellation
@@ -209,7 +209,7 @@ func (uc *RestorePostgresqlBackupUsecase) restoreViaStdin(
 	}
 
 	// Get backup stream from storage
-	rawReader, err := storage.GetFile(fieldEncryptor, backup.FileName)
+	rawReader, err := storage.GetFile(fieldEncryptor, backup.ID)
 	if err != nil {
 		return fmt.Errorf("failed to get backup file from storage: %w", err)
 	}
@@ -429,7 +429,7 @@ func (uc *RestorePostgresqlBackupUsecase) restoreFromStorage(
 		isExcludeExtensions,
 	)
 
-	ctx, cancel := context.WithTimeout(parentCtx, 23*time.Hour)
+	ctx, cancel := context.WithTimeout(parentCtx, 60*time.Minute)
 	defer cancel()
 
 	// Monitor for shutdown and parent cancellation
@@ -540,14 +540,12 @@ func (uc *RestorePostgresqlBackupUsecase) downloadBackupToTempFile(
 		"encrypted",
 		backup.Encryption == backups_config.BackupEncryptionEncrypted,
 	)
-
 	fieldEncryptor := util_encryption.GetFieldEncryptor()
-	rawReader, err := storage.GetFile(fieldEncryptor, backup.FileName)
+	rawReader, err := storage.GetFile(fieldEncryptor, backup.ID)
 	if err != nil {
 		cleanupFunc()
 		return "", nil, fmt.Errorf("failed to get backup file from storage: %w", err)
 	}
-
 	defer func() {
 		if err := rawReader.Close(); err != nil {
 			uc.logger.Error("Failed to close backup reader", "error", err)

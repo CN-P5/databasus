@@ -5,7 +5,6 @@ import (
 	"errors"
 
 	common "databasus-backend/internal/features/backups/backups/common"
-	backups_core "databasus-backend/internal/features/backups/backups/core"
 	usecases_mariadb "databasus-backend/internal/features/backups/backups/usecases/mariadb"
 	usecases_mongodb "databasus-backend/internal/features/backups/backups/usecases/mongodb"
 	usecases_mysql "databasus-backend/internal/features/backups/backups/usecases/mysql"
@@ -13,6 +12,8 @@ import (
 	backups_config "databasus-backend/internal/features/backups/config"
 	"databasus-backend/internal/features/databases"
 	"databasus-backend/internal/features/storages"
+
+	"github.com/google/uuid"
 )
 
 type CreateBackupUsecase struct {
@@ -24,7 +25,7 @@ type CreateBackupUsecase struct {
 
 func (uc *CreateBackupUsecase) Execute(
 	ctx context.Context,
-	backup *backups_core.Backup,
+	backupID uuid.UUID,
 	backupConfig *backups_config.BackupConfig,
 	database *databases.Database,
 	storage *storages.Storage,
@@ -34,7 +35,7 @@ func (uc *CreateBackupUsecase) Execute(
 	case databases.DatabaseTypePostgres:
 		return uc.CreatePostgresqlBackupUsecase.Execute(
 			ctx,
-			backup,
+			backupID,
 			backupConfig,
 			database,
 			storage,
@@ -44,7 +45,7 @@ func (uc *CreateBackupUsecase) Execute(
 	case databases.DatabaseTypeMysql:
 		return uc.CreateMysqlBackupUsecase.Execute(
 			ctx,
-			backup,
+			backupID,
 			backupConfig,
 			database,
 			storage,
@@ -54,7 +55,7 @@ func (uc *CreateBackupUsecase) Execute(
 	case databases.DatabaseTypeMariadb:
 		return uc.CreateMariadbBackupUsecase.Execute(
 			ctx,
-			backup,
+			backupID,
 			backupConfig,
 			database,
 			storage,
@@ -64,7 +65,7 @@ func (uc *CreateBackupUsecase) Execute(
 	case databases.DatabaseTypeMongodb:
 		return uc.CreateMongodbBackupUsecase.Execute(
 			ctx,
-			backup,
+			backupID,
 			backupConfig,
 			database,
 			storage,

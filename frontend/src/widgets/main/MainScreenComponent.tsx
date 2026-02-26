@@ -25,15 +25,15 @@ import {
   WorkspaceSettingsComponent,
 } from '../../features/workspaces';
 import { useIsMobile, useScreenHeight } from '../../shared/hooks';
-import { LanguageSwitcher } from '../../shared/i18n';
+import { LanguageSwitcher } from '../../shared/ui/LanguageSwitcherComponent';
 import { StarButtonComponent } from '../../shared/ui/StarButtonComponent';
 import { ThemeToggleComponent } from '../../shared/ui/ThemeToggleComponent';
 import { SidebarComponent } from './SidebarComponent';
 import { WorkspaceSelectionComponent } from './WorkspaceSelectionComponent';
 
 export const MainScreenComponent = () => {
-  const { t } = useTranslation(['common', 'sidebar', 'settings']);
   const { message } = App.useApp();
+  const { t } = useTranslation(['common', 'sidebar']);
   const screenHeight = useScreenHeight();
   const isMobile = useIsMobile();
   const contentHeight = screenHeight - (isMobile ? 70 : 95);
@@ -124,7 +124,7 @@ export const MainScreenComponent = () => {
 
   const tabs = [
     {
-      text: t('sidebar:databases'),
+      text: t('databases', { ns: 'sidebar' }),
       name: 'databases',
       icon: '/icons/menu/database-gray.svg',
       selectedIcon: '/icons/menu/database-white.svg',
@@ -134,7 +134,7 @@ export const MainScreenComponent = () => {
       isVisible: true,
     },
     {
-      text: t('sidebar:storages'),
+      text: t('storages', { ns: 'sidebar' }),
       name: 'storages',
       icon: '/icons/menu/storage-gray.svg',
       selectedIcon: '/icons/menu/storage-white.svg',
@@ -144,7 +144,7 @@ export const MainScreenComponent = () => {
       isVisible: !!selectedWorkspace,
     },
     {
-      text: t('sidebar:notifiers'),
+      text: t('notifiers', { ns: 'sidebar' }),
       name: 'notifiers',
       icon: '/icons/menu/notifier-gray.svg',
       selectedIcon: '/icons/menu/notifier-white.svg',
@@ -154,7 +154,7 @@ export const MainScreenComponent = () => {
       isVisible: !!selectedWorkspace,
     },
     {
-      text: t('sidebar:settings'),
+      text: t('settings', { ns: 'sidebar' }),
       name: 'settings',
       icon: '/icons/menu/workspace-settings-gray.svg',
       selectedIcon: '/icons/menu/workspace-settings-white.svg',
@@ -164,7 +164,7 @@ export const MainScreenComponent = () => {
       isVisible: !!selectedWorkspace,
     },
     {
-      text: t('sidebar:profile'),
+      text: t('profile', { ns: 'sidebar' }),
       name: 'profile',
       icon: '/icons/menu/profile-gray.svg',
       selectedIcon: '/icons/menu/profile-white.svg',
@@ -174,7 +174,7 @@ export const MainScreenComponent = () => {
       isVisible: true,
     },
     {
-      text: t('sidebar:databasusSettings'),
+      text: t('settings', { ns: 'common' }),
       name: 'databasus-settings',
       icon: '/icons/menu/global-settings-gray.svg',
       selectedIcon: '/icons/menu/global-settings-white.svg',
@@ -184,7 +184,7 @@ export const MainScreenComponent = () => {
       isVisible: true,
     },
     {
-      text: t('sidebar:users'),
+      text: t('users', { ns: 'sidebar' }),
       name: 'users',
       icon: '/icons/menu/user-card-gray.svg',
       selectedIcon: '/icons/menu/user-card-white.svg',
@@ -222,7 +222,7 @@ export const MainScreenComponent = () => {
             target="_blank"
             rel="noreferrer"
           >
-            {t('common:docs')}
+            Docs
           </a>
 
           <a
@@ -231,18 +231,18 @@ export const MainScreenComponent = () => {
             target="_blank"
             rel="noreferrer"
           >
-            {t('common:community')}
+            Community
           </a>
 
           {isUsedMoreThan85Percent && (
-            <Tooltip title={t('common:diskUsageTooltip')}>
+            <Tooltip title="To make backups locally and restore them, you need to have enough space on your disk. For restore, you need to have same amount of space that the backup size.">
               <div
                 className={`cursor-pointer text-center text-xs ${isUsedMoreThan95Percent ? 'text-red-500' : 'text-gray-500 dark:text-gray-400'}`}
               >
-                {(diskUsage.usedSpaceBytes / 1024 ** 3).toFixed(1)} {t('common:of')}{' '}
+                {(diskUsage.usedSpaceBytes / 1024 ** 3).toFixed(1)} of{' '}
                 {(diskUsage.totalSpaceBytes / 1024 ** 3).toFixed(1)} GB
                 <br />
-                {t('common:diskUsage')} {t('common:used')} (
+                ROM used (
                 {((diskUsage.usedSpaceBytes / diskUsage.totalSpaceBytes) * 100).toFixed(1)}%)
               </div>
             </Tooltip>
@@ -318,7 +318,7 @@ export const MainScreenComponent = () => {
                       onClick={handleCreateWorkspace}
                       className="border-blue-600 bg-blue-600 hover:border-blue-700 hover:bg-blue-700"
                     >
-                      {t('common:createWorkspace')}
+                      Create workspace
                     </Button>
                   </div>
                 </div>

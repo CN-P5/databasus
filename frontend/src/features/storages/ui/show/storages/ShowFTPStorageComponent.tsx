@@ -8,6 +8,7 @@ interface Props {
 
 export function ShowFTPStorageComponent({ storage }: Props) {
   const { t } = useTranslation('storages');
+
   return (
     <>
       <div className="mb-1 flex items-center">
@@ -42,7 +43,7 @@ export function ShowFTPStorageComponent({ storage }: Props) {
 
       {storage?.ftpStorage?.useSsl && storage?.ftpStorage?.skipTlsVerify && (
         <div className="mb-1 flex items-center">
-          <div className="min-w-[110px]">{t('skipTlsVerify')}</div>
+          <div className="min-w-[110px]">{t('skipTLS')}</div>
           {t('enabled')}
         </div>
       )}

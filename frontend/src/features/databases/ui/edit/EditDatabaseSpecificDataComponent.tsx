@@ -41,7 +41,7 @@ export const EditDatabaseSpecificDataComponent = ({
   isShowDbName = true,
   isRestoreMode = false,
 }: Props) => {
-  const { t } = useTranslation('databases');
+  const { t } = useTranslation(['common', 'databases']);
   const [isShowReadOnlyDialog, setIsShowReadOnlyDialog] = useState(false);
   const [editingDatabase, setEditingDatabase] = useState<Database>(database);
 
@@ -79,7 +79,7 @@ export const EditDatabaseSpecificDataComponent = ({
   if (isShowReadOnlyDialog) {
     return (
       <Modal
-        title={t('createReadOnlyUser')}
+        title={t('databases:createReadOnlyUserModalTitle')}
         footer={<div />}
         open={isShowReadOnlyDialog}
         onCancel={() => setIsShowReadOnlyDialog(false)}

@@ -16,7 +16,6 @@ import (
 
 	"databasus-backend/internal/config"
 	common "databasus-backend/internal/features/backups/backups/common"
-	backups_core "databasus-backend/internal/features/backups/backups/core"
 	backup_encryption "databasus-backend/internal/features/backups/backups/encryption"
 	backups_config "databasus-backend/internal/features/backups/config"
 	"databasus-backend/internal/features/databases"
@@ -24,6 +23,7 @@ import (
 	encryption_secrets "databasus-backend/internal/features/encryption/secrets"
 	"databasus-backend/internal/features/storages"
 	"databasus-backend/internal/util/encryption"
+	"databasus-backend/internal/util/ssh"
 	"databasus-backend/internal/util/tools"
 )
 
@@ -47,7 +47,7 @@ type writeResult struct {
 
 func (uc *CreateMongodbBackupUsecase) Execute(
 	ctx context.Context,
-	backup *backups_core.Backup,
+	backupID uuid.UUID,
 	backupConfig *backups_config.BackupConfig,
 	db *databases.Database,
 	storage *storages.Storage,
@@ -73,11 +73,36 @@ func (uc *CreateMongodbBackupUsecase) Execute(
 		return nil, fmt.Errorf("failed to decrypt database password: %w", err)
 	}
 
-	args := uc.buildMongodumpArgs(mdb, decryptedPassword)
+	host := mdb.Host
+	port := mdb.Port
+	var tunnel *ssh.Tunnel
+
+	if db.SSHTunnel != nil && db.SSHTunnel.Enabled {
+		sshConfig, err := db.SSHTunnel.ToSSHConfigWithDecrypt(uc.fieldEncryptor, db.ID)
+		if err != nil {
+			return nil, fmt.Errorf("failed to prepare SSH tunnel config: %w", err)
+		}
+
+		tunnel = ssh.NewTunnel(sshConfig)
+		if err := tunnel.Start(ctx, mdb.Host, mdb.Port); err != nil {
+			return nil, fmt.Errorf("failed to start SSH tunnel: %w", err)
+		}
+		defer func() { _ = tunnel.Stop() }()
+
+		host = "127.0.0.1"
+		port = tunnel.GetLocalPort()
+
+		uc.logger.Info("SSH tunnel established for MongoDB backup",
+			"originalHost", mdb.Host,
+			"localPort", port,
+		)
+	}
+
+	args := uc.buildMongodumpArgsWithHostPort(mdb, decryptedPassword, host, port)
 
 	return uc.streamToStorage(
 		ctx,
-		backup,
+		backupID,
 		backupConfig,
 		tools.GetMongodbExecutable(
 			tools.MongodbExecutableMongodump,
@@ -90,11 +115,13 @@ func (uc *CreateMongodbBackupUsecase) Execute(
 	)
 }
 
-func (uc *CreateMongodbBackupUsecase) buildMongodumpArgs(
+func (uc *CreateMongodbBackupUsecase) buildMongodumpArgsWithHostPort(
 	mdb *mongodbtypes.MongodbDatabase,
 	password string,
+	host string,
+	port int,
 ) []string {
-	uri := mdb.BuildMongodumpURI(password)
+	uri := mdb.BuildMongodumpURIWithHostPort(password, host, port)
 
 	args := []string{
 		"--uri=" + uri,
@@ -103,8 +130,6 @@ func (uc *CreateMongodbBackupUsecase) buildMongodumpArgs(
 		"--gzip",
 	}
 
-	// Use numParallelCollections based on CPU count
-	// Cap between 1 and 16 to balance performance and resource usage
 	parallelCollections := max(1, min(mdb.CpuCount, 16))
 	if parallelCollections > 1 {
 		args = append(args, "--numParallelCollections="+fmt.Sprintf("%d", parallelCollections))
@@ -115,7 +140,7 @@ func (uc *CreateMongodbBackupUsecase) buildMongodumpArgs(
 
 func (uc *CreateMongodbBackupUsecase) streamToStorage(
 	parentCtx context.Context,
-	backup *backups_core.Backup,
+	backupID uuid.UUID,
 	backupConfig *backups_config.BackupConfig,
 	mongodumpBin string,
 	args []string,
@@ -164,7 +189,7 @@ func (uc *CreateMongodbBackupUsecase) streamToStorage(
 	storageReader, storageWriter := io.Pipe()
 
 	finalWriter, encryptionWriter, backupMetadata, err := uc.setupBackupEncryption(
-		backup.ID,
+		backupID,
 		backupConfig,
 		storageWriter,
 	)
@@ -176,13 +201,7 @@ func (uc *CreateMongodbBackupUsecase) streamToStorage(
 
 	saveErrCh := make(chan error, 1)
 	go func() {
-		saveErr := storage.SaveFile(
-			ctx,
-			uc.fieldEncryptor,
-			uc.logger,
-			backup.FileName,
-			storageReader,
-		)
+		saveErr := storage.SaveFile(ctx, uc.fieldEncryptor, uc.logger, backupID, storageReader)
 		saveErrCh <- saveErr
 	}()
 
@@ -269,7 +288,6 @@ func (uc *CreateMongodbBackupUsecase) setupBackupEncryption(
 	storageWriter io.WriteCloser,
 ) (io.Writer, *backup_encryption.EncryptionWriter, common.BackupMetadata, error) {
 	backupMetadata := common.BackupMetadata{
-		BackupID:   backupID,
 		Encryption: backups_config.BackupEncryptionNone,
 	}
 
@@ -306,7 +324,6 @@ func (uc *CreateMongodbBackupUsecase) setupBackupEncryption(
 	saltBase64 := base64.StdEncoding.EncodeToString(salt)
 	nonceBase64 := base64.StdEncoding.EncodeToString(nonce)
 
-	backupMetadata.BackupID = backupID
 	backupMetadata.Encryption = backups_config.BackupEncryptionEncrypted
 	backupMetadata.EncryptionSalt = &saltBase64
 	backupMetadata.EncryptionIV = &nonceBase64
