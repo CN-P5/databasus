@@ -6,6 +6,7 @@ import type {
   MongodbDatabase,
   MysqlDatabase,
   PostgresqlDatabase,
+  SshTunnel,
 } from '../../databases';
 import type { Restore } from '../model/Restore';
 
@@ -24,12 +25,14 @@ export const restoreApi = {
     mysql,
     mariadb,
     mongodb,
+    sshTunnel,
   }: {
     backupId: string;
     postgresql?: PostgresqlDatabase;
     mysql?: MysqlDatabase;
     mariadb?: MariadbDatabase;
     mongodb?: MongodbDatabase;
+    sshTunnel?: SshTunnel;
   }) {
     const requestOptions: RequestOptions = new RequestOptions();
     requestOptions.setBody(
@@ -38,6 +41,7 @@ export const restoreApi = {
         mysqlDatabase: mysql,
         mariadbDatabase: mariadb,
         mongodbDatabase: mongodb,
+        sshTunnel: sshTunnel,
       }),
     );
 

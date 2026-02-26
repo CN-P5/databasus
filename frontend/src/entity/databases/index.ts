@@ -13,3 +13,4 @@ export { type MongodbDatabase } from './model/mongodb/MongodbDatabase';
 export { MongodbVersion } from './model/mongodb/MongodbVersion';
 export { type IsReadOnlyResponse } from './model/IsReadOnlyResponse';
 export { type CreateReadOnlyUserResponse } from './model/CreateReadOnlyUserResponse';
+export { type SshTunnel } from './model/SshTunnel';
