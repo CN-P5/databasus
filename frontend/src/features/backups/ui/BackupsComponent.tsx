@@ -365,7 +365,7 @@ export const BackupsComponent = ({ database, isCanManageDBs, scrollContainerRef 
                   </Tooltip>
                 )}
 
-                <Tooltip title={t('restoreFromBackup')}>
+                <Tooltip title={t('backups:restoreFromBackup')}>
                   <CloudUploadOutlined
                     className="cursor-pointer"
                     onClick={() => {
@@ -649,7 +649,7 @@ export const BackupsComponent = ({ database, isCanManageDBs, scrollContainerRef 
           width={400}
           open={!!showingRestoresBackupId}
           onCancel={() => setShowingRestoresBackupId(undefined)}
-          title="Restore from backup"
+          title={t('backups:deleteBackup')}
           footer={null}
           maskClosable={false}
         >

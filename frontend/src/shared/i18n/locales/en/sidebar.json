@@ -21,5 +21,8 @@
   "overview": "Overview",
   "statistics": "Statistics",
   "recentActivity": "Recent activity",
-  "quickActions": "Quick actions"
+  "quickActions": "Quick actions",
+  "docs": "Docs",
+  "community": "Community",
+  "backupSpaceWarning": "To make local backups and restores, you need to have enough space on your disk. For restore, you need to have same amount of space that the backup size."
 }

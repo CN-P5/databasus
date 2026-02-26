@@ -118,7 +118,7 @@ export const ShowBackupConfigComponent = ({ database }: Props) => {
       <div className="mb-1 flex w-full items-center">
         <div className="min-w-[150px]">{t('backupsEnabled')}</div>
         <div className={backupConfig.isBackupsEnabled ? '' : 'font-bold text-red-600'}>
-          {backupConfig.isBackupsEnabled ? 'Yes' : 'No'}
+          {backupConfig.isBackupsEnabled ? t('databases:yes') : t('databases:no')}
         </div>
       </div>
 
@@ -188,7 +188,7 @@ export const ShowBackupConfigComponent = ({ database }: Props) => {
 
           <div className="mb-1 flex w-full items-center">
             <div className="min-w-[150px]">{t('retryBackupIfFailed')}</div>
-            <div>{backupConfig.isRetryIfFailed ? 'Yes' : 'No'}</div>
+            <div>{backupConfig.isRetryIfFailed ? t('databases:yes') : t('databases:no')}</div>
           </div>
 
           {backupConfig.isRetryIfFailed && (

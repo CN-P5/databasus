@@ -49,15 +49,16 @@ const createInitialEditingDatabase = (database: Database): Database => ({
 });
 
 const getRestorePayload = (database: Database, editingDatabase: Database) => {
+  const sshTunnel = editingDatabase.sshTunnel;
   switch (database.type) {
     case DatabaseType.POSTGRES:
-      return { postgresql: editingDatabase.postgresql };
+      return { postgresql: editingDatabase.postgresql, sshTunnel };
     case DatabaseType.MYSQL:
-      return { mysql: editingDatabase.mysql };
+      return { mysql: editingDatabase.mysql, sshTunnel };
     case DatabaseType.MARIADB:
-      return { mariadb: editingDatabase.mariadb };
+      return { mariadb: editingDatabase.mariadb, sshTunnel };
     case DatabaseType.MONGODB:
-      return { mongodb: editingDatabase.mongodb };
+      return { mongodb: editingDatabase.mongodb, sshTunnel };
     default:
       return {};
   }

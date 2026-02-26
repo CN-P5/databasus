@@ -58,7 +58,7 @@ export const WorkspaceSelectionComponent = ({
         size={isMobile ? 'small' : 'middle'}
         className="border-blue-600 bg-blue-600 hover:border-blue-700 hover:bg-blue-700"
       >
-        {isMobile ? tCommon('add') : t('addWorkspace')}
+        {isMobile ? tCommon('add') : t('workspaces:addWorkspace')}
       </Button>
     );
   }

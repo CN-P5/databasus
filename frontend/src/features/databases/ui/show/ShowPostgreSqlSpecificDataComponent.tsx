@@ -69,7 +69,7 @@ export const ShowPostgreSqlSpecificDataComponent = ({ database }: Props) => {
         <>
           <div className="mb-1 flex w-full items-center">
             <div className="min-w-[150px]">{t('databases:sshTunnel')}</div>
-            <div>{t('databases:enabled')}</div>
+            <div>{t('common:enabled')}</div>
           </div>
 
           <div className="mb-1 flex w-full items-center">

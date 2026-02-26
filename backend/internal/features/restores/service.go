@@ -174,6 +174,7 @@ func (s *RestoreService) RestoreBackupWithAuth(
 		MysqlDatabase:      requestDTO.MysqlDatabase,
 		MariadbDatabase:    requestDTO.MariadbDatabase,
 		MongodbDatabase:    requestDTO.MongodbDatabase,
+		SSHTunnel:          requestDTO.SSHTunnel,
 	}
 
 	// Trigger restore via scheduler

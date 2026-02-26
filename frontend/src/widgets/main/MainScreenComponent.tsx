@@ -222,7 +222,7 @@ export const MainScreenComponent = () => {
             target="_blank"
             rel="noreferrer"
           >
-            Docs
+            {t('sidebar:docs')}
           </a>
 
           <a
@@ -231,11 +231,11 @@ export const MainScreenComponent = () => {
             target="_blank"
             rel="noreferrer"
           >
-            Community
+            {t('sidebar:community')}
           </a>
 
           {isUsedMoreThan85Percent && (
-            <Tooltip title="To make backups locally and restore them, you need to have enough space on your disk. For restore, you need to have same amount of space that the backup size.">
+            <Tooltip title={t('sidebar:backupSpaceWarning')}>
               <div
                 className={`cursor-pointer text-center text-xs ${isUsedMoreThan95Percent ? 'text-red-500' : 'text-gray-500 dark:text-gray-400'}`}
               >
@@ -318,7 +318,7 @@ export const MainScreenComponent = () => {
                       onClick={handleCreateWorkspace}
                       className="border-blue-600 bg-blue-600 hover:border-blue-700 hover:bg-blue-700"
                     >
-                      Create workspace
+                        {t('sidebar:createWorkspace')}
                     </Button>
                   </div>
                 </div>

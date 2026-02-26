@@ -21,5 +21,8 @@
   "overview": "概览",
   "statistics": "统计",
   "recentActivity": "最近活动",
-  "quickActions": "快速操作"
+  "quickActions": "快速操作",
+  "docs": "文档",
+  "community": "社区",
+  "backupSpaceWarning": "要使本地备份和恢复工作，您需要在磁盘上有足够的空间。恢复时，您需要有与备份大小相同的空间。"
 }

@@ -93,7 +93,7 @@
   "unsupportedStorageTypeForOAuth": "不支持的 OAuth 存储类型",
   "oauthStateParameterIsInvalid": "OAuth 状态参数无效",
   "oauthParamNotFound": "未找到 OAuth 参数。请确保重定向 URL 配置正确。",
-  "starOnGithub": "在 GitHub 上点赞",
+  "starOnGithub": "点赞数",
   "light": "浅色",
   "dark": "深色",
   "system": "系统",

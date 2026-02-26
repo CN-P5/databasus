@@ -1,6 +1,7 @@
 package restores_core
 
 import (
+	"databasus-backend/internal/features/databases"
 	"databasus-backend/internal/features/databases/databases/mariadb"
 	"databasus-backend/internal/features/databases/databases/mongodb"
 	"databasus-backend/internal/features/databases/databases/mysql"
@@ -12,4 +13,5 @@ type RestoreBackupRequest struct {
 	MysqlDatabase      *mysql.MysqlDatabase           `json:"mysqlDatabase"`
 	MariadbDatabase    *mariadb.MariadbDatabase       `json:"mariadbDatabase"`
 	MongodbDatabase    *mongodb.MongodbDatabase       `json:"mongodbDatabase"`
+	SSHTunnel          *databases.SSHTunnelConfig     `json:"sshTunnel"`
 }

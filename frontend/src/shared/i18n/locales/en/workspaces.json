@@ -76,5 +76,6 @@
   "remove": "Remove",
   "warning": "Warning",
   "transferOwnershipWarning": "This action cannot be undone. You will lose ownership of this workspace and the new owner will have full control.",
-  "selectNewOwner": "Select new owner"
+  "selectNewOwner": "Select new owner",
+  "addWorkspace": "Add workspace"
 }

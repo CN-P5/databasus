@@ -207,6 +207,7 @@ func (n *RestorerNode) MakeRestore(restoreID uuid.UUID) {
 		Mysql:      dbCache.MysqlDatabase,
 		Mariadb:    dbCache.MariadbDatabase,
 		Mongodb:    dbCache.MongodbDatabase,
+		SSHTunnel:  dbCache.SSHTunnel,
 	}
 
 	if err := restoringToDB.PopulateDbData(n.logger, n.fieldEncryptor); err != nil {

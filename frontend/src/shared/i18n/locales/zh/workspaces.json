@@ -63,7 +63,7 @@
   "permissionDenied": "权限被拒绝",
   "youDontHavePermissionToCreateWorkspaces": "您没有权限创建工作空间。请要求管理员为您创建工作空间。",
   "ok": "确定",
-  "workspaceDescription": "工作空间是您分组的地方：<br />- 您的数据库；<br />- 存储（如本地驱动器、S3、Google Drive 等）；<br />- 通知（如电子邮件、Slack、Telegram 等）；<br />- 访问控制（如果您有团队）；",
+  "workspaceDescription": "工作空间是您得分组的:<br />- 您的数据库;<br />- 存储(如本地驱动器、S3、Google Drive 等);<br />- 通知(如电子邮件、Slack、Telegram 等);<br />- 访问控制（如果您有团队）;",
   "workspaceNameLabel": "工作空间名称",
   "enterWorkspaceNamePlaceholder": "输入工作空间名称",
   "pleaseEnterAWorkspaceName": "请输入工作空间名称",
@@ -76,5 +76,6 @@
   "remove": "移除",
   "warning": "警告",
   "transferOwnershipWarning": "此操作无法撤销。您将失去此工作空间的所有权，新所有者将拥有完全控制权。",
-  "selectNewOwner": "选择新所有者"
+  "selectNewOwner": "选择新所有者",
+  "addWorkspace": "添加工作空间"
 }

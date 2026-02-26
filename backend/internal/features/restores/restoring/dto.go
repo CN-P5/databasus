@@ -1,6 +1,7 @@
 package restoring
 
 import (
+	"databasus-backend/internal/features/databases"
 	"databasus-backend/internal/features/databases/databases/mariadb"
 	"databasus-backend/internal/features/databases/databases/mongodb"
 	"databasus-backend/internal/features/databases/databases/mysql"
@@ -15,6 +16,7 @@ type RestoreDatabaseCache struct {
 	MysqlDatabase      *mysql.MysqlDatabase           `json:"mysqlDatabase,omitempty"`
 	MariadbDatabase    *mariadb.MariadbDatabase       `json:"mariadbDatabase,omitempty"`
 	MongodbDatabase    *mongodb.MongodbDatabase       `json:"mongodbDatabase,omitempty"`
+	SSHTunnel          *databases.SSHTunnelConfig     `json:"sshTunnel,omitempty"`
 }
 
 type RestoreToNodeRelation struct {
