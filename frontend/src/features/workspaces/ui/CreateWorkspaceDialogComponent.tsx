@@ -68,7 +68,11 @@ export const CreateWorkspaceDialogComponent = ({
           </Button>,
         ]}
       >
-        <p dangerouslySetInnerHTML={{ __html: t('workspaces:youDontHavePermissionToCreateWorkspaces') }} />
+        <p
+          dangerouslySetInnerHTML={{
+            __html: t('workspaces:youDontHavePermissionToCreateWorkspaces'),
+          }}
+        />
       </Modal>
     );
   }

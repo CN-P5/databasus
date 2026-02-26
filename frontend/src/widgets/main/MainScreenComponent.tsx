@@ -318,7 +318,7 @@ export const MainScreenComponent = () => {
                       onClick={handleCreateWorkspace}
                       className="border-blue-600 bg-blue-600 hover:border-blue-700 hover:bg-blue-700"
                     >
-                        {t('sidebar:createWorkspace')}
+                      {t('sidebar:createWorkspace')}
                     </Button>
                   </div>
                 </div>
