@@ -16,6 +16,7 @@ import (
 	users_models "databasus-backend/internal/features/users/models"
 	workspaces_services "databasus-backend/internal/features/workspaces/services"
 	"databasus-backend/internal/util/encryption"
+	"databasus-backend/internal/util/ssh"
 	"databasus-backend/internal/util/tools"
 	"errors"
 	"fmt"
@@ -219,12 +220,17 @@ func (s *RestoreService) validateVersionCompatibility(
 	backupDatabase *databases.Database,
 	requestDTO restores_core.RestoreBackupRequest,
 ) error {
+	var sshTunnelConfig *ssh.Config
+	if requestDTO.SSHTunnel != nil && requestDTO.SSHTunnel.Enabled {
+		sshTunnelConfig = requestDTO.SSHTunnel.ToSSHConfig()
+	}
+
 	if requestDTO.MariadbDatabase != nil {
 		err := requestDTO.MariadbDatabase.PopulateVersion(
 			s.logger,
 			s.fieldEncryptor,
 			backupDatabase.ID,
-			nil,
+			sshTunnelConfig,
 		)
 		if err != nil {
 			return err
@@ -235,7 +241,7 @@ func (s *RestoreService) validateVersionCompatibility(
 			s.logger,
 			s.fieldEncryptor,
 			backupDatabase.ID,
-			nil,
+			sshTunnelConfig,
 		)
 		if err != nil {
 			return err
@@ -246,7 +252,7 @@ func (s *RestoreService) validateVersionCompatibility(
 			s.logger,
 			s.fieldEncryptor,
 			backupDatabase.ID,
-			nil,
+			sshTunnelConfig,
 		)
 		if err != nil {
 			return err
@@ -257,7 +263,7 @@ func (s *RestoreService) validateVersionCompatibility(
 			s.logger,
 			s.fieldEncryptor,
 			backupDatabase.ID,
-			nil,
+			sshTunnelConfig,
 		)
 		if err != nil {
 			return err

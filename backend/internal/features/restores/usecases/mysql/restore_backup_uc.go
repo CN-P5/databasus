@@ -27,6 +27,7 @@ import (
 	restores_core "databasus-backend/internal/features/restores/core"
 	"databasus-backend/internal/features/storages"
 	util_encryption "databasus-backend/internal/util/encryption"
+	"databasus-backend/internal/util/ssh"
 	"databasus-backend/internal/util/tools"
 )
 
@@ -63,9 +64,38 @@ func (uc *RestoreMysqlBackupUsecase) Execute(
 		return fmt.Errorf("target database name is required for mysql restore")
 	}
 
+	host := my.Host
+	port := my.Port
+
+	var tunnel *ssh.Tunnel
+	if restoringToDB.SSHTunnel != nil && restoringToDB.SSHTunnel.Enabled {
+		sshConfig, err := restoringToDB.SSHTunnel.ToSSHConfigWithDecrypt(
+			util_encryption.GetFieldEncryptor(),
+			restoringToDB.ID,
+		)
+		if err != nil {
+			return fmt.Errorf("failed to prepare SSH tunnel config: %w", err)
+		}
+
+		tunnel = ssh.NewTunnel(sshConfig)
+		if err := tunnel.Start(parentCtx, my.Host, my.Port); err != nil {
+			return fmt.Errorf("failed to start SSH tunnel: %w", err)
+		}
+		defer func() { _ = tunnel.Stop() }()
+
+		host = "127.0.0.1"
+		port = tunnel.GetLocalPort()
+
+		uc.logger.Info("SSH tunnel established for MySQL restore",
+			"originalHost", my.Host,
+			"originalPort", my.Port,
+			"localPort", port,
+		)
+	}
+
 	args := []string{
-		"--host=" + my.Host,
-		"--port=" + strconv.Itoa(my.Port),
+		"--host=" + host,
+		"--port=" + strconv.Itoa(port),
 		"--user=" + my.Username,
 		"--verbose",
 	}
